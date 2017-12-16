@@ -42,6 +42,14 @@ public class CacheConfiguration {
             cm.createCache(com.arnellconsulting.worktajm.domain.Authority.class.getName(), jcacheConfiguration);
             cm.createCache(com.arnellconsulting.worktajm.domain.User.class.getName() + ".authorities", jcacheConfiguration);
             cm.createCache(com.arnellconsulting.worktajm.domain.SocialUserConnection.class.getName(), jcacheConfiguration);
+            cm.createCache(com.arnellconsulting.worktajm.domain.Address.class.getName(), jcacheConfiguration);
+            cm.createCache(com.arnellconsulting.worktajm.domain.Project.class.getName(), jcacheConfiguration);
+            cm.createCache(com.arnellconsulting.worktajm.domain.Customer.class.getName(), jcacheConfiguration);
+            cm.createCache(com.arnellconsulting.worktajm.domain.Customer.class.getName() + ".projects", jcacheConfiguration);
+            cm.createCache(com.arnellconsulting.worktajm.domain.TimeEntry.class.getName(), jcacheConfiguration);
+            cm.createCache(com.arnellconsulting.worktajm.domain.Domain.class.getName(), jcacheConfiguration);
+            cm.createCache(com.arnellconsulting.worktajm.domain.Domain.class.getName() + ".customers", jcacheConfiguration);
+            cm.createCache(com.arnellconsulting.worktajm.domain.Domain.class.getName() + ".members", jcacheConfiguration);
             // jhipster-needle-ehcache-add-entry
         };
     }

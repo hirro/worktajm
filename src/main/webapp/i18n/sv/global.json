@@ -7,6 +7,11 @@
             "jhipster-needle-menu-add-element": "JHipster will add additional menu entries here (do not translate!)",
             "entities": {
                 "main": "Entiter",
+                "address": "Address",
+                "project": "Project",
+                "customer": "Customer",
+                "timeEntry": "Time Entry",
+                "domain": "Domain",
                 "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
             },
             "account": {
