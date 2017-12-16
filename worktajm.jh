@@ -1,0 +1,71 @@
+#fontSize: 12
+#spacing: 150
+#padding: 10
+
+/**
+ * Address for customer or domain
+ */
+entity Address {
+	addressLine1 String required,
+	addressLine2 String
+	addressLine3 String,
+	city String required,
+	zipOrPostcode String required,
+	stateProvinceCounty String,
+	country String required,
+	addressDetails String
+}
+
+/**
+ * The project associated with a time entry.
+ *
+ * Each project belongs to either an user or an organization.
+ */
+entity Project {
+	name String required,
+    description String
+}
+
+entity Customer {
+	name String required
+}
+
+/**
+ * The time entry that logs work on a particular project.
+ *
+ * Each time entry belongs to one user.
+ */
+entity TimeEntry {
+	start ZonedDateTime required,
+	end ZonedDateTime,
+    comment String
+}
+
+/**
+ * In many cases an organization is only one user.
+ */
+entity Domain {
+	name String required,
+	domainName String required,
+    organizationNumber String
+}
+
+// Time Entry relationships
+relationship ManyToOne { TimeEntry{project(name)} to Project }
+relationship ManyToOne { TimeEntry{createdBy(email)} to User }
+
+// Domain relationships
+relationship OneToMany { Domain{customers(name)} to Customer{domain(name)} }
+relationship ManyToMany { Domain{members(login)} to User }
+relationship OneToOne { Domain{address} to Address }
+
+// Project relationships
+
+// Customer relationships
+relationship OneToMany { Customer{projects} to Project{belongsTo(name)} }
+relationship OneToOne { Customer{address} to Address }
+
+paginate * with pagination
+
+dto * with mapstruct
+
