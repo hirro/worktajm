@@ -1,13 +1,15 @@
 {
   "generator-jhipster": {
-    "applicationType": "monolith",
-    "gitHubOrganization": "hirro",
+    "promptValues": {
+      "packageName": "com.arnellconsulting.worktajm",
+      "nativeLanguage": "en"
+    },
+    "jhipsterVersion": "4.13.0",
     "baseName": "worktajm",
     "packageName": "com.arnellconsulting.worktajm",
-    "serverPort": 8080,
-    "serviceDiscoveryType": false,
+    "packageFolder": "com/arnellconsulting/worktajm",
+    "serverPort": "8080",
     "authenticationType": "jwt",
-    "uaaBaseName": "../uaa",
     "hibernateCache": "ehcache",
     "clusteredHttpSession": false,
     "websocket": "spring-websocket",
@@ -15,25 +17,43 @@
     "devDatabaseType": "h2Disk",
     "prodDatabaseType": "mysql",
     "searchEngine": "elasticsearch",
-    "enableSwaggerCodegen": false,
     "messageBroker": false,
+    "serviceDiscoveryType": false,
     "buildTool": "maven",
     "enableSocialSignIn": true,
-    "useSass": false,
+    "enableSwaggerCodegen": true,
+    "jwtSecretKey": "b622abd49e94bb9fa4a17f0087edf0ac3e414105",
+    "clientFramework": "angularX",
+    "useSass": true,
     "clientPackageManager": "yarn",
+    "applicationType": "monolith",
     "testFrameworks": [
       "cucumber"
+    ],
+    "jhiPrefix": "jhi",
+    "otherModules": [
+      {
+        "name": "generator-jhipster-primeng",
+        "version": "2.0.2"
+      },
+      {
+        "name": "generator-jhipster-docker",
+        "version": "2.2.0"
+      },
+      {
+        "name": "generator-jhipster-ci",
+        "version": "1.0.0"
+      },
+      {
+        "name": "generator-jhipster-elasticsearch-reindexer",
+        "version": "1.0.2"
+      }
     ],
     "enableTranslation": true,
     "nativeLanguage": "en",
     "languages": [
       "en",
       "sv"
-    ],
-    "clientFramework": "angularX",
-    "jhipsterVersion": "4.13.0",
-    "packageFolder": "com/arnellconsulting/worktajm",
-    "jwtSecretKey": "f0da16202bfad772f721a768505e23d64d18a132",
-    "jhiPrefix": "jhi"
+    ]
   }
 }

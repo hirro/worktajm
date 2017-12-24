@@ -31,7 +31,7 @@
             ]
         }
     ],
-    "changelogDate": "20171216082612",
+    "changelogDate": "20171224084900",
     "entityTableName": "customer",
     "dto": "mapstruct",
     "pagination": "pagination",

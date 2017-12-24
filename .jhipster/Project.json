@@ -21,7 +21,7 @@
             "fieldType": "String"
         }
     ],
-    "changelogDate": "20171216082611",
+    "changelogDate": "20171224084859",
     "javadoc": "The project associated with a time entry.\n\nEach project belongs to either an user or an organization.",
     "entityTableName": "project",
     "dto": "mapstruct",

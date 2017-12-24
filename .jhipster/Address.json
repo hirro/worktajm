@@ -47,7 +47,7 @@
             "fieldType": "String"
         }
     ],
-    "changelogDate": "20171216082610",
+    "changelogDate": "20171224084858",
     "javadoc": "Address for customer or domain",
     "entityTableName": "address",
     "dto": "mapstruct",

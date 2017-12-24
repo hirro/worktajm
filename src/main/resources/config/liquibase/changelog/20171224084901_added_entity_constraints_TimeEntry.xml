@@ -6,7 +6,7 @@
     <!--
         Added the constraints for entity TimeEntry.
     -->
-    <changeSet id="20171216082613-2" author="jhipster">
+    <changeSet id="20171224084901-2" author="jhipster">
         
         <addForeignKeyConstraint baseColumnNames="project_id"
                                  baseTableName="time_entry"

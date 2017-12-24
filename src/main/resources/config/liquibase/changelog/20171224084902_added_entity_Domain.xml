@@ -15,10 +15,10 @@
     <property name="floatType" value="float" dbms="mysql, oracle, mssql"/>
 
     <!--
-        Added the entity Project.
+        Added the entity Domain.
     -->
-    <changeSet id="20171216082611-1" author="jhipster">
-        <createTable tableName="project">
+    <changeSet id="20171224084902-1" author="jhipster">
+        <createTable tableName="domain">
             <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -26,16 +26,29 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="description" type="varchar(255)">
-                <constraints nullable="true" />
+            <column name="domain_name" type="varchar(255)">
+                <constraints nullable="false" />
             </column>
 
-            <column name="belongs_to_id" type="bigint">
+            <column name="organization_number" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-
+            <column name="address_id" type="bigint">
+                <constraints unique="true" nullable="true" />
+            </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
+        
+        <createTable tableName="domain_members">
+            <column name="members_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="domains_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="domains_id, members_id" tableName="domain_members"/>
         
     </changeSet>
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here, do not remove-->

@@ -44,7 +44,7 @@
             "fieldType": "String"
         }
     ],
-    "changelogDate": "20171216082614",
+    "changelogDate": "20171224084902",
     "javadoc": "In many cases an organization is only one user.",
     "entityTableName": "domain",
     "dto": "mapstruct",

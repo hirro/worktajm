@@ -6,7 +6,7 @@
     <!--
         Added the constraints for entity Domain.
     -->
-    <changeSet id="20171216082614-2" author="jhipster">
+    <changeSet id="20171224084902-2" author="jhipster">
         
         <addForeignKeyConstraint baseColumnNames="address_id"
                                  baseTableName="domain"

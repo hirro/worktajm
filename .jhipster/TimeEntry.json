@@ -31,7 +31,7 @@
             "fieldType": "String"
         }
     ],
-    "changelogDate": "20171216082613",
+    "changelogDate": "20171224084901",
     "javadoc": "The time entry that logs work on a particular project.\n\nEach time entry belongs to one user.",
     "entityTableName": "time_entry",
     "dto": "mapstruct",
