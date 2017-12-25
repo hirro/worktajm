@@ -6,7 +6,6 @@ rm -rf .gitattributes
 rm -rf .gitignore
 rm -rf .idea
 rm -rf .jhipster
-rm -rf LICENSE.md
 rm -rf .mvn
 rm -rf mvnw
 rm -rf mvnw.cmd
@@ -25,6 +24,15 @@ rm -rf webpack
 rm -rf worktajm.iml
 rm -rf yarn.lock
 
-jhipster --force
-jhipster import-jdl jdl.jdl --force
+jhipster --with-entities --force
+
+# jhipster --force
+# jhipster import-jdl jdl.jdl --force
+
+yarn add @angular/material hammerjs
+yarn add  @angular/cdk
+yarn add @angular/animations
+
+yo jhipster-elasticsearch-reindexer  --force
+
 ./mvnw
