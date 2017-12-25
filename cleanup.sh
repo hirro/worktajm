@@ -5,8 +5,6 @@ rm -rf .editorconfig
 rm -rf .gitattributes
 rm -rf .gitignore
 rm -rf .idea
-rm -rf .jhipster
-rm -rf LICENSE.md
 rm -rf .mvn
 rm -rf mvnw
 rm -rf mvnw.cmd
@@ -14,7 +12,6 @@ rm -rf node_modules
 rm -rf package.json
 rm -rf pom.xml
 rm -rf proxy.conf.json
-rm -rf README.md
 rm -rf src
 rm -rf target
 rm -rf .travis.yml
@@ -27,4 +24,8 @@ rm -rf yarn.lock
 
 jhipster --force
 jhipster import-jdl jdl.jdl --force
+yo jhipster-elasticsearch-reindexer --force
+
 ./mvnw
+
+
