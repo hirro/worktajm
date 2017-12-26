@@ -1,38 +1,21 @@
-#!/usr/bin/env bash
+#!/bin/zsh
 
-rm -rf .angular-cli.json
-rm -rf .editorconfig
-rm -rf .gitattributes
-rm -rf .gitignore
-rm -rf .idea
-rm -rf .mvn
-rm -rf mvnw
-rm -rf mvnw.cmd
-rm -rf node_modules
-rm -rf package.json
-rm -rf pom.xml
-rm -rf proxy.conf.json
-rm -rf src
-rm -rf target
-rm -rf .travis.yml
-rm -rf tsconfig-aot.json
-rm -rf tsconfig.json
-rm -rf tslint.json
-rm -rf webpack
-rm -rf worktajm.iml
-rm -rf yarn.lock
+rm -rf ^(cleanup.sh|LICENSE.md|.jhipster|.yo-rc.json|.git|.jdl)
 
-jhipster --with-entities --force
+if [ -d ".jhipster" ]
+then
+    jhipster --with-entities --force
+else
+    jhipster --force
+    jhipster import-jdl jdl.jdl --force
+fi
 
-# jhipster --force
-# jhipster import-jdl jdl.jdl --force
-
-yarn add @angular/material hammerjs
-yarn add  @angular/cdk
-yarn add @angular/animations
+if grep -q angular ".yo-rc.json"; then
+    yarn add @angular/material hammerjs
+    yarn add  @angular/cdk
+    yarn add @angular/animations
+fi
 
 yo jhipster-elasticsearch-reindexer  --force
 
 ./mvnw
-
-
