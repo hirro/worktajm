@@ -34,3 +34,5 @@ yarn add @angular/animations
 yo jhipster-elasticsearch-reindexer  --force
 
 ./mvnw
+
+
