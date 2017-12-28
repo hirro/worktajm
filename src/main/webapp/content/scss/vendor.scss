@@ -14,10 +14,7 @@ eg $input-color: red;
 /* ==========================================================================
 PrimeNG and it's third-party dependencies resources
 ========================================================================== */
-
 @import "~primeng/resources/primeng.min.css";
- @import "~primeng/resources/themes/home/theme.css";
- @import "~quill/dist/quill.core.css";
- @import "~quill/dist/quill.snow.css";
+@import "~primeng/resources/themes/bootstrap/theme.css";
 
 /* jhipster-needle-scss-add-vendor JHipster will add new css style */
