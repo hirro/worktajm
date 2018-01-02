@@ -1,0 +1,9 @@
+{
+    "dashboard": {
+        "projects": {
+            "add": "Add new project",
+            "start": "Start",
+            "stop": "Stop"
+        }
+    }
+}

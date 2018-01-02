@@ -4,22 +4,55 @@
     <div class="col-md-3">
 
         <p-panel header="Projects">
-            <button pButton type="button" (click)="count()" label="Add new project">
+
+            <button class="btn btn-primary jh-create-entity create-project" [routerLink]="['/', { outlets: { popup: ['project-new'] } }]">
+                <span class="fa fa-plus"></span>
+                <span class="hidden-sm-down"  jhiTranslate="worktajmApp.project.home.createLabel">
+                Create new Project
+                </span>
             </button>
+
+
+            <hr />
+
+            <div class="table-responsive" *ngIf="projects">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr *ngFor="let project of projects ;trackBy: trackId">
+                            <td class="align-middle">{{project.name}}</td>
+                            <td class="text-right">
+                                <button *ngIf="!isProjectActive(project)" class="btn btn-primary float-right btn-xs" (click)="add()">
+                                    <span class="fa fa-play"></span> <span jhiTranslate="dashboard.projects.start">Start</span>
+                                </button>
+                                <button *ngIf="isProjectActive(project)" class="btn btn-error float-right btn-xs" (click)="add()">
+                                    <span class="fa fa-stop"></span> <span jhiTranslate="dashboard.projects.stop">Stop</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
         </p-panel>
     </div>
     <div class="col-md-9">
         <p-panel header="Time Entries">
             <div class="row">
+                <div class="col-md-6" >
+                    <p-calendar [(ngModel)]="date" [showIcon]="true"></p-calendar>
+                    <span style="margin-left:35px">{{date|date}}</span>
+                </div>
                 <div class="col-md-6">
-                    <button pButton type="button" (click)="count()" label="Add new time entry">
+                    <button class="btn btn-primary float-right jh-create-entity create-time-entry" [routerLink]="['/', { outlets: { popup: ['time-entry-new'] } }]">
+                        <span class="fa fa-plus"></span>
+                        <span class="hidden-sm-down"  jhiTranslate="worktajmApp.timeEntry.home.createLabel">
+                        Create new Time Entry
+                        </span>
                     </button>
                 </div>
-                <div class="col-md-6">
-                    <p-calendar [(ngModel)]="date" [showIcon]="true"></p-calendar>
-                    <span style="margin-left:35px">{{date3|date}}</span>
-                </div>
             </div>
+            <hr />
+
         </p-panel>
 
     </div>

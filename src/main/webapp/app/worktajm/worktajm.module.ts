@@ -5,7 +5,8 @@ import { WorktajmSharedModule } from '../shared';
 
 import { PanelModule,
          ButtonModule,
-         CalendarModule
+         CalendarModule,
+         DataTableModule
        } from 'primeng/primeng';
 
 import {
@@ -21,6 +22,7 @@ import {
         PanelModule,
         ButtonModule,
         CalendarModule,
+        DataTableModule,
         WorktajmSharedModule,
         RouterModule.forChild(worktajmState)
     ],
