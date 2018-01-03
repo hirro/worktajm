@@ -3,7 +3,9 @@ package com.arnellconsulting.worktajm.web.rest;
 import com.arnellconsulting.worktajm.WorktajmApp;
 
 import com.arnellconsulting.worktajm.domain.Project;
+import com.arnellconsulting.worktajm.repository.DomainRepository;
 import com.arnellconsulting.worktajm.repository.ProjectRepository;
+import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.ProjectSearchRepository;
 import com.arnellconsulting.worktajm.service.dto.ProjectDTO;
 import com.arnellconsulting.worktajm.service.mapper.ProjectMapper;
@@ -57,6 +59,12 @@ public class ProjectResourceIntTest {
     private ProjectSearchRepository projectSearchRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private DomainRepository domainRepository;
+
+    @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
@@ -75,7 +83,7 @@ public class ProjectResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final ProjectResource projectResource = new ProjectResource(projectRepository, projectMapper, projectSearchRepository);
+        final ProjectResource projectResource = new ProjectResource(projectRepository, projectMapper, projectSearchRepository, userRepository, domainRepository);
         this.restProjectMockMvc = MockMvcBuilders.standaloneSetup(projectResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
