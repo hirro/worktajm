@@ -41,6 +41,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = WorktajmApp.class)
 public class AddressResourceIntTest {
 
+    private static final String DEFAULT_ORGANIZATION_NUMBER = "AAAAAAAAAA";
+    private static final String UPDATED_ORGANIZATION_NUMBER = "BBBBBBBBBB";
+
     private static final String DEFAULT_ADDRESS_LINE_1 = "AAAAAAAAAA";
     private static final String UPDATED_ADDRESS_LINE_1 = "BBBBBBBBBB";
 
@@ -109,6 +112,7 @@ public class AddressResourceIntTest {
      */
     public static Address createEntity(EntityManager em) {
         Address address = new Address()
+            .organizationNumber(DEFAULT_ORGANIZATION_NUMBER)
             .addressLine1(DEFAULT_ADDRESS_LINE_1)
             .addressLine2(DEFAULT_ADDRESS_LINE_2)
             .addressLine3(DEFAULT_ADDRESS_LINE_3)
@@ -142,6 +146,7 @@ public class AddressResourceIntTest {
         List<Address> addressList = addressRepository.findAll();
         assertThat(addressList).hasSize(databaseSizeBeforeCreate + 1);
         Address testAddress = addressList.get(addressList.size() - 1);
+        assertThat(testAddress.getOrganizationNumber()).isEqualTo(DEFAULT_ORGANIZATION_NUMBER);
         assertThat(testAddress.getAddressLine1()).isEqualTo(DEFAULT_ADDRESS_LINE_1);
         assertThat(testAddress.getAddressLine2()).isEqualTo(DEFAULT_ADDRESS_LINE_2);
         assertThat(testAddress.getAddressLine3()).isEqualTo(DEFAULT_ADDRESS_LINE_3);
@@ -263,6 +268,7 @@ public class AddressResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(address.getId().intValue())))
+            .andExpect(jsonPath("$.[*].organizationNumber").value(hasItem(DEFAULT_ORGANIZATION_NUMBER.toString())))
             .andExpect(jsonPath("$.[*].addressLine1").value(hasItem(DEFAULT_ADDRESS_LINE_1.toString())))
             .andExpect(jsonPath("$.[*].addressLine2").value(hasItem(DEFAULT_ADDRESS_LINE_2.toString())))
             .andExpect(jsonPath("$.[*].addressLine3").value(hasItem(DEFAULT_ADDRESS_LINE_3.toString())))
@@ -284,6 +290,7 @@ public class AddressResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(address.getId().intValue()))
+            .andExpect(jsonPath("$.organizationNumber").value(DEFAULT_ORGANIZATION_NUMBER.toString()))
             .andExpect(jsonPath("$.addressLine1").value(DEFAULT_ADDRESS_LINE_1.toString()))
             .andExpect(jsonPath("$.addressLine2").value(DEFAULT_ADDRESS_LINE_2.toString()))
             .andExpect(jsonPath("$.addressLine3").value(DEFAULT_ADDRESS_LINE_3.toString()))
@@ -315,6 +322,7 @@ public class AddressResourceIntTest {
         // Disconnect from session so that the updates on updatedAddress are not directly saved in db
         em.detach(updatedAddress);
         updatedAddress
+            .organizationNumber(UPDATED_ORGANIZATION_NUMBER)
             .addressLine1(UPDATED_ADDRESS_LINE_1)
             .addressLine2(UPDATED_ADDRESS_LINE_2)
             .addressLine3(UPDATED_ADDRESS_LINE_3)
@@ -334,6 +342,7 @@ public class AddressResourceIntTest {
         List<Address> addressList = addressRepository.findAll();
         assertThat(addressList).hasSize(databaseSizeBeforeUpdate);
         Address testAddress = addressList.get(addressList.size() - 1);
+        assertThat(testAddress.getOrganizationNumber()).isEqualTo(UPDATED_ORGANIZATION_NUMBER);
         assertThat(testAddress.getAddressLine1()).isEqualTo(UPDATED_ADDRESS_LINE_1);
         assertThat(testAddress.getAddressLine2()).isEqualTo(UPDATED_ADDRESS_LINE_2);
         assertThat(testAddress.getAddressLine3()).isEqualTo(UPDATED_ADDRESS_LINE_3);
@@ -401,6 +410,7 @@ public class AddressResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(address.getId().intValue())))
+            .andExpect(jsonPath("$.[*].organizationNumber").value(hasItem(DEFAULT_ORGANIZATION_NUMBER.toString())))
             .andExpect(jsonPath("$.[*].addressLine1").value(hasItem(DEFAULT_ADDRESS_LINE_1.toString())))
             .andExpect(jsonPath("$.[*].addressLine2").value(hasItem(DEFAULT_ADDRESS_LINE_2.toString())))
             .andExpect(jsonPath("$.[*].addressLine3").value(hasItem(DEFAULT_ADDRESS_LINE_3.toString())))

@@ -3,6 +3,8 @@ package com.arnellconsulting.worktajm.web.rest;
 import com.arnellconsulting.worktajm.WorktajmApp;
 
 import com.arnellconsulting.worktajm.domain.Customer;
+import com.arnellconsulting.worktajm.domain.Address;
+import com.arnellconsulting.worktajm.domain.Domain;
 import com.arnellconsulting.worktajm.repository.CustomerRepository;
 import com.arnellconsulting.worktajm.repository.search.CustomerSearchRepository;
 import com.arnellconsulting.worktajm.service.dto.CustomerDTO;
@@ -89,6 +91,16 @@ public class CustomerResourceIntTest {
     public static Customer createEntity(EntityManager em) {
         Customer customer = new Customer()
             .name(DEFAULT_NAME);
+        // Add required entity
+        Address address = AddressResourceIntTest.createEntity(em);
+        em.persist(address);
+        em.flush();
+        customer.setAddress(address);
+        // Add required entity
+        Domain domain = DomainResourceIntTest.createEntity(em);
+        em.persist(domain);
+        em.flush();
+        customer.setDomain(domain);
         return customer;
     }
 

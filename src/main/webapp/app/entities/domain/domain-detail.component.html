@@ -8,24 +8,16 @@
         <dd>
             <span>{{domain.name}}</span>
         </dd>
-        <dt><span jhiTranslate="worktajmApp.domain.domainName">Domain Name</span></dt>
-        <dd>
-            <span>{{domain.domainName}}</span>
-        </dd>
-        <dt><span jhiTranslate="worktajmApp.domain.organizationNumber">Organization Number</span></dt>
-        <dd>
-            <span>{{domain.organizationNumber}}</span>
-        </dd>
         <dt><span jhiTranslate="worktajmApp.domain.address">Address</span></dt>
         <dd>
             <div *ngIf="domain.addressId">
-                <a [routerLink]="['/address', domain.addressId]">{{domain.addressId}}</a>
+                <a [routerLink]="['/address', domain.addressId]">{{domain.addressAddressLine1}}</a>
             </div>
         </dd>
-        <dt><span jhiTranslate="worktajmApp.domain.members">Members</span></dt>
+        <dt><span jhiTranslate="worktajmApp.domain.authorizedUsers">Authorized Users</span></dt>
         <dd>
-            <span *ngFor="let members of domain.members; let last = last">
-                {{members.login}}{{last ? '' : ', '}}
+            <span *ngFor="let authorizedUsers of domain.authorizedUsers; let last = last">
+                {{authorizedUsers.email}}{{last ? '' : ', '}}
             </span>
         </dd>
     </dl>

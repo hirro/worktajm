@@ -13,12 +13,12 @@ public interface TimeEntryMapper extends EntityMapper<TimeEntryDTO, TimeEntry> {
 
     @Mapping(source = "project.id", target = "projectId")
     @Mapping(source = "project.name", target = "projectName")
-    @Mapping(source = "createdBy.id", target = "createdById")
-    @Mapping(source = "createdBy.email", target = "createdByEmail")
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "user.email", target = "userEmail")
     TimeEntryDTO toDto(TimeEntry timeEntry); 
 
     @Mapping(source = "projectId", target = "project")
-    @Mapping(source = "createdById", target = "createdBy")
+    @Mapping(source = "userId", target = "user")
     TimeEntry toEntity(TimeEntryDTO timeEntryDTO);
 
     default TimeEntry fromId(Long id) {

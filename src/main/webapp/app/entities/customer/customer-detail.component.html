@@ -11,7 +11,7 @@
         <dt><span jhiTranslate="worktajmApp.customer.address">Address</span></dt>
         <dd>
             <div *ngIf="customer.addressId">
-                <a [routerLink]="['/address', customer.addressId]">{{customer.addressId}}</a>
+                <a [routerLink]="['/address', customer.addressId]">{{customer.addressAddressLine1}}</a>
             </div>
         </dd>
         <dt><span jhiTranslate="worktajmApp.customer.domain">Domain</span></dt>

@@ -17,14 +17,11 @@ public class DomainDTO implements Serializable {
     @NotNull
     private String name;
 
-    @NotNull
-    private String domainName;
-
-    private String organizationNumber;
-
     private Long addressId;
 
-    private Set<UserDTO> members = new HashSet<>();
+    private String addressAddressLine1;
+
+    private Set<UserDTO> authorizedUsers = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -42,22 +39,6 @@ public class DomainDTO implements Serializable {
         this.name = name;
     }
 
-    public String getDomainName() {
-        return domainName;
-    }
-
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
-    }
-
-    public String getOrganizationNumber() {
-        return organizationNumber;
-    }
-
-    public void setOrganizationNumber(String organizationNumber) {
-        this.organizationNumber = organizationNumber;
-    }
-
     public Long getAddressId() {
         return addressId;
     }
@@ -66,12 +47,20 @@ public class DomainDTO implements Serializable {
         this.addressId = addressId;
     }
 
-    public Set<UserDTO> getMembers() {
-        return members;
+    public String getAddressAddressLine1() {
+        return addressAddressLine1;
     }
 
-    public void setMembers(Set<UserDTO> users) {
-        this.members = users;
+    public void setAddressAddressLine1(String addressAddressLine1) {
+        this.addressAddressLine1 = addressAddressLine1;
+    }
+
+    public Set<UserDTO> getAuthorizedUsers() {
+        return authorizedUsers;
+    }
+
+    public void setAuthorizedUsers(Set<UserDTO> users) {
+        this.authorizedUsers = users;
     }
 
     @Override
@@ -100,8 +89,6 @@ public class DomainDTO implements Serializable {
         return "DomainDTO{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", domainName='" + getDomainName() + "'" +
-            ", organizationNumber='" + getOrganizationNumber() + "'" +
             "}";
     }
 }

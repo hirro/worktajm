@@ -2,6 +2,7 @@ package com.arnellconsulting.worktajm.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -30,32 +31,47 @@ public class Domain implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Name of the domain (required)
+     */
     @NotNull
+    @ApiModelProperty(value = "Name of the domain (required)", required = true)
     @Column(name = "name", nullable = false)
     private String name;
 
+    /**
+     * 1 -> 1 (unidirectional)
+     * Domain has an address (required).
+     */
+    @ApiModelProperty(value = "1 -> 1 (unidirectional) Domain has an address (required).")
+    @OneToOne(optional = false)
     @NotNull
-    @Column(name = "domain_name", nullable = false)
-    private String domainName;
-
-    @Column(name = "organization_number")
-    private String organizationNumber;
-
-    @OneToOne
     @JoinColumn(unique = true)
     private Address address;
 
+    /**
+     * 1 -> m (bidirectional)
+     * Domain has zero or more customers.
+     * Customer belongs to one domain (required).
+     */
+    @ApiModelProperty(value = "1 -> m (bidirectional) Domain has zero or more customers. Customer belongs to one domain (required).")
     @OneToMany(mappedBy = "domain")
     @JsonIgnore
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<Customer> customers = new HashSet<>();
 
+    /**
+     * m -> m (unidirectional many-to-many)
+     * One user can be registered at many domains.
+     * Natural order would be User<->Domain but can't extend User.
+     */
+    @ApiModelProperty(value = "m -> m (unidirectional many-to-many) One user can be registered at many domains. Natural order would be User<->Domain but can't extend User.")
     @ManyToMany
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    @JoinTable(name = "domain_members",
+    @JoinTable(name = "domain_authorized_users",
                joinColumns = @JoinColumn(name="domains_id", referencedColumnName="id"),
-               inverseJoinColumns = @JoinColumn(name="members_id", referencedColumnName="id"))
-    private Set<User> members = new HashSet<>();
+               inverseJoinColumns = @JoinColumn(name="authorized_users_id", referencedColumnName="id"))
+    private Set<User> authorizedUsers = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -77,32 +93,6 @@ public class Domain implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDomainName() {
-        return domainName;
-    }
-
-    public Domain domainName(String domainName) {
-        this.domainName = domainName;
-        return this;
-    }
-
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
-    }
-
-    public String getOrganizationNumber() {
-        return organizationNumber;
-    }
-
-    public Domain organizationNumber(String organizationNumber) {
-        this.organizationNumber = organizationNumber;
-        return this;
-    }
-
-    public void setOrganizationNumber(String organizationNumber) {
-        this.organizationNumber = organizationNumber;
     }
 
     public Address getAddress() {
@@ -143,27 +133,27 @@ public class Domain implements Serializable {
         this.customers = customers;
     }
 
-    public Set<User> getMembers() {
-        return members;
+    public Set<User> getAuthorizedUsers() {
+        return authorizedUsers;
     }
 
-    public Domain members(Set<User> users) {
-        this.members = users;
+    public Domain authorizedUsers(Set<User> users) {
+        this.authorizedUsers = users;
         return this;
     }
 
-    public Domain addMembers(User user) {
-        this.members.add(user);
+    public Domain addAuthorizedUsers(User user) {
+        this.authorizedUsers.add(user);
         return this;
     }
 
-    public Domain removeMembers(User user) {
-        this.members.remove(user);
+    public Domain removeAuthorizedUsers(User user) {
+        this.authorizedUsers.remove(user);
         return this;
     }
 
-    public void setMembers(Set<User> users) {
-        this.members = users;
+    public void setAuthorizedUsers(Set<User> users) {
+        this.authorizedUsers = users;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -192,8 +182,6 @@ public class Domain implements Serializable {
         return "Domain{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", domainName='" + getDomainName() + "'" +
-            ", organizationNumber='" + getOrganizationNumber() + "'" +
             "}";
     }
 }

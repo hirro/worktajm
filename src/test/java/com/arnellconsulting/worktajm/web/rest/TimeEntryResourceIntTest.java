@@ -3,6 +3,8 @@ package com.arnellconsulting.worktajm.web.rest;
 import com.arnellconsulting.worktajm.WorktajmApp;
 
 import com.arnellconsulting.worktajm.domain.TimeEntry;
+import com.arnellconsulting.worktajm.domain.Project;
+import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.TimeEntryRepository;
 import com.arnellconsulting.worktajm.repository.search.TimeEntrySearchRepository;
 import com.arnellconsulting.worktajm.service.dto.TimeEntryDTO;
@@ -102,6 +104,16 @@ public class TimeEntryResourceIntTest {
             .start(DEFAULT_START)
             .end(DEFAULT_END)
             .comment(DEFAULT_COMMENT);
+        // Add required entity
+        Project project = ProjectResourceIntTest.createEntity(em);
+        em.persist(project);
+        em.flush();
+        timeEntry.setProject(project);
+        // Add required entity
+        User user = UserResourceIntTest.createEntity(em);
+        em.persist(user);
+        em.flush();
+        timeEntry.setUser(user);
         return timeEntry;
     }
 

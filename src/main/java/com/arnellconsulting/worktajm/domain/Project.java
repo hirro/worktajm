@@ -1,6 +1,7 @@
 package com.arnellconsulting.worktajm.domain;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -9,6 +10,8 @@ import javax.validation.constraints.*;
 
 import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Objects;
 
 /**
@@ -29,15 +32,46 @@ public class Project implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Name of the project (required)
+     */
     @NotNull
+    @ApiModelProperty(value = "Name of the project (required)", required = true)
     @Column(name = "name", nullable = false)
     private String name;
 
+    /**
+     * Description of the project (optional)
+     */
+    @ApiModelProperty(value = "Description of the project (optional)")
     @Column(name = "description")
     private String description;
 
-    @ManyToOne
-    private Customer belongsTo;
+    /**
+     * Hourly rate of the project (optional)
+     */
+    @ApiModelProperty(value = "Hourly rate of the project (optional)")
+    @Column(name = "hourly_rate")
+    private Float hourlyRate;
+
+    /**
+     * m -> m (unidirectional many-to-many)
+     * One project may have one or more (global) users.
+     * One user (global) may be authorized to register time on zero or more projects.
+     * Natural order would be User<->Project but can't extend User.
+     * Note: In order to add a user to a project, it should be authorized in the domain.
+     */
+    @ApiModelProperty(value = "m -> m (unidirectional many-to-many) One project may have one or more (global) users. One user (global) may be authorized to register time on zero or more projects. Natural order would be User<->Project but can't extend User. Note: In order to add a user to a project, it should be authorized in the domain.")
+    @ManyToMany
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @JoinTable(name = "project_project_members",
+               joinColumns = @JoinColumn(name="projects_id", referencedColumnName="id"),
+               inverseJoinColumns = @JoinColumn(name="project_members_id", referencedColumnName="id"))
+    private Set<User> projectMembers = new HashSet<>();
+
+    @ManyToOne(optional = false)
+    @NotNull
+    private Customer customer;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -74,17 +108,53 @@ public class Project implements Serializable {
         this.description = description;
     }
 
-    public Customer getBelongsTo() {
-        return belongsTo;
+    public Float getHourlyRate() {
+        return hourlyRate;
     }
 
-    public Project belongsTo(Customer customer) {
-        this.belongsTo = customer;
+    public Project hourlyRate(Float hourlyRate) {
+        this.hourlyRate = hourlyRate;
         return this;
     }
 
-    public void setBelongsTo(Customer customer) {
-        this.belongsTo = customer;
+    public void setHourlyRate(Float hourlyRate) {
+        this.hourlyRate = hourlyRate;
+    }
+
+    public Set<User> getProjectMembers() {
+        return projectMembers;
+    }
+
+    public Project projectMembers(Set<User> users) {
+        this.projectMembers = users;
+        return this;
+    }
+
+    public Project addProjectMembers(User user) {
+        this.projectMembers.add(user);
+        return this;
+    }
+
+    public Project removeProjectMembers(User user) {
+        this.projectMembers.remove(user);
+        return this;
+    }
+
+    public void setProjectMembers(Set<User> users) {
+        this.projectMembers = users;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public Project customer(Customer customer) {
+        this.customer = customer;
+        return this;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -114,6 +184,7 @@ public class Project implements Serializable {
             "id=" + getId() +
             ", name='" + getName() + "'" +
             ", description='" + getDescription() + "'" +
+            ", hourlyRate=" + getHourlyRate() +
             "}";
     }
 }

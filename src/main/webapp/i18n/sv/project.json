@@ -18,7 +18,9 @@
             },
             "name": "Name",
             "description": "Description",
-            "belongsTo": "Belongs To"
+            "hourlyRate": "Hourly Rate",
+            "projectMembers": "Project Members",
+            "customer": "Customer"
         }
     }
 }

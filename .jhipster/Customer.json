@@ -3,20 +3,24 @@
     "relationships": [
         {
             "relationshipType": "one-to-one",
+            "relationshipValidateRules": "required",
+            "javadoc": "1 -> 1 (unidirectional)\nDomain has one billing address.",
             "relationshipName": "address",
             "otherEntityName": "address",
-            "otherEntityField": "id",
+            "otherEntityField": "addressLine1",
             "ownerSide": true,
             "otherEntityRelationshipName": "customer"
         },
         {
             "relationshipType": "one-to-many",
+            "javadoc": "1 <-> m (bidirectional)\nCustomer has zero or more projects.\nProject belongs to one customer (required).",
             "relationshipName": "projects",
             "otherEntityName": "project",
-            "otherEntityRelationshipName": "belongsTo"
+            "otherEntityRelationshipName": "customer"
         },
         {
             "relationshipType": "many-to-one",
+            "relationshipValidateRules": "required",
             "relationshipName": "domain",
             "otherEntityName": "domain",
             "otherEntityField": "name"
@@ -31,7 +35,7 @@
             ]
         }
     ],
-    "changelogDate": "20171224084900",
+    "changelogDate": "20180103113354",
     "entityTableName": "customer",
     "dto": "mapstruct",
     "pagination": "pagination",

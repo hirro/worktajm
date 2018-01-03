@@ -22,9 +22,9 @@
                 <a [routerLink]="['/project', timeEntry.projectId]">{{timeEntry.projectName}}</a>
             </div>
         </dd>
-        <dt><span jhiTranslate="worktajmApp.timeEntry.createdBy">Created By</span></dt>
+        <dt><span jhiTranslate="worktajmApp.timeEntry.user">User</span></dt>
         <dd>
-            {{timeEntry.createdByEmail}}
+            {{timeEntry.userEmail}}
         </dd>
     </dl>
 

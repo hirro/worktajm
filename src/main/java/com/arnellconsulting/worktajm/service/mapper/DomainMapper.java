@@ -12,6 +12,7 @@ import org.mapstruct.*;
 public interface DomainMapper extends EntityMapper<DomainDTO, Domain> {
 
     @Mapping(source = "address.id", target = "addressId")
+    @Mapping(source = "address.addressLine1", target = "addressAddressLine1")
     DomainDTO toDto(Domain domain); 
 
     @Mapping(source = "addressId", target = "address")

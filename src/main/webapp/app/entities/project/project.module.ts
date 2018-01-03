@@ -2,6 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { WorktajmSharedModule } from '../../shared';
+import { WorktajmAdminModule } from '../../admin/admin.module';
 import {
     ProjectService,
     ProjectPopupService,
@@ -24,6 +25,7 @@ const ENTITY_STATES = [
 @NgModule({
     imports: [
         WorktajmSharedModule,
+        WorktajmAdminModule,
         RouterModule.forChild(ENTITY_STATES)
     ],
     declarations: [

@@ -12,6 +12,8 @@ public class AddressDTO implements Serializable {
 
     private Long id;
 
+    private String organizationNumber;
+
     @NotNull
     private String addressLine1;
 
@@ -38,6 +40,14 @@ public class AddressDTO implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getOrganizationNumber() {
+        return organizationNumber;
+    }
+
+    public void setOrganizationNumber(String organizationNumber) {
+        this.organizationNumber = organizationNumber;
     }
 
     public String getAddressLine1() {
@@ -129,6 +139,7 @@ public class AddressDTO implements Serializable {
     public String toString() {
         return "AddressDTO{" +
             "id=" + getId() +
+            ", organizationNumber='" + getOrganizationNumber() + "'" +
             ", addressLine1='" + getAddressLine1() + "'" +
             ", addressLine2='" + getAddressLine2() + "'" +
             ", addressLine3='" + getAddressLine3() + "'" +

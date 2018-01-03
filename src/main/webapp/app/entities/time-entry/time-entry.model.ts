@@ -7,7 +7,7 @@ export class TimeEntry implements BaseEntity {
         public end?: any,
         public comment?: string,
         public projectId?: number,
-        public createdById?: number,
+        public userId?: number,
     ) {
     }
 }

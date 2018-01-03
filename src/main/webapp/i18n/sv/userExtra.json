@@ -1,0 +1,24 @@
+{
+    "worktajmApp": {
+        "userExtra" : {
+            "home": {
+                "title": "User Extras",
+                "createLabel": "Skapa en ny User Extra",
+                "createOrEditLabel": "Skapa eller ändra en User Extra",
+                "search": "Sök efter User Extra"
+            },
+            "created": "En ny User Extra är skapad med id {{ param }}",
+            "updated": "En User Extra är uppdaterad med id  {{ param }}",
+            "deleted": "En User Extra är borttagen med id  {{ param }}",
+            "delete": {
+                "question": "Är du säker på att du vill ta bort User Extra {{ id }}?"
+            },
+            "detail": {
+                "title": "User Extra"
+            },
+            "phone": "Phone",
+            "user": "User",
+            "activeTimeEntry": "Active Time Entry"
+        }
+    }
+}

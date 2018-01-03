@@ -23,34 +23,24 @@
                 </small>
             </div>
         </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.domain.domainName" for="field_domainName">Domain Name</label>
-            <input type="text" class="form-control" name="domainName" id="field_domainName"
-                [(ngModel)]="domain.domainName" required/>
-            <div [hidden]="!(editForm.controls.domainName?.dirty && editForm.controls.domainName?.invalid)">
-                <small class="form-text text-danger"
-                   [hidden]="!editForm.controls.domainName?.errors?.required" jhiTranslate="entity.validation.required">
-                   This field is required.
-                </small>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.domain.organizationNumber" for="field_organizationNumber">Organization Number</label>
-            <input type="text" class="form-control" name="organizationNumber" id="field_organizationNumber"
-                [(ngModel)]="domain.organizationNumber" />
-        </div>
 
         <div class="form-group">
             <label class="form-control-label" jhiTranslate="worktajmApp.domain.address" for="field_address">Address</label>
-            <select class="form-control" id="field_address" name="address" [(ngModel)]="domain.addressId">
-                <option [ngValue]="null"></option>
-                <option [ngValue]="addressOption.id" *ngFor="let addressOption of addresses; trackBy: trackAddressById">{{addressOption.id}}</option>
+            <select class="form-control" id="field_address" name="address" [(ngModel)]="domain.addressId" required>
+                <option *ngIf="!editForm.value.address" [ngValue]="null" selected></option>
+                <option [ngValue]="addressOption.id" *ngFor="let addressOption of addresses; trackBy: trackAddressById">{{addressOption.addressLine1}}</option>
             </select>
         </div>
+        <div [hidden]="!(editForm.controls.address?.dirty && editForm.controls.address?.invalid)">
+            <small class="form-text text-danger"
+                [hidden]="!editForm.controls.address?.errors?.required" jhiTranslate="entity.validation.required">
+                This field is required.
+            </small>
+        </div>
         <div class="form-group">
-            <label jhiTranslate="worktajmApp.domain.members" for="field_members">Members</label>
-            <select class="form-control" id="field_members" multiple name="members" [(ngModel)]="domain.members">
-                <option [ngValue]="getSelected(domain.members, userOption)" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.login}}</option>
+            <label jhiTranslate="worktajmApp.domain.authorizedUsers" for="field_authorizedUsers">Authorized Users</label>
+            <select class="form-control" id="field_authorizedUsers" multiple name="authorizedUsers" [(ngModel)]="domain.authorizedUsers">
+                <option [ngValue]="getSelected(domain.authorizedUsers, userOption)" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.email}}</option>
             </select>
         </div>
     </div>

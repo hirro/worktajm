@@ -2,8 +2,18 @@
     "fluentMethods": true,
     "relationships": [
         {
+            "relationshipType": "many-to-many",
+            "javadoc": "m -> m (unidirectional many-to-many)\nOne project may have one or more (global) users.\nOne user (global) may be authorized to register time on zero or more projects.\nNatural order would be User<->Project but can't extend User.\nNote: In order to add a user to a project, it should be authorized in the domain.",
+            "otherEntityRelationshipName": "",
+            "relationshipName": "projectMembers",
+            "otherEntityName": "user",
+            "otherEntityField": "email",
+            "ownerSide": true
+        },
+        {
             "relationshipType": "many-to-one",
-            "relationshipName": "belongsTo",
+            "relationshipValidateRules": "required",
+            "relationshipName": "customer",
             "otherEntityName": "customer",
             "otherEntityField": "name"
         }
@@ -11,6 +21,7 @@
     "fields": [
         {
             "fieldName": "name",
+            "javadoc": "Name of the project (required)",
             "fieldType": "String",
             "fieldValidateRules": [
                 "required"
@@ -18,10 +29,16 @@
         },
         {
             "fieldName": "description",
+            "javadoc": "Description of the project (optional)",
             "fieldType": "String"
+        },
+        {
+            "fieldName": "hourlyRate",
+            "javadoc": "Hourly rate of the project (optional)",
+            "fieldType": "Float"
         }
     ],
-    "changelogDate": "20171224084859",
+    "changelogDate": "20180103113353",
     "javadoc": "The project associated with a time entry.\n\nEach project belongs to either an user or an organization.",
     "entityTableName": "project",
     "dto": "mapstruct",

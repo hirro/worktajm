@@ -19,6 +19,8 @@ public class CustomerDTO implements Serializable {
 
     private Long addressId;
 
+    private String addressAddressLine1;
+
     private Long domainId;
 
     private String domainName;
@@ -45,6 +47,14 @@ public class CustomerDTO implements Serializable {
 
     public void setAddressId(Long addressId) {
         this.addressId = addressId;
+    }
+
+    public String getAddressAddressLine1() {
+        return addressAddressLine1;
+    }
+
+    public void setAddressAddressLine1(String addressAddressLine1) {
+        this.addressAddressLine1 = addressAddressLine1;
     }
 
     public Long getDomainId() {

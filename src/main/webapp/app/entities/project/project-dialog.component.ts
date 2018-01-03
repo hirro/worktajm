@@ -9,6 +9,7 @@ import { JhiEventManager, JhiAlertService } from 'ng-jhipster';
 import { Project } from './project.model';
 import { ProjectPopupService } from './project-popup.service';
 import { ProjectService } from './project.service';
+import { User, UserService } from '../../shared';
 import { Customer, CustomerService } from '../customer';
 import { ResponseWrapper } from '../../shared';
 
@@ -21,12 +22,15 @@ export class ProjectDialogComponent implements OnInit {
     project: Project;
     isSaving: boolean;
 
+    users: User[];
+
     customers: Customer[];
 
     constructor(
         public activeModal: NgbActiveModal,
         private jhiAlertService: JhiAlertService,
         private projectService: ProjectService,
+        private userService: UserService,
         private customerService: CustomerService,
         private eventManager: JhiEventManager
     ) {
@@ -34,6 +38,8 @@ export class ProjectDialogComponent implements OnInit {
 
     ngOnInit() {
         this.isSaving = false;
+        this.userService.query()
+            .subscribe((res: ResponseWrapper) => { this.users = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
         this.customerService.query()
             .subscribe((res: ResponseWrapper) => { this.customers = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
     }
@@ -72,8 +78,23 @@ export class ProjectDialogComponent implements OnInit {
         this.jhiAlertService.error(error.message, null, null);
     }
 
+    trackUserById(index: number, item: User) {
+        return item.id;
+    }
+
     trackCustomerById(index: number, item: Customer) {
         return item.id;
+    }
+
+    getSelected(selectedVals: Array<any>, option: any) {
+        if (selectedVals) {
+            for (let i = 0; i < selectedVals.length; i++) {
+                if (option.id === selectedVals[i].id) {
+                    return selectedVals[i];
+                }
+            }
+        }
+        return option;
     }
 }
 

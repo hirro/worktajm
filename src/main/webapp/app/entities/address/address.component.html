@@ -30,6 +30,7 @@
             <thead>
             <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
             <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="organizationNumber"><span jhiTranslate="worktajmApp.address.organizationNumber">Organization Number</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="addressLine1"><span jhiTranslate="worktajmApp.address.addressLine1">Address Line 1</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="addressLine2"><span jhiTranslate="worktajmApp.address.addressLine2">Address Line 2</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="addressLine3"><span jhiTranslate="worktajmApp.address.addressLine3">Address Line 3</span> <span class="fa fa-sort"></span></th>
@@ -44,6 +45,7 @@
             <tbody>
             <tr *ngFor="let address of addresses ;trackBy: trackId">
                 <td><a [routerLink]="['../address', address.id ]">{{address.id}}</a></td>
+                <td>{{address.organizationNumber}}</td>
                 <td>{{address.addressLine1}}</td>
                 <td>{{address.addressLine2}}</td>
                 <td>{{address.addressLine3}}</td>

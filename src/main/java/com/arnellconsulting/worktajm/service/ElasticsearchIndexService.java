@@ -43,6 +43,10 @@ public class ElasticsearchIndexService {
 
     private final TimeEntrySearchRepository timeEntrySearchRepository;
 
+    private final UserExtraRepository userExtraRepository;
+
+    private final UserExtraSearchRepository userExtraSearchRepository;
+
     private final UserRepository userRepository;
 
     private final UserSearchRepository userSearchRepository;
@@ -62,6 +66,8 @@ public class ElasticsearchIndexService {
         ProjectSearchRepository projectSearchRepository,
         TimeEntryRepository timeEntryRepository,
         TimeEntrySearchRepository timeEntrySearchRepository,
+        UserExtraRepository userExtraRepository,
+        UserExtraSearchRepository userExtraSearchRepository,
         ElasticsearchTemplate elasticsearchTemplate) {
         this.userRepository = userRepository;
         this.userSearchRepository = userSearchRepository;
@@ -75,6 +81,8 @@ public class ElasticsearchIndexService {
         this.projectSearchRepository = projectSearchRepository;
         this.timeEntryRepository = timeEntryRepository;
         this.timeEntrySearchRepository = timeEntrySearchRepository;
+        this.userExtraRepository = userExtraRepository;
+        this.userExtraSearchRepository = userExtraSearchRepository;
         this.elasticsearchTemplate = elasticsearchTemplate;
     }
 
@@ -86,6 +94,7 @@ public class ElasticsearchIndexService {
         reindexForClass(Domain.class, domainRepository, domainSearchRepository);
         reindexForClass(Project.class, projectRepository, projectSearchRepository);
         reindexForClass(TimeEntry.class, timeEntryRepository, timeEntrySearchRepository);
+        reindexForClass(UserExtra.class, userExtraRepository, userExtraSearchRepository);
         reindexForClass(User.class, userRepository, userSearchRepository);
 
         log.info("Elasticsearch: Successfully performed reindexing");

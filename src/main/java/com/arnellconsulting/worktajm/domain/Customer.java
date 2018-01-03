@@ -1,6 +1,7 @@
 package com.arnellconsulting.worktajm.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -32,16 +33,29 @@ public class Customer implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToOne
+    /**
+     * 1 -> 1 (unidirectional)
+     * Domain has one billing address.
+     */
+    @ApiModelProperty(value = "1 -> 1 (unidirectional) Domain has one billing address.")
+    @OneToOne(optional = false)
+    @NotNull
     @JoinColumn(unique = true)
     private Address address;
 
-    @OneToMany(mappedBy = "belongsTo")
+    /**
+     * 1 <-> m (bidirectional)
+     * Customer has zero or more projects.
+     * Project belongs to one customer (required).
+     */
+    @ApiModelProperty(value = "1 <-> m (bidirectional) Customer has zero or more projects. Project belongs to one customer (required).")
+    @OneToMany(mappedBy = "customer")
     @JsonIgnore
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<Project> projects = new HashSet<>();
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @NotNull
     private Domain domain;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
@@ -90,13 +104,13 @@ public class Customer implements Serializable {
 
     public Customer addProjects(Project project) {
         this.projects.add(project);
-        project.setBelongsTo(this);
+        project.setCustomer(this);
         return this;
     }
 
     public Customer removeProjects(Project project) {
         this.projects.remove(project);
-        project.setBelongsTo(null);
+        project.setCustomer(null);
         return this;
     }
 

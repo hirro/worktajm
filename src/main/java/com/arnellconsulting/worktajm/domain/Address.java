@@ -1,6 +1,7 @@
 package com.arnellconsulting.worktajm.domain;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -12,9 +13,9 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Address for customer or domain
+ * Billing address for customer or domain.
  */
-@ApiModel(description = "Address for customer or domain")
+@ApiModel(description = "Billing address for customer or domain.")
 @Entity
 @Table(name = "address")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
@@ -26,6 +27,13 @@ public class Address implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /**
+     * Organizational number (optional)
+     */
+    @ApiModelProperty(value = "Organizational number (optional)")
+    @Column(name = "organization_number")
+    private String organizationNumber;
 
     @NotNull
     @Column(name = "address_line_1", nullable = false)
@@ -62,6 +70,19 @@ public class Address implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getOrganizationNumber() {
+        return organizationNumber;
+    }
+
+    public Address organizationNumber(String organizationNumber) {
+        this.organizationNumber = organizationNumber;
+        return this;
+    }
+
+    public void setOrganizationNumber(String organizationNumber) {
+        this.organizationNumber = organizationNumber;
     }
 
     public String getAddressLine1() {
@@ -193,6 +214,7 @@ public class Address implements Serializable {
     public String toString() {
         return "Address{" +
             "id=" + getId() +
+            ", organizationNumber='" + getOrganizationNumber() + "'" +
             ", addressLine1='" + getAddressLine1() + "'" +
             ", addressLine2='" + getAddressLine2() + "'" +
             ", addressLine3='" + getAddressLine3() + "'" +

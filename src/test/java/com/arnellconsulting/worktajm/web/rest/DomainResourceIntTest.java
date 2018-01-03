@@ -3,6 +3,7 @@ package com.arnellconsulting.worktajm.web.rest;
 import com.arnellconsulting.worktajm.WorktajmApp;
 
 import com.arnellconsulting.worktajm.domain.Domain;
+import com.arnellconsulting.worktajm.domain.Address;
 import com.arnellconsulting.worktajm.repository.DomainRepository;
 import com.arnellconsulting.worktajm.repository.search.DomainSearchRepository;
 import com.arnellconsulting.worktajm.service.dto.DomainDTO;
@@ -43,12 +44,6 @@ public class DomainResourceIntTest {
 
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
     private static final String UPDATED_NAME = "BBBBBBBBBB";
-
-    private static final String DEFAULT_DOMAIN_NAME = "AAAAAAAAAA";
-    private static final String UPDATED_DOMAIN_NAME = "BBBBBBBBBB";
-
-    private static final String DEFAULT_ORGANIZATION_NUMBER = "AAAAAAAAAA";
-    private static final String UPDATED_ORGANIZATION_NUMBER = "BBBBBBBBBB";
 
     @Autowired
     private DomainRepository domainRepository;
@@ -94,9 +89,12 @@ public class DomainResourceIntTest {
      */
     public static Domain createEntity(EntityManager em) {
         Domain domain = new Domain()
-            .name(DEFAULT_NAME)
-            .domainName(DEFAULT_DOMAIN_NAME)
-            .organizationNumber(DEFAULT_ORGANIZATION_NUMBER);
+            .name(DEFAULT_NAME);
+        // Add required entity
+        Address address = AddressResourceIntTest.createEntity(em);
+        em.persist(address);
+        em.flush();
+        domain.setAddress(address);
         return domain;
     }
 
@@ -123,8 +121,6 @@ public class DomainResourceIntTest {
         assertThat(domainList).hasSize(databaseSizeBeforeCreate + 1);
         Domain testDomain = domainList.get(domainList.size() - 1);
         assertThat(testDomain.getName()).isEqualTo(DEFAULT_NAME);
-        assertThat(testDomain.getDomainName()).isEqualTo(DEFAULT_DOMAIN_NAME);
-        assertThat(testDomain.getOrganizationNumber()).isEqualTo(DEFAULT_ORGANIZATION_NUMBER);
 
         // Validate the Domain in Elasticsearch
         Domain domainEs = domainSearchRepository.findOne(testDomain.getId());
@@ -172,25 +168,6 @@ public class DomainResourceIntTest {
 
     @Test
     @Transactional
-    public void checkDomainNameIsRequired() throws Exception {
-        int databaseSizeBeforeTest = domainRepository.findAll().size();
-        // set the field null
-        domain.setDomainName(null);
-
-        // Create the Domain, which fails.
-        DomainDTO domainDTO = domainMapper.toDto(domain);
-
-        restDomainMockMvc.perform(post("/api/domains")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(domainDTO)))
-            .andExpect(status().isBadRequest());
-
-        List<Domain> domainList = domainRepository.findAll();
-        assertThat(domainList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
     public void getAllDomains() throws Exception {
         // Initialize the database
         domainRepository.saveAndFlush(domain);
@@ -200,9 +177,7 @@ public class DomainResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(domain.getId().intValue())))
-            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
-            .andExpect(jsonPath("$.[*].domainName").value(hasItem(DEFAULT_DOMAIN_NAME.toString())))
-            .andExpect(jsonPath("$.[*].organizationNumber").value(hasItem(DEFAULT_ORGANIZATION_NUMBER.toString())));
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
     }
 
     @Test
@@ -216,9 +191,7 @@ public class DomainResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(domain.getId().intValue()))
-            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
-            .andExpect(jsonPath("$.domainName").value(DEFAULT_DOMAIN_NAME.toString()))
-            .andExpect(jsonPath("$.organizationNumber").value(DEFAULT_ORGANIZATION_NUMBER.toString()));
+            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
     }
 
     @Test
@@ -242,9 +215,7 @@ public class DomainResourceIntTest {
         // Disconnect from session so that the updates on updatedDomain are not directly saved in db
         em.detach(updatedDomain);
         updatedDomain
-            .name(UPDATED_NAME)
-            .domainName(UPDATED_DOMAIN_NAME)
-            .organizationNumber(UPDATED_ORGANIZATION_NUMBER);
+            .name(UPDATED_NAME);
         DomainDTO domainDTO = domainMapper.toDto(updatedDomain);
 
         restDomainMockMvc.perform(put("/api/domains")
@@ -257,8 +228,6 @@ public class DomainResourceIntTest {
         assertThat(domainList).hasSize(databaseSizeBeforeUpdate);
         Domain testDomain = domainList.get(domainList.size() - 1);
         assertThat(testDomain.getName()).isEqualTo(UPDATED_NAME);
-        assertThat(testDomain.getDomainName()).isEqualTo(UPDATED_DOMAIN_NAME);
-        assertThat(testDomain.getOrganizationNumber()).isEqualTo(UPDATED_ORGANIZATION_NUMBER);
 
         // Validate the Domain in Elasticsearch
         Domain domainEs = domainSearchRepository.findOne(testDomain.getId());
@@ -318,9 +287,7 @@ public class DomainResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(domain.getId().intValue())))
-            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
-            .andExpect(jsonPath("$.[*].domainName").value(hasItem(DEFAULT_DOMAIN_NAME.toString())))
-            .andExpect(jsonPath("$.[*].organizationNumber").value(hasItem(DEFAULT_ORGANIZATION_NUMBER.toString())));
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
     }
 
     @Test

@@ -6,7 +6,7 @@
     <!--
         Added the constraints for entity TimeEntry.
     -->
-    <changeSet id="20171224084901-2" author="jhipster">
+    <changeSet id="20180103113355-2" author="jhipster">
         
         <addForeignKeyConstraint baseColumnNames="project_id"
                                  baseTableName="time_entry"
@@ -14,9 +14,9 @@
                                  referencedColumnNames="id"
                                  referencedTableName="project"/>
 
-        <addForeignKeyConstraint baseColumnNames="created_by_id"
+        <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="time_entry"
-                                 constraintName="fk_time_entry_created_by_id"
+                                 constraintName="fk_time_entry_user_id"
                                  referencedColumnNames="id"
                                  referencedTableName="jhi_user"/>
 

@@ -3,17 +3,19 @@
 #padding: 10
 
 /**
- * Address for customer or domain
+ * Billing address for customer or domain.
  */
 entity Address {
-	addressLine1 String required,
-	addressLine2 String
-	addressLine3 String,
-	city String required,
-	zipOrPostcode String required,
-	stateProvinceCounty String,
-	country String required,
-	addressDetails String
+    /** Organizational number (optional) */
+    organizationNumber String,
+    addressLine1 String required,
+    addressLine2 String
+    addressLine3 String,
+    city String required,
+    zipOrPostcode String required,
+    stateProvinceCounty String,
+    country String required,
+    addressDetails String
 }
 
 /**
@@ -22,12 +24,16 @@ entity Address {
  * Each project belongs to either an user or an organization.
  */
 entity Project {
-	name String required,
-    description String
+    /** Name of the project (required) */
+    name String required,
+    /** Description of the project (optional) */
+    description String,
+    /** Hourly rate of the project (optional) */
+    hourlyRate Float
 }
 
 entity Customer {
-	name String required
+    name String required
 }
 
 /**
@@ -36,8 +42,11 @@ entity Customer {
  * Each time entry belongs to one user.
  */
 entity TimeEntry {
-	start ZonedDateTime required,
-	end ZonedDateTime,
+    /** Start time for the time entry (required) */
+    start ZonedDateTime required,
+    /** End time for the time entry (optional for running tasks) */
+    end ZonedDateTime,
+    /** Optional comment */
     comment String
 }
 
@@ -45,25 +54,102 @@ entity TimeEntry {
  * In many cases an organization is only one user.
  */
 entity Domain {
-	name String required,
-	domainName String required,
-    organizationNumber String
+    /** Name of the domain (required) */
+    name String required
+}
+
+/**
+ * Addtional information for our users.
+ */
+entity UserExtra {
+    phone String
+}
+
+// Extra User relationships
+relationship OneToOne {
+    /**
+     * Extended User object according to:
+     * http://www.jhipster.tech/tips/022_tip_registering_user_with_additional_information.html
+     */
+    UserExtra{user} to User
+}
+relationship OneToOne {
+    /**
+     * User may have one active time entry.
+     * 1 -> 1
+     */
+    UserExtra{activeTimeEntry} to TimeEntry
 }
 
 // Time Entry relationships
-relationship ManyToOne { TimeEntry{project(name)} to Project }
-relationship ManyToOne { TimeEntry{createdBy(email)} to User }
+relationship ManyToOne {
+    /**
+     * TimeEntry belongs to one Project.
+     * m -> 1 (required)
+     */
+    TimeEntry{project(name) required} to Project
+}
+relationship ManyToOne {
+    /**
+     * TimeEntry belongs to one User.
+     * m -> 1 (required)
+     */
+    TimeEntry{user(email) required} to User
+}
 
 // Domain relationships
-relationship OneToMany { Domain{customers(name)} to Customer{domain(name)} }
-relationship ManyToMany { Domain{members(login)} to User }
-relationship OneToOne { Domain{address} to Address }
-
-// Project relationships
+relationship OneToMany {
+    /**
+     * 1 -> m (bidirectional)
+     * Domain has zero or more customers.
+     * Customer belongs to one domain (required).
+     */
+    Domain{customers(name)} to Customer{domain(name) required}
+}
+relationship ManyToMany {
+    /**
+     * m -> m (unidirectional many-to-many)
+     * One user can be registered at many domains.
+     * Natural order would be User<->Domain but can't extend User.
+     */
+    Domain{authorizedUsers(email)} to User
+}
+relationship OneToOne {
+    /**
+     * 1 -> 1 (unidirectional)
+     * Domain has an address (required).
+     */
+    Domain{address(addressLine1) required} to Address
+}
 
 // Customer relationships
-relationship OneToMany { Customer{projects} to Project{belongsTo(name)} }
-relationship OneToOne { Customer{address} to Address }
+relationship OneToMany {
+    /**
+     * 1 <-> m (bidirectional)
+     * Customer has zero or more projects.
+     * Project belongs to one customer (required).
+     */
+    Customer{projects} to Project{customer(name) required}
+}
+relationship OneToOne {
+    /**
+     * 1 -> 1 (unidirectional)
+     * Domain has one billing address.
+     */
+    Customer{address(addressLine1) required} to Address
+}
+
+// Project relationships
+relationship ManyToMany {
+    /**
+     * m -> m (unidirectional many-to-many)
+     * One project may have one or more (global) users.
+     * One user (global) may be authorized to register time on zero or more projects.
+     * Natural order would be User<->Project but can't extend User.
+     * Note: In order to add a user to a project, it should be authorized in the domain.
+     */
+    Project{projectMembers(email)} to User
+}
 
 paginate * with pagination
 

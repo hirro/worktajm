@@ -1,20 +1,18 @@
 package com.arnellconsulting.worktajm.web.rest;
 
-import com.arnellconsulting.worktajm.domain.Domain;
-import com.arnellconsulting.worktajm.domain.Project;
 import com.arnellconsulting.worktajm.domain.User;
-import com.arnellconsulting.worktajm.repository.DomainRepository;
-import com.arnellconsulting.worktajm.repository.ProjectRepository;
 import com.arnellconsulting.worktajm.repository.UserRepository;
-import com.arnellconsulting.worktajm.repository.search.ProjectSearchRepository;
-import com.arnellconsulting.worktajm.security.AuthoritiesConstants;
 import com.arnellconsulting.worktajm.security.SecurityUtils;
-import com.arnellconsulting.worktajm.service.dto.ProjectDTO;
-import com.arnellconsulting.worktajm.service.mapper.ProjectMapper;
+import com.codahale.metrics.annotation.Timed;
+import com.arnellconsulting.worktajm.domain.Project;
+
+import com.arnellconsulting.worktajm.repository.ProjectRepository;
+import com.arnellconsulting.worktajm.repository.search.ProjectSearchRepository;
 import com.arnellconsulting.worktajm.web.rest.errors.BadRequestAlertException;
 import com.arnellconsulting.worktajm.web.rest.util.HeaderUtil;
 import com.arnellconsulting.worktajm.web.rest.util.PaginationUtil;
-import com.codahale.metrics.annotation.Timed;
+import com.arnellconsulting.worktajm.service.dto.ProjectDTO;
+import com.arnellconsulting.worktajm.service.mapper.ProjectMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,18 +21,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Project.
@@ -50,23 +48,17 @@ public class ProjectResource {
 
     private final ProjectRepository projectRepository;
 
+    private final UserRepository userRepository;
+
     private final ProjectMapper projectMapper;
 
     private final ProjectSearchRepository projectSearchRepository;
 
-    private final UserRepository userRepository;
-
-    private final DomainRepository domainRepository;
-
-    public ProjectResource(ProjectRepository projectRepository,
-                           ProjectMapper projectMapper,
-                           ProjectSearchRepository projectSearchRepository,
-                           UserRepository userRepository, DomainRepository domainRepository) {
+    public ProjectResource(ProjectRepository projectRepository, UserRepository userRepository, ProjectMapper projectMapper, ProjectSearchRepository projectSearchRepository) {
         this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
         this.projectMapper = projectMapper;
         this.projectSearchRepository = projectSearchRepository;
-        this.userRepository = userRepository;
-        this.domainRepository = domainRepository;
     }
 
     /**
@@ -124,20 +116,14 @@ public class ProjectResource {
      * @return the ResponseEntity with status 200 (OK) and the list of projects in body
      */
     @GetMapping("/projects")
-    @Transactional
     @Timed
     public ResponseEntity<List<ProjectDTO>> getAllProjects(Pageable pageable) {
         log.debug("REST request to get a page of Projects");
 
         // Find currently logged in user
-        Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
-        Optional<User> user = userRepository.findOneByLogin(userLogin.get());
+        List<User> users = Arrays.asList(getLoggedInUser());
 
-        // Get all domains user is a member of
-        List<Domain> userDomains = domainRepository.findAllByMembersEquals(user.get());
-
-        // Find all projects for the domains
-        Page<Project> page = projectRepository.findAllProjectsInDomains(userDomains, pageable);
+        Page<Project> page = projectRepository.findAllByProjectMembersIn(users, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/projects");
         return new ResponseEntity<>(projectMapper.toDto(page.getContent()), headers, HttpStatus.OK);
     }
@@ -152,17 +138,10 @@ public class ProjectResource {
     @Timed
     public ResponseEntity<ProjectDTO> getProject(@PathVariable Long id) {
         log.debug("REST request to get Project : {}", id);
-        Project project = projectRepository.findOne(id);
-        ProjectDTO projectDTO = projectMapper.toDto(project);
-
-        // Find currently logged in user
-        Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
-        Optional<User> user = userRepository.findOneByLogin(userLogin.get());
-        if (project.getBelongsTo().getDomain().getMembers().contains(user.get())) {
-            return ResponseUtil.wrapOrNotFound(Optional.ofNullable(projectDTO));
-        } else {
-            return ResponseUtil.wrapOrNotFound(null);
-        }
+        final Project project = projectRepository.findOneWithEagerRelationships(id);
+        final boolean isUserMemberOfProject = project.getProjectMembers().contains(getLoggedInUser());
+        final ProjectDTO projectDTO = isUserMemberOfProject ? projectMapper.toDto(project) : null;
+        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(projectDTO));
     }
 
     /**
@@ -173,7 +152,6 @@ public class ProjectResource {
      */
     @DeleteMapping("/projects/{id}")
     @Timed
-    @Secured(AuthoritiesConstants.ADMIN)
     public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
         log.debug("REST request to delete Project : {}", id);
         projectRepository.delete(id);
@@ -198,4 +176,8 @@ public class ProjectResource {
         return new ResponseEntity<>(projectMapper.toDto(page.getContent()), headers, HttpStatus.OK);
     }
 
+    private User getLoggedInUser() {
+        Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
+        return userRepository.findOneByLogin(userLogin.get()).get();
+    }
 }

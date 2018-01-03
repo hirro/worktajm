@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface TimeEntryRepository extends JpaRepository<TimeEntry, Long> {
 
-    @Query("select time_entry from TimeEntry time_entry where time_entry.createdBy.login = ?#{principal.username}")
-    List<TimeEntry> findByCreatedByIsCurrentUser();
+    @Query("select time_entry from TimeEntry time_entry where time_entry.user.login = ?#{principal.username}")
+    List<TimeEntry> findByUserIsCurrentUser();
 
 }

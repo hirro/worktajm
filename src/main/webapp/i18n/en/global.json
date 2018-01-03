@@ -12,6 +12,7 @@
                 "customer": "Customer",
                 "timeEntry": "Time Entry",
                 "domain": "Domain",
+                "userExtra": "User Extra",
                 "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
             },
             "account": {

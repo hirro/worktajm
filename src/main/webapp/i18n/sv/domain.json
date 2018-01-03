@@ -17,11 +17,9 @@
                 "title": "Domain"
             },
             "name": "Name",
-            "domainName": "Domain Name",
-            "organizationNumber": "Organization Number",
             "address": "Address",
             "customers": "Customers",
-            "members": "Members"
+            "authorizedUsers": "Authorized Users"
         }
     }
 }

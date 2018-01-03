@@ -6,7 +6,7 @@
     <!--
         Added the constraints for entity Domain.
     -->
-    <changeSet id="20171224084902-2" author="jhipster">
+    <changeSet id="20180103113356-2" author="jhipster">
         
         <addForeignKeyConstraint baseColumnNames="address_id"
                                  baseTableName="domain"
@@ -15,13 +15,13 @@
                                  referencedTableName="address"/>
 
         <addForeignKeyConstraint baseColumnNames="domains_id"
-                                 baseTableName="domain_members"
-                                 constraintName="fk_domain_members_domains_id"
+                                 baseTableName="domain_authorized_users"
+                                 constraintName="fk_domain_authorized_users_domains_id"
                                  referencedColumnNames="id"
                                  referencedTableName="domain"/>
-        <addForeignKeyConstraint baseColumnNames="members_id"
-                                 baseTableName="domain_members"
-                                 constraintName="fk_domain_members_members_id"
+        <addForeignKeyConstraint baseColumnNames="authorized_users_id"
+                                 baseTableName="domain_authorized_users"
+                                 constraintName="fk_domain_authorized_users_authorized_users_id"
                                  referencedColumnNames="id"
                                  referencedTableName="jhi_user"/>
         

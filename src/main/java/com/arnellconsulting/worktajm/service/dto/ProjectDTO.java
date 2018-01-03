@@ -19,9 +19,13 @@ public class ProjectDTO implements Serializable {
 
     private String description;
 
-    private Long belongsToId;
+    private Float hourlyRate;
 
-    private String belongsToName;
+    private Set<UserDTO> projectMembers = new HashSet<>();
+
+    private Long customerId;
+
+    private String customerName;
 
     public Long getId() {
         return id;
@@ -47,20 +51,36 @@ public class ProjectDTO implements Serializable {
         this.description = description;
     }
 
-    public Long getBelongsToId() {
-        return belongsToId;
+    public Float getHourlyRate() {
+        return hourlyRate;
     }
 
-    public void setBelongsToId(Long customerId) {
-        this.belongsToId = customerId;
+    public void setHourlyRate(Float hourlyRate) {
+        this.hourlyRate = hourlyRate;
     }
 
-    public String getBelongsToName() {
-        return belongsToName;
+    public Set<UserDTO> getProjectMembers() {
+        return projectMembers;
     }
 
-    public void setBelongsToName(String customerName) {
-        this.belongsToName = customerName;
+    public void setProjectMembers(Set<UserDTO> users) {
+        this.projectMembers = users;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
     @Override
@@ -90,6 +110,7 @@ public class ProjectDTO implements Serializable {
             "id=" + getId() +
             ", name='" + getName() + "'" +
             ", description='" + getDescription() + "'" +
+            ", hourlyRate=" + getHourlyRate() +
             "}";
     }
 }

@@ -20,7 +20,7 @@
             "end": "End",
             "comment": "Comment",
             "project": "Project",
-            "createdBy": "Created By"
+            "user": "User"
         }
     }
 }

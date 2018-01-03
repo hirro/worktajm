@@ -1,6 +1,7 @@
 package com.arnellconsulting.worktajm.domain;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -30,21 +31,45 @@ public class TimeEntry implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Start time for the time entry (required)
+     */
     @NotNull
+    @ApiModelProperty(value = "Start time for the time entry (required)", required = true)
     @Column(name = "jhi_start", nullable = false)
     private ZonedDateTime start;
 
+    /**
+     * End time for the time entry (optional for running tasks)
+     */
+    @ApiModelProperty(value = "End time for the time entry (optional for running tasks)")
     @Column(name = "jhi_end")
     private ZonedDateTime end;
 
+    /**
+     * Optional comment
+     */
+    @ApiModelProperty(value = "Optional comment")
     @Column(name = "jhi_comment")
     private String comment;
 
-    @ManyToOne
+    /**
+     * TimeEntry belongs to one Project.
+     * m -> 1 (required)
+     */
+    @ApiModelProperty(value = "TimeEntry belongs to one Project. m -> 1 (required)")
+    @ManyToOne(optional = false)
+    @NotNull
     private Project project;
 
-    @ManyToOne
-    private User createdBy;
+    /**
+     * TimeEntry belongs to one User.
+     * m -> 1 (required)
+     */
+    @ApiModelProperty(value = "TimeEntry belongs to one User. m -> 1 (required)")
+    @ManyToOne(optional = false)
+    @NotNull
+    private User user;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -107,17 +132,17 @@ public class TimeEntry implements Serializable {
         this.project = project;
     }
 
-    public User getCreatedBy() {
-        return createdBy;
+    public User getUser() {
+        return user;
     }
 
-    public TimeEntry createdBy(User user) {
-        this.createdBy = user;
+    public TimeEntry user(User user) {
+        this.user = user;
         return this;
     }
 
-    public void setCreatedBy(User user) {
-        this.createdBy = user;
+    public void setUser(User user) {
+        this.user = user;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 

@@ -32,7 +32,8 @@
             <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="name"><span jhiTranslate="worktajmApp.project.name">Name</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="description"><span jhiTranslate="worktajmApp.project.description">Description</span> <span class="fa fa-sort"></span></th>
-            <th jhiSortBy="belongsToName"><span jhiTranslate="worktajmApp.project.belongsTo">Belongs To</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="hourlyRate"><span jhiTranslate="worktajmApp.project.hourlyRate">Hourly Rate</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="customerName"><span jhiTranslate="worktajmApp.project.customer">Customer</span> <span class="fa fa-sort"></span></th>
             <th></th>
             </tr>
             </thead>
@@ -41,9 +42,10 @@
                 <td><a [routerLink]="['../project', project.id ]">{{project.id}}</a></td>
                 <td>{{project.name}}</td>
                 <td>{{project.description}}</td>
+                <td>{{project.hourlyRate}}</td>
                 <td>
-                    <div *ngIf="project.belongsToId">
-                        <a [routerLink]="['../customer', project.belongsToId  ]" >{{project.belongsToName}}</a>
+                    <div *ngIf="project.customerId">
+                        <a [routerLink]="['../customer', project.customerId  ]" >{{project.customerName}}</a>
                     </div>
                 </td>
                 <td class="text-right">

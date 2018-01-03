@@ -12,10 +12,20 @@
         <dd>
             <span>{{project.description}}</span>
         </dd>
-        <dt><span jhiTranslate="worktajmApp.project.belongsTo">Belongs To</span></dt>
+        <dt><span jhiTranslate="worktajmApp.project.hourlyRate">Hourly Rate</span></dt>
         <dd>
-            <div *ngIf="project.belongsToId">
-                <a [routerLink]="['/customer', project.belongsToId]">{{project.belongsToName}}</a>
+            <span>{{project.hourlyRate}}</span>
+        </dd>
+        <dt><span jhiTranslate="worktajmApp.project.projectMembers">Project Members</span></dt>
+        <dd>
+            <span *ngFor="let projectMembers of project.projectMembers; let last = last">
+                {{projectMembers.email}}{{last ? '' : ', '}}
+            </span>
+        </dd>
+        <dt><span jhiTranslate="worktajmApp.project.customer">Customer</span></dt>
+        <dd>
+            <div *ngIf="project.customerId">
+                <a [routerLink]="['/customer', project.customerId]">{{project.customerName}}</a>
             </div>
         </dd>
     </dl>
