@@ -59,7 +59,7 @@ entity Domain {
 }
 
 /**
- * Addtional information for our users.
+ * Additional information for our users.
  */
 entity UserExtra {
     phone String

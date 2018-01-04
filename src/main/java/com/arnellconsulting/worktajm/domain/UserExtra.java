@@ -24,7 +24,6 @@ public class UserExtra implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "phone")
@@ -36,7 +35,7 @@ public class UserExtra implements Serializable {
      */
     @ApiModelProperty(value = "Extended User object according to: http:")
     @OneToOne
-    @JoinColumn(unique = true)
+    @MapsId
     private User user;
 
     /**

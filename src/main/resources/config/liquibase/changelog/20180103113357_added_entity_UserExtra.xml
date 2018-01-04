@@ -19,20 +19,18 @@
     -->
     <changeSet id="20180103113357-1" author="jhipster">
         <createTable tableName="user_extra">
-            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
+            <column name="user_id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="phone" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="user_id" type="bigint">
-                <constraints unique="true" nullable="true" />
-            </column>            <column name="active_time_entry_id" type="bigint">
+            <column name="active_time_entry_id" type="bigint">
                 <constraints unique="true" nullable="true" />
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
-        
+
     </changeSet>
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here, do not remove-->
 </databaseChangeLog>
