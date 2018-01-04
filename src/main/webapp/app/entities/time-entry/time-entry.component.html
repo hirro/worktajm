@@ -29,29 +29,27 @@
         <table class="table table-striped">
             <thead>
             <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="start"><span jhiTranslate="worktajmApp.timeEntry.start">Start</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="end"><span jhiTranslate="worktajmApp.timeEntry.end">End</span> <span class="fa fa-sort"></span></th>
-            <th jhiSortBy="comment"><span jhiTranslate="worktajmApp.timeEntry.comment">Comment</span> <span class="fa fa-sort"></span></th>
             <th jhiSortBy="projectName"><span jhiTranslate="worktajmApp.timeEntry.project">Project</span> <span class="fa fa-sort"></span></th>
-            <th jhiSortBy="userEmail"><span jhiTranslate="worktajmApp.timeEntry.user">User</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="comment"><span jhiTranslate="worktajmApp.timeEntry.comment">Comment</span> <span class="fa fa-sort"></span></th>
+            <!--<th jhiSortBy="userEmail"><span jhiTranslate="worktajmApp.timeEntry.user">User</span> <span class="fa fa-sort"></span></th>-->
             <th></th>
             </tr>
             </thead>
             <tbody>
             <tr *ngFor="let timeEntry of timeEntries ;trackBy: trackId">
-                <td><a [routerLink]="['../time-entry', timeEntry.id ]">{{timeEntry.id}}</a></td>
                 <td>{{timeEntry.start | date:'medium'}}</td>
                 <td>{{timeEntry.end | date:'medium'}}</td>
-                <td>{{timeEntry.comment}}</td>
                 <td>
                     <div *ngIf="timeEntry.projectId">
                         <a [routerLink]="['../project', timeEntry.projectId  ]" >{{timeEntry.projectName}}</a>
                     </div>
                 </td>
-                <td>
-                    {{timeEntry.userEmail}}
-                </td>
+                <td>{{timeEntry.comment}}</td>
+                <!--<td>-->
+                    <!--{{timeEntry.userEmail}}-->
+                <!--</td>-->
                 <td class="text-right">
                     <div class="btn-group flex-btn-group-container">
                         <button type="submit"

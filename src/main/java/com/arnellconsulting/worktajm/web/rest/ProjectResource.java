@@ -139,8 +139,15 @@ public class ProjectResource {
     public ResponseEntity<ProjectDTO> getProject(@PathVariable Long id) {
         log.debug("REST request to get Project : {}", id);
         final Project project = projectRepository.findOneWithEagerRelationships(id);
-        final boolean isUserMemberOfProject = project.getProjectMembers().contains(getLoggedInUser());
-        final ProjectDTO projectDTO = isUserMemberOfProject ? projectMapper.toDto(project) : null;
+        final ProjectDTO projectDTO;
+
+        // Only projects that is authorized to the logged in user may be returned
+        if ((project != null) && project.getProjectMembers().contains(getLoggedInUser())) {
+            projectDTO = projectMapper.toDto(project);
+        } else {
+            projectDTO = null;
+        }
+
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(projectDTO));
     }
 

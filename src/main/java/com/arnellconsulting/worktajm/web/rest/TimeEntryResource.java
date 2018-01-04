@@ -1,5 +1,8 @@
 package com.arnellconsulting.worktajm.web.rest;
 
+import com.arnellconsulting.worktajm.domain.User;
+import com.arnellconsulting.worktajm.repository.UserRepository;
+import com.arnellconsulting.worktajm.security.SecurityUtils;
 import com.codahale.metrics.annotation.Timed;
 import com.arnellconsulting.worktajm.domain.TimeEntry;
 
@@ -18,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +31,6 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
@@ -50,10 +52,13 @@ public class TimeEntryResource {
 
     private final TimeEntrySearchRepository timeEntrySearchRepository;
 
-    public TimeEntryResource(TimeEntryRepository timeEntryRepository, TimeEntryMapper timeEntryMapper, TimeEntrySearchRepository timeEntrySearchRepository) {
+    private final UserRepository userRepository;
+
+    public TimeEntryResource(TimeEntryRepository timeEntryRepository, TimeEntryMapper timeEntryMapper, TimeEntrySearchRepository timeEntrySearchRepository, UserRepository userRepository) {
         this.timeEntryRepository = timeEntryRepository;
         this.timeEntryMapper = timeEntryMapper;
         this.timeEntrySearchRepository = timeEntrySearchRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -70,7 +75,12 @@ public class TimeEntryResource {
         if (timeEntryDTO.getId() != null) {
             throw new BadRequestAlertException("A new timeEntry cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
         TimeEntry timeEntry = timeEntryMapper.toEntity(timeEntryDTO);
+
+        // Time entries are always owned by the logged in user.
+        timeEntry.setUser(getLoggedInUser());
+
         timeEntry = timeEntryRepository.save(timeEntry);
         TimeEntryDTO result = timeEntryMapper.toDto(timeEntry);
         timeEntrySearchRepository.save(timeEntry);
@@ -96,6 +106,18 @@ public class TimeEntryResource {
             return createTimeEntry(timeEntryDTO);
         }
         TimeEntry timeEntry = timeEntryMapper.toEntity(timeEntryDTO);
+
+        // Only owner may update the time entry and ownership may not be changed.
+        TimeEntry existingTimeEntry = timeEntryRepository.findOne(timeEntry.getId());
+        if (existingTimeEntry.getUser().getId() != timeEntry.getUser().getId()) {
+            throw new AccessDeniedException("Ownership manipulation detected");
+        }
+
+        // Only logged in user may update object
+        if (timeEntry.getUser().getId() != getLoggedInUser().getId()) {
+            throw new AccessDeniedException("Only owner may modify time entry");
+        }
+
         timeEntry = timeEntryRepository.save(timeEntry);
         TimeEntryDTO result = timeEntryMapper.toDto(timeEntry);
         timeEntrySearchRepository.save(timeEntry);
@@ -114,7 +136,7 @@ public class TimeEntryResource {
     @Timed
     public ResponseEntity<List<TimeEntryDTO>> getAllTimeEntries(Pageable pageable) {
         log.debug("REST request to get a page of TimeEntries");
-        Page<TimeEntry> page = timeEntryRepository.findAll(pageable);
+        Page<TimeEntry> page = timeEntryRepository.findByUserIsCurrentUser(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/time-entries");
         return new ResponseEntity<>(timeEntryMapper.toDto(page.getContent()), headers, HttpStatus.OK);
     }
@@ -164,6 +186,11 @@ public class TimeEntryResource {
         Page<TimeEntry> page = timeEntrySearchRepository.search(queryStringQuery(query), pageable);
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/time-entries");
         return new ResponseEntity<>(timeEntryMapper.toDto(page.getContent()), headers, HttpStatus.OK);
+    }
+
+    private User getLoggedInUser() {
+        Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
+        return userRepository.findOneByLogin(userLogin.get()).get();
     }
 
 }

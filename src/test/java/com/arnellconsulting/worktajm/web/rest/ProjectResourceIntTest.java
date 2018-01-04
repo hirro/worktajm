@@ -4,6 +4,7 @@ import com.arnellconsulting.worktajm.WorktajmApp;
 
 import com.arnellconsulting.worktajm.domain.Project;
 import com.arnellconsulting.worktajm.domain.Customer;
+import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.ProjectRepository;
 import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.ProjectSearchRepository;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -29,6 +31,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.arnellconsulting.worktajm.web.rest.TestUtil.createFormattingConversionService;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_A_LOGIN;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_B_LOGIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -80,6 +84,10 @@ public class ProjectResourceIntTest {
 
     private Project project;
 
+    private User userA;
+
+    private User userB;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -114,6 +122,13 @@ public class ProjectResourceIntTest {
     public void initTest() {
         projectSearchRepository.deleteAll();
         project = createEntity(em);
+
+        // Create test users
+        userA = UserResourceIntTest.createEntity(em);
+        userA.setLogin(USER_A_LOGIN);
+
+        userB = UserResourceIntTest.createEntity(em);
+        userB.setLogin(USER_B_LOGIN);
     }
 
     @Test
@@ -198,8 +213,12 @@ public class ProjectResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void getProject() throws Exception {
+
         // Initialize the database
+        userRepository.saveAndFlush(userA);
+        project.getProjectMembers().add(userA);
         projectRepository.saveAndFlush(project);
 
         // Get the project
@@ -214,6 +233,7 @@ public class ProjectResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void getNonExistingProject() throws Exception {
         // Get the project
         restProjectMockMvc.perform(get("/api/projects/{id}", Long.MAX_VALUE))
@@ -222,7 +242,7 @@ public class ProjectResourceIntTest {
 
     @Test
     @Transactional
-    public void updateProject() throws Exception {
+    public void updateAuthorizedProject() throws Exception {
         // Initialize the database
         projectRepository.saveAndFlush(project);
         projectSearchRepository.save(project);

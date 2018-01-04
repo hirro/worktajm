@@ -72,6 +72,9 @@ public class UserResourceIntTest {
     private static final String DEFAULT_LANGKEY = "en";
     private static final String UPDATED_LANGKEY = "fr";
 
+    public static final String USER_A_LOGIN = "user_a";
+    public static final String USER_B_LOGIN = "user_b";
+
     @Autowired
     private UserRepository userRepository;
 

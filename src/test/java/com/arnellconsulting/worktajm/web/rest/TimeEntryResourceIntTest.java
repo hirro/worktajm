@@ -6,6 +6,7 @@ import com.arnellconsulting.worktajm.domain.TimeEntry;
 import com.arnellconsulting.worktajm.domain.Project;
 import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.TimeEntryRepository;
+import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.TimeEntrySearchRepository;
 import com.arnellconsulting.worktajm.service.dto.TimeEntryDTO;
 import com.arnellconsulting.worktajm.service.mapper.TimeEntryMapper;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -34,6 +36,8 @@ import java.util.List;
 
 import static com.arnellconsulting.worktajm.web.rest.TestUtil.sameInstant;
 import static com.arnellconsulting.worktajm.web.rest.TestUtil.createFormattingConversionService;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_A_LOGIN;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_B_LOGIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -67,6 +71,9 @@ public class TimeEntryResourceIntTest {
     private TimeEntrySearchRepository timeEntrySearchRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
@@ -81,11 +88,13 @@ public class TimeEntryResourceIntTest {
     private MockMvc restTimeEntryMockMvc;
 
     private TimeEntry timeEntry;
+    private User userA;
+    private User userB;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final TimeEntryResource timeEntryResource = new TimeEntryResource(timeEntryRepository, timeEntryMapper, timeEntrySearchRepository);
+        final TimeEntryResource timeEntryResource = new TimeEntryResource(timeEntryRepository, timeEntryMapper, timeEntrySearchRepository, userRepository);
         this.restTimeEntryMockMvc = MockMvcBuilders.standaloneSetup(timeEntryResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -121,11 +130,23 @@ public class TimeEntryResourceIntTest {
     public void initTest() {
         timeEntrySearchRepository.deleteAll();
         timeEntry = createEntity(em);
+
+        // Create test users
+        userA = UserResourceIntTest.createEntity(em);
+        userA.setLogin(USER_A_LOGIN);
+
+        userB = UserResourceIntTest.createEntity(em);
+        userB.setLogin(USER_B_LOGIN);
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void createTimeEntry() throws Exception {
+
+        // Initialize the database
+        userRepository.saveAndFlush(userA);
+
         int databaseSizeBeforeCreate = timeEntryRepository.findAll().size();
 
         // Create the TimeEntry
@@ -191,8 +212,11 @@ public class TimeEntryResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void getAllTimeEntries() throws Exception {
         // Initialize the database
+        userRepository.saveAndFlush(userA);
+        timeEntry.setUser(userA);
         timeEntryRepository.saveAndFlush(timeEntry);
 
         // Get all the timeEntryList
@@ -231,8 +255,11 @@ public class TimeEntryResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateTimeEntry() throws Exception {
         // Initialize the database
+        userRepository.saveAndFlush(userA);
+        timeEntry.setUser(userA);
         timeEntryRepository.saveAndFlush(timeEntry);
         timeEntrySearchRepository.save(timeEntry);
         int databaseSizeBeforeUpdate = timeEntryRepository.findAll().size();
@@ -269,7 +296,12 @@ public class TimeEntryResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateNonExistingTimeEntry() throws Exception {
+
+        // Initialize the database
+        userRepository.saveAndFlush(userA);
+
         int databaseSizeBeforeUpdate = timeEntryRepository.findAll().size();
 
         // Create the TimeEntry
