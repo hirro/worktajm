@@ -10,8 +10,14 @@ import { ResponseWrapper} from '../../shared';
 export class WorktajmDashboardService {
 
     private projectsResourceUrl = SERVER_API_URL + 'api/projects';
+    private accountResourceUrl = SERVER_API_URL + 'api/account';
 
     constructor(private http: Http) {}
+
+    getUserExtra(req?: any): Observable<ResponseWrapper> {
+        return this.http.get(this.projectsResourceUrl)
+            .map((res: Response) => this.convertResponse(res));
+    }
 
     listAllMyProjects(req?: any): Observable<ResponseWrapper> {
         return this.http.get(this.projectsResourceUrl)
@@ -27,12 +33,21 @@ export class WorktajmDashboardService {
         return new ResponseWrapper(res.headers, result, res.status);
     }
 
+
     /**
      * Convert a returned JSON object to Project.
      */
     private convertItemFromServer(json: any): Project {
         const entity: Project = Object.assign(new Project(), json);
         return entity;
+    }
+
+    /**
+     * Convert a Project to a JSON which can be sent to the server.
+     */
+    private convert(project: Project): Project {
+        const copy: Project = Object.assign({}, project);
+        return copy;
     }
 
 }

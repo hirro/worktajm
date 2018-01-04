@@ -242,6 +242,23 @@ public class ProjectResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_B_LOGIN)
+    public void getNonAuthorizedExistingProject() throws Exception {
+        // Initialize the database
+        userRepository.saveAndFlush(userA);
+        userRepository.saveAndFlush(userB);
+        project.addProjectMembers(userA);
+        projectRepository.saveAndFlush(project);
+        projectSearchRepository.save(project);
+        int databaseSizeBeforeUpdate = projectRepository.findAll().size();
+
+        // Get the project
+        restProjectMockMvc.perform(get("/api/projects/{id}", Long.MAX_VALUE))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
     public void updateAuthorizedProject() throws Exception {
         // Initialize the database
         projectRepository.saveAndFlush(project);
