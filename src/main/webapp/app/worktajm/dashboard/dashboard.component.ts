@@ -1,10 +1,9 @@
-import { Component, OnInit, AfterViewInit, Renderer, ElementRef } from '@angular/core';
-import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { JhiAlertService } from 'ng-jhipster';
 
 import { WorktajmDashboardService } from './dashboard.service';
-import { EMAIL_NOT_FOUND_TYPE } from '../../shared';
 import { Project } from '../../entities/project';
-import { ITEMS_PER_PAGE, Principal, ResponseWrapper } from '../../shared';
+import { ITEMS_PER_PAGE, ResponseWrapper } from '../../shared';
 
 @Component({
     selector: 'jhi-dashboard',
@@ -12,8 +11,6 @@ import { ITEMS_PER_PAGE, Principal, ResponseWrapper } from '../../shared';
 })
 export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
     error: string;
-    errorEmailNotExists: string;
-    resetAccount: any;
     success: string;
     date: string;
     projects: Project[];
@@ -31,7 +28,7 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
             .subscribe(
                 (res: ResponseWrapper) => this.onSuccess(res.json, res.headers),
                 (res: ResponseWrapper) => this.onError(res.json)
-            );;
+            );
     }
 
     ngOnInit() {
@@ -39,10 +36,6 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-    }
-
-    private isProjectActive(project: Project) : boolean {
-        return false;
     }
 
     private onSuccess(data, headers) {

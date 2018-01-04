@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Rx';
 import { SERVER_API_URL } from '../../app.constants';
 
 import { Project } from '../../entities/project/project.model';
-import { ResponseWrapper, createRequestOption } from '../../shared';
+import { ResponseWrapper} from '../../shared';
 
 @Injectable()
 export class WorktajmDashboardService {
@@ -35,11 +35,4 @@ export class WorktajmDashboardService {
         return entity;
     }
 
-    /**
-     * Convert a Project to a JSON which can be sent to the server.
-     */
-    private convert(project: Project): Project {
-        const copy: Project = Object.assign({}, project);
-        return copy;
-    }
 }
