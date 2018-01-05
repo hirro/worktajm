@@ -1,9 +1,12 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { JhiAlertService } from 'ng-jhipster';
 
-import { WorktajmDashboardService } from './dashboard.service';
-import { Project } from '../../entities/project';
-import { Principal, AccountService, JhiLanguageHelper, ITEMS_PER_PAGE, ResponseWrapper } from '../../shared';
+import { Project, ProjectService } from '../../entities/project';
+import { Principal, ITEMS_PER_PAGE, ResponseWrapper } from '../../shared';
+import {UserExtra} from '../../entities/worktajm/user-extra.model';
+import {TimeEntryService} from '../../entities/time-entry/time-entry.service';
+import {TimeEntry} from '../../entities/time-entry/time-entry.model';
+import {WorktajmDashboardService} from './dashboard.service';
 
 @Component({
     selector: 'jhi-dashboard',
@@ -16,10 +19,13 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
     projects: Project[];
     itemsPerPage: any;
     user: any;
+    userExtra: UserExtra;
+    activeTimeEntry: TimeEntry;
 
     constructor(
-        private worktajmDashboardService: WorktajmDashboardService,
-        private accountService: AccountService,
+        private projectService: ProjectService,
+        private dashboardService: WorktajmDashboardService,
+        private timeEntryService: TimeEntryService,
         private jhiAlertService: JhiAlertService,
         private principal: Principal
     ) {
@@ -28,16 +34,16 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
     }
 
     loadAll() {
-        this.worktajmDashboardService.listAllMyProjects()
+        this.projectService.query()
             .subscribe(
                 (res: ResponseWrapper) => this.onListAllMyProjectsSuccess(res.json, res.headers),
                 (res: ResponseWrapper) => this.onListAllMyProjectsError(res.json)
             );
 
-        this.accountService.get()
+        this.dashboardService.find()
             .subscribe(
-                (res: ResponseWrapper) => this.onAccountGetSuccess(res.json, res.headers),
-                (res: ResponseWrapper) => this.onAccountGetError(res.json)
+                (res: UserExtra) => this.onGetUserExtrasSuccess(res),
+                (res: ResponseWrapper) => this.onGetUserExtrasError(res.json)
             );
     }
 
@@ -52,7 +58,7 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
     }
 
     private isProjectActive(project: Project) : boolean {
-        return this.user;
+        return project.id === this.activeTimeEntry.projectId;
     }
 
     private toggleProject(project: Project) {
@@ -67,11 +73,30 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
         this.jhiAlertService.error(error.message, null, null);
     }
 
-    private onAccountGetSuccess(data, headers) {
+    private onGetUserExtrasSuccess(data) {
         this.userExtra = data;
+        if (this.userExtra.activeTimeEntryId) {
+            console.log('Has active time entry!');
+            // Fetching
+            this.timeEntryService.find(this.userExtra.activeTimeEntryId)
+                .subscribe(
+                    (res: TimeEntry) => this.onFindActiveTimeEntrySuccess(res, null),
+                    (res: ResponseWrapper) => this.onFindActiveTimeEntryError(res.json)
+                );
+        } else {
+            console.log('Has no active time entry!');
+        }
     }
 
-    private onAccountGetError(error) {
+    private onGetUserExtrasError(error) {
+        this.jhiAlertService.error(error.message, null, null);
+    }
+
+    private onFindActiveTimeEntrySuccess(data, headers) {
+        this.activeTimeEntry = data;
+    }
+
+    private onFindActiveTimeEntryError(error) {
         this.jhiAlertService.error(error.message, null, null);
     }
 }

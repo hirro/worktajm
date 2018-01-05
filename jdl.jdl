@@ -59,27 +59,13 @@ entity Domain {
 }
 
 /**
- * Additional information for our users.
+ * Additional information for our users (uncommented since it's done manually to avoid interference with generator).
+ *
+ * entity UserExtra {
+ *     phone String
+ * }
+ *
  */
-entity UserExtra {
-    phone String
-}
-
-// Extra User relationships
-relationship OneToOne {
-    /**
-     * Extended User object according to:
-     * http://www.jhipster.tech/tips/022_tip_registering_user_with_additional_information.html
-     */
-    UserExtra{user} to User
-}
-relationship OneToOne {
-    /**
-     * User may have one active time entry.
-     * 1 -> 1
-     */
-    UserExtra{activeTimeEntry} to TimeEntry
-}
 
 // Time Entry relationships
 relationship ManyToOne {

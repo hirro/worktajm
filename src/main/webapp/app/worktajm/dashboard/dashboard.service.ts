@@ -5,48 +5,45 @@ import { SERVER_API_URL } from '../../app.constants';
 
 import { Project } from '../../entities/project/project.model';
 import { ResponseWrapper} from '../../shared';
+import { UserExtra } from '../../entities/worktajm/user-extra.model';
 
 @Injectable()
 export class WorktajmDashboardService {
 
     private projectsResourceUrl = SERVER_API_URL + 'api/projects';
     private accountResourceUrl = SERVER_API_URL + 'api/account';
+    private userExtraResourceUrl = SERVER_API_URL + 'api/user-extras';
 
-    constructor(private http: Http) {}
+    constructor(private http: Http) { }
 
-    getUserExtra(req?: any): Observable<ResponseWrapper> {
-        return this.http.get(this.projectsResourceUrl)
-            .map((res: Response) => this.convertResponse(res));
+    update(userExtra: UserExtra): Observable<UserExtra> {
+        const copy = this.convert(userExtra);
+        return this.http.put(this.userExtraResourceUrl, copy).map((res: Response) => {
+            const jsonResponse = res.json();
+            return this.convertItemFromServer(jsonResponse);
+        });
     }
 
-    listAllMyProjects(req?: any): Observable<ResponseWrapper> {
-        return this.http.get(this.projectsResourceUrl)
-            .map((res: Response) => this.convertResponse(res));
+    find(): Observable<UserExtra> {
+        return this.http.get(`${this.userExtraResourceUrl}`).map((res: Response) => {
+            const jsonResponse = res.json();
+            return this.convertItemFromServer(jsonResponse);
+        });
     }
-
-    private convertResponse(res: Response): ResponseWrapper {
-        const jsonResponse = res.json();
-        const result = [];
-        for (let i = 0; i < jsonResponse.length; i++) {
-            result.push(this.convertItemFromServer(jsonResponse[i]));
-        }
-        return new ResponseWrapper(res.headers, result, res.status);
-    }
-
 
     /**
-     * Convert a returned JSON object to Project.
+     * Convert a returned JSON object to UserExtra.
      */
-    private convertItemFromServer(json: any): Project {
-        const entity: Project = Object.assign(new Project(), json);
+    private convertItemFromServer(json: any): UserExtra {
+        const entity: UserExtra = Object.assign(new UserExtra(), json);
         return entity;
     }
 
     /**
-     * Convert a Project to a JSON which can be sent to the server.
+     * Convert a UserExtra to a JSON which can be sent to the server.
      */
-    private convert(project: Project): Project {
-        const copy: Project = Object.assign({}, project);
+    private convert(userExtra: UserExtra): UserExtra {
+        const copy: UserExtra = Object.assign({}, userExtra);
         return copy;
     }
 

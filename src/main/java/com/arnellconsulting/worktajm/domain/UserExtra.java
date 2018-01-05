@@ -123,4 +123,9 @@ public class UserExtra implements Serializable {
             ", phone='" + getPhone() + "'" +
             "}";
     }
+
+    public void copyFrom(UserExtra userExtra) {
+        this.phone = userExtra.phone;
+        this.activeTimeEntry = userExtra.activeTimeEntry;
+    }
 }

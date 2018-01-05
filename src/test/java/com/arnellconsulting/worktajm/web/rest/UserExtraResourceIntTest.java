@@ -2,8 +2,10 @@ package com.arnellconsulting.worktajm.web.rest;
 
 import com.arnellconsulting.worktajm.WorktajmApp;
 
+import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.domain.UserExtra;
 import com.arnellconsulting.worktajm.repository.UserExtraRepository;
+import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.UserExtraSearchRepository;
 import com.arnellconsulting.worktajm.service.dto.UserExtraDTO;
 import com.arnellconsulting.worktajm.service.mapper.UserExtraMapper;
@@ -18,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -27,6 +30,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.arnellconsulting.worktajm.web.rest.TestUtil.createFormattingConversionService;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_A_LOGIN;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_B_LOGIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -69,10 +74,16 @@ public class UserExtraResourceIntTest {
 
     private UserExtra userExtra;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    private User userA;
+    private User userB;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final UserExtraResource userExtraResource = new UserExtraResource(userExtraRepository, userExtraMapper, userExtraSearchRepository);
+        final UserExtraResource userExtraResource = new UserExtraResource(userRepository, userExtraRepository, userExtraMapper, userExtraSearchRepository);
         this.restUserExtraMockMvc = MockMvcBuilders.standaloneSetup(userExtraResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -95,74 +106,27 @@ public class UserExtraResourceIntTest {
     @Before
     public void initTest() {
         userExtraSearchRepository.deleteAll();
+        userRepository.deleteAll();
+
+        // Create test users
         userExtra = createEntity(em);
+        userA = UserResourceIntTest.createEntity(em);
+        userA.setLogin(USER_A_LOGIN);
+        userB = UserResourceIntTest.createEntity(em);
+        userB.setLogin(USER_B_LOGIN);
     }
 
     @Test
     @Transactional
-    public void createUserExtra() throws Exception {
-        int databaseSizeBeforeCreate = userExtraRepository.findAll().size();
-
-        // Create the UserExtra
-        UserExtraDTO userExtraDTO = userExtraMapper.toDto(userExtra);
-        restUserExtraMockMvc.perform(post("/api/user-extras")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(userExtraDTO)))
-            .andExpect(status().isCreated());
-
-        // Validate the UserExtra in the database
-        List<UserExtra> userExtraList = userExtraRepository.findAll();
-        assertThat(userExtraList).hasSize(databaseSizeBeforeCreate + 1);
-        UserExtra testUserExtra = userExtraList.get(userExtraList.size() - 1);
-        assertThat(testUserExtra.getPhone()).isEqualTo(DEFAULT_PHONE);
-
-        // Validate the UserExtra in Elasticsearch
-        UserExtra userExtraEs = userExtraSearchRepository.findOne(testUserExtra.getId());
-        assertThat(userExtraEs).isEqualToIgnoringGivenFields(testUserExtra);
-    }
-
-    @Test
-    @Transactional
-    public void createUserExtraWithExistingId() throws Exception {
-        int databaseSizeBeforeCreate = userExtraRepository.findAll().size();
-
-        // Create the UserExtra with an existing ID
-        userExtra.setId(1L);
-        UserExtraDTO userExtraDTO = userExtraMapper.toDto(userExtra);
-
-        // An entity with an existing ID cannot be created, so this API call must fail
-        restUserExtraMockMvc.perform(post("/api/user-extras")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(userExtraDTO)))
-            .andExpect(status().isBadRequest());
-
-        // Validate the UserExtra in the database
-        List<UserExtra> userExtraList = userExtraRepository.findAll();
-        assertThat(userExtraList).hasSize(databaseSizeBeforeCreate);
-    }
-
-    @Test
-    @Transactional
-    public void getAllUserExtras() throws Exception {
+    @WithMockUser(USER_A_LOGIN)
+    public void getUserExtraExisting() throws Exception {
         // Initialize the database
-        userExtraRepository.saveAndFlush(userExtra);
-
-        // Get all the userExtraList
-        restUserExtraMockMvc.perform(get("/api/user-extras?sort=id,desc"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(userExtra.getId().intValue())))
-            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE.toString())));
-    }
-
-    @Test
-    @Transactional
-    public void getUserExtra() throws Exception {
-        // Initialize the database
+        userRepository.saveAndFlush(userA);
+        userExtra.setUser(userA);
         userExtraRepository.saveAndFlush(userExtra);
 
         // Get the userExtra
-        restUserExtraMockMvc.perform(get("/api/user-extras/{id}", userExtra.getId()))
+        restUserExtraMockMvc.perform(get("/api/user-extras", userExtra.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(userExtra.getId().intValue()))
@@ -171,18 +135,37 @@ public class UserExtraResourceIntTest {
 
     @Test
     @Transactional
-    public void getNonExistingUserExtra() throws Exception {
+    @WithMockUser(USER_B_LOGIN)
+    public void getUserExtraNotExisting() throws Exception {
+        // Initialize the database
+        userRepository.saveAndFlush(userA);
+        userRepository.saveAndFlush(userB);
+        userExtra.setUser(userA);
+        userExtraRepository.saveAndFlush(userExtra);
+
         // Get the userExtra
-        restUserExtraMockMvc.perform(get("/api/user-extras/{id}", Long.MAX_VALUE))
+        restUserExtraMockMvc.perform(get("/api/user-extras", userExtra.getId()))
             .andExpect(status().isNotFound());
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_B_LOGIN)
+    public void getUserExtraUnknownUser() throws Exception {
+        // Get the userExtra
+        restUserExtraMockMvc.perform(get("/api/user-extras", userExtra.getId()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateUserExtra() throws Exception {
         // Initialize the database
+        userRepository.saveAndFlush(userA);
+        userExtra.setUser(userA);
         userExtraRepository.saveAndFlush(userExtra);
-        userExtraSearchRepository.save(userExtra);
+
         int databaseSizeBeforeUpdate = userExtraRepository.findAll().size();
 
         // Update the userExtra
@@ -211,7 +194,11 @@ public class UserExtraResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateNonExistingUserExtra() throws Exception {
+        // Initialize the database
+        userRepository.saveAndFlush(userA);
+
         int databaseSizeBeforeUpdate = userExtraRepository.findAll().size();
 
         // Create the UserExtra
@@ -221,48 +208,7 @@ public class UserExtraResourceIntTest {
         restUserExtraMockMvc.perform(put("/api/user-extras")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(userExtraDTO)))
-            .andExpect(status().isCreated());
-
-        // Validate the UserExtra in the database
-        List<UserExtra> userExtraList = userExtraRepository.findAll();
-        assertThat(userExtraList).hasSize(databaseSizeBeforeUpdate + 1);
-    }
-
-    @Test
-    @Transactional
-    public void deleteUserExtra() throws Exception {
-        // Initialize the database
-        userExtraRepository.saveAndFlush(userExtra);
-        userExtraSearchRepository.save(userExtra);
-        int databaseSizeBeforeDelete = userExtraRepository.findAll().size();
-
-        // Get the userExtra
-        restUserExtraMockMvc.perform(delete("/api/user-extras/{id}", userExtra.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
-            .andExpect(status().isOk());
-
-        // Validate Elasticsearch is empty
-        boolean userExtraExistsInEs = userExtraSearchRepository.exists(userExtra.getId());
-        assertThat(userExtraExistsInEs).isFalse();
-
-        // Validate the database is empty
-        List<UserExtra> userExtraList = userExtraRepository.findAll();
-        assertThat(userExtraList).hasSize(databaseSizeBeforeDelete - 1);
-    }
-
-    @Test
-    @Transactional
-    public void searchUserExtra() throws Exception {
-        // Initialize the database
-        userExtraRepository.saveAndFlush(userExtra);
-        userExtraSearchRepository.save(userExtra);
-
-        // Search the userExtra
-        restUserExtraMockMvc.perform(get("/api/_search/user-extras?query=id:" + userExtra.getId()))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(userExtra.getId().intValue())))
-            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE.toString())));
+            .andExpect(status().isNotFound());
     }
 
     @Test
