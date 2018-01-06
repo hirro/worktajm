@@ -21,10 +21,10 @@
                         <tr *ngFor="let project of projects ;trackBy: trackId">
                             <td class="align-middle">{{project.name}}</td>
                             <td class="text-right">
-                                <button *ngIf="!isProjectActive(project)" class="btn btn-primary float-right btn-xs" (click)="add()">
+                                <button *ngIf="!project.isActive()" class="btn btn-primary float-right btn-xs" (click)="startProject(project)">
                                     <span class="fa fa-play"></span> <span jhiTranslate="dashboard.projects.start">Start</span>
                                 </button>
-                                <button *ngIf="isProjectActive(project)" class="btn btn-error float-right btn-xs" (click)="add()">
+                                <button *ngIf="project.isActive()" class="btn btn-error float-right btn-xs" (click)="stopProject(project)">
                                     <span class="fa fa-stop"></span> <span jhiTranslate="dashboard.projects.stop">Stop</span>
                                 </button>
                             </td>

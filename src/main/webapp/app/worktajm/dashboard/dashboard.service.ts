@@ -6,45 +6,60 @@ import { SERVER_API_URL } from '../../app.constants';
 import { Project } from '../../entities/project/project.model';
 import { ResponseWrapper} from '../../shared';
 import { UserExtra } from '../../entities/worktajm/user-extra.model';
+import {TimeEntry} from '../../entities/time-entry/time-entry.model';
 
 @Injectable()
 export class WorktajmDashboardService {
 
-    private projectsResourceUrl = SERVER_API_URL + 'api/projects';
-    private accountResourceUrl = SERVER_API_URL + 'api/account';
     private userExtraResourceUrl = SERVER_API_URL + 'api/user-extras';
+    private startProjectResourceUrl = SERVER_API_URL + 'api/worktajm/startProject';
+    private stopProjectResourceUrl = SERVER_API_URL + 'api/worktajm/stopProject';
 
     constructor(private http: Http) { }
 
     update(userExtra: UserExtra): Observable<UserExtra> {
-        const copy = this.convert(userExtra);
+        const copy = this.convertUserExtra(userExtra);
         return this.http.put(this.userExtraResourceUrl, copy).map((res: Response) => {
             const jsonResponse = res.json();
-            return this.convertItemFromServer(jsonResponse);
+            return this.convertUserExtraFromServer(jsonResponse);
         });
     }
 
     find(): Observable<UserExtra> {
         return this.http.get(`${this.userExtraResourceUrl}`).map((res: Response) => {
             const jsonResponse = res.json();
-            return this.convertItemFromServer(jsonResponse);
+            return this.convertUserExtraFromServer(jsonResponse);
         });
     }
 
-    /**
-     * Convert a returned JSON object to UserExtra.
-     */
-    private convertItemFromServer(json: any): UserExtra {
+    stopProject(project: Project) : Observable<UserExtra> {
+        const copy = this.convertProject(project);
+        return this.http.post(`${this.stopProjectResourceUrl}/${project.id}`, copy).map((res: Response) => {
+            const jsonResponse = res.json();
+            return this.convertUserExtraFromServer(jsonResponse);
+        });
+    }
+
+    startProject(project: Project) : Observable<UserExtra>{
+        const copy = this.convertProject(project);
+        return this.http.post(`${this.startProjectResourceUrl}/${project.id}`, copy).map((res: Response) => {
+            const jsonResponse = res.json();
+            return this.convertUserExtraFromServer(jsonResponse);
+        });
+    }
+
+    private convertUserExtraFromServer(json: any): UserExtra {
         const entity: UserExtra = Object.assign(new UserExtra(), json);
         return entity;
     }
 
-    /**
-     * Convert a UserExtra to a JSON which can be sent to the server.
-     */
-    private convert(userExtra: UserExtra): UserExtra {
+    private convertUserExtra(userExtra: UserExtra): UserExtra {
         const copy: UserExtra = Object.assign({}, userExtra);
         return copy;
     }
 
+    private convertProject(project: Project) {
+        const copy: Project = Object.assign({}, project);
+        return copy;
+    }
 }

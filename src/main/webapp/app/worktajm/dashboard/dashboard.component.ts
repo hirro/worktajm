@@ -94,9 +94,51 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
 
     private onFindActiveTimeEntrySuccess(data, headers) {
         this.activeTimeEntry = data;
+        if (this.activeTimeEntry.projectId) {
+            for (let p of this.projects) {
+                p.setActive(p.id === this.activeTimeEntry.projectId);
+            }
+        }
     }
 
     private onFindActiveTimeEntryError(error) {
         this.jhiAlertService.error(error.message, null, null);
+    }
+
+    stopProject(project: Project) {
+        console.log('stopProject');
+        this.dashboardService.stopProject(project)
+            .subscribe(
+                (res: UserExtra) => this.onStopProjectSuccess(res),
+                (res: ResponseWrapper) => this.onStopProjectError(res.json)
+            );
+    }
+
+    startProject(project: Project) {
+        console.log('startProject');
+        this.dashboardService.startProject(project)
+            .subscribe(
+                (res: UserExtra) => this.onStartProjectSuccess(res),
+                (res: ResponseWrapper) => this.onStartProjectError(res.json)
+            );
+    }
+
+    private onStopProjectSuccess(res: UserExtra) {
+        this.userExtra = res;
+        this.updateProjecs(this.userExtra);
+    }
+
+    private updateProjecs(userExtra: UserExtra) {
+    }
+
+    private onStopProjectError(json: any) {
+    }
+
+    private onStartProjectSuccess(res: UserExtra) {
+        this.userExtra = res;
+        updateProjecs(this.userExtra);
+    }
+
+    private onStartProjectError(json: any) {
     }
 }
