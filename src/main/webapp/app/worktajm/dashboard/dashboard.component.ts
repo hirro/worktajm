@@ -40,7 +40,7 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
     user: any;
     userExtra: UserExtra;
     activeTimeEntry: TimeEntry;
-    private date: Date;
+    date: Date;
 
     constructor(
         private projectService: ProjectService,
