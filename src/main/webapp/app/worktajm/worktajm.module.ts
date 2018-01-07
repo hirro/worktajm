@@ -17,6 +17,8 @@ import {
     worktajmState
 } from './';
 
+import {TimeEntryResolvePagingParams} from './dashboard/dashboard.route';
+
 @NgModule({
     imports: [
         PanelModule,
@@ -32,7 +34,8 @@ import {
     ],
     providers: [
         WorktajmReportsService,
-        WorktajmDashboardService
+        WorktajmDashboardService,
+        TimeEntryResolvePagingParams
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

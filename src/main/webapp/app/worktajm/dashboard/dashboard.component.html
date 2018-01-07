@@ -2,22 +2,23 @@
 
 <div class="row">
     <div class="col-md-3">
+        <div class="card bg-light mb-3">
+            <div class="card-header">
+                <h5>Projects</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-primary jh-create-entity create-project" [routerLink]="['/', { outlets: { popup: ['project-new'] } }]">
+                    <span class="fa fa-plus"></span>
+                    <span class="hidden-sm-down"  jhiTranslate="worktajmApp.project.home.createLabel">
+            Create new Project
+            </span>
+                </button>
 
-        <p-panel header="Projects">
+                <hr />
 
-            <button class="btn btn-primary jh-create-entity create-project" [routerLink]="['/', { outlets: { popup: ['project-new'] } }]">
-                <span class="fa fa-plus"></span>
-                <span class="hidden-sm-down"  jhiTranslate="worktajmApp.project.home.createLabel">
-                Create new Project
-                </span>
-            </button>
-
-
-            <hr />
-
-            <div class="table-responsive" *ngIf="projects">
-                <table class="table table-striped">
-                    <tbody>
+                <div class="table-responsive" *ngIf="projects">
+                    <table class="table table-striped">
+                        <tbody>
                         <tr *ngFor="let project of projects ;trackBy: trackId">
                             <td class="align-middle">{{project.name}}</td>
                             <td class="text-right">
@@ -29,31 +30,104 @@
                                 </button>
                             </td>
                         </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </p-panel>
-    </div>
-    <div class="col-md-9">
-        <p-panel header="Time Entries">
-            <div class="row">
-                <div class="col-md-6" >
-                    <p-calendar [(ngModel)]="date" [showIcon]="true"></p-calendar>
-                    <span style="margin-left:35px">{{date|date}}</span>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="col-md-6">
-                    <button class="btn btn-primary float-right jh-create-entity create-time-entry" [routerLink]="['/', { outlets: { popup: ['time-entry-new'] } }]">
-                        <span class="fa fa-plus"></span>
-                        <span class="hidden-sm-down"  jhiTranslate="worktajmApp.timeEntry.home.createLabel">
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+
+        <div class="card bg-light">
+            <div class="card-header">
+                <h5>Time Entries</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6" >
+                        <p-calendar [(ngModel)]="date" [showIcon]="true"></p-calendar>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary float-right jh-create-entity create-time-entry" [routerLink]="['/', { outlets: { popup: ['time-entry-new'] } }]">
+                            <span class="fa fa-plus"></span>
+                            <span class="hidden-sm-down"  jhiTranslate="worktajmApp.timeEntry.home.createLabel">
                         Create new Time Entry
                         </span>
-                    </button>
+                        </button>
+                    </div>
                 </div>
+                <hr />
+
+                <div class="row">
+
+                    <div class="table-responsive" *ngIf="timeEntries">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+                                <th jhiSortBy="start"><span jhiTranslate="worktajmApp.timeEntry.start">Start</span> <span class="fa fa-sort"></span></th>
+                                <th jhiSortBy="end"><span jhiTranslate="worktajmApp.timeEntry.end">End</span> <span class="fa fa-sort"></span></th>
+                                <th>Duration</th>
+                                <th jhiSortBy="projectName"><span jhiTranslate="worktajmApp.timeEntry.project">Project</span> <span class="fa fa-sort"></span></th>
+                                <th jhiSortBy="comment"><span jhiTranslate="worktajmApp.timeEntry.comment">Comment</span> <span class="fa fa-sort"></span></th>
+                                <!--<th jhiSortBy="userEmail"><span jhiTranslate="worktajmApp.timeEntry.user">User</span> <span class="fa fa-sort"></span></th>-->
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr *ngFor="let timeEntry of timeEntries ;trackBy: trackId">
+                                <td>{{timeEntry.start | date:'HH:mm:ss'}}</td>
+                                <td>{{timeEntry.end | date:'HH:mm:ss'}}</td>
+                                <td class="text-right">{{this.duration(timeEntry)}}</td>
+                                <td>
+                                    <div *ngIf="timeEntry.projectId">
+                                        <a [routerLink]="['../project', timeEntry.projectId  ]" >{{timeEntry.projectName}}</a>
+                                    </div>
+                                </td>
+                                <td>{{timeEntry.comment}}</td>
+                                <td class="text-right">
+                                    <div class="btn-group flex-btn-group-container">
+                                        <button type="submit"
+                                                [routerLink]="['../time-entry', timeEntry.id ]"
+                                                class="btn btn-info btn-sm">
+                                            <span class="fa fa-eye"></span>
+                                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                                        </button>
+                                        <button type="submit"
+                                                [routerLink]="['/', { outlets: { popup: 'time-entry/'+ timeEntry.id + '/edit'} }]"
+                                                replaceUrl="true"
+                                                queryParamsHandling="merge"
+                                                class="btn btn-primary btn-sm">
+                                            <span class="fa fa-pencil"></span>
+                                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                                        </button>
+                                        <button type="submit"
+                                                [routerLink]="['/', { outlets: { popup: 'time-entry/'+ timeEntry.id + '/delete'} }]"
+                                                replaceUrl="true"
+                                                queryParamsHandling="merge"
+                                                class="btn btn-danger btn-sm">
+                                            <span class="fa fa-remove"></span>
+                                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div *ngIf="timeEntries && (totalItems > itemsPerPage)">
+                        <div class="row justify-content-center">
+                            <jhi-item-count [page]="page" [total]="queryCount" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+                        </div>
+                        <div class="row justify-content-center">
+                            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <hr />
-
-        </p-panel>
-
+        </div>
     </div>
 </div>
