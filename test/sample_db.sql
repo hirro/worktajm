@@ -3,6 +3,11 @@ VALUES
     (5,'jim','$2a$10$nJ3De2xkUTgG2s4k1XiOH.zYchtqBhB6A3EuE5GYdrGaAlCRzVRii','jim','a','jim@example.com',NULL,b'1','en',NULL,NULL,'anonymousUser','2018-01-04 12:55:33',NULL,'anonymousUser','2018-01-04 12:55:33'),
     (6,'frank','$2a$10$jzrzjCGcj47dG5szDLprve6KuIVOa29vCASeqVw2BnMr3hpkBPZwW','frank','b','frank@example.com',NULL,b'1','en',NULL,NULL,'anonymousUser','2018-01-04 12:56:16',NULL,'anonymousUser','2018-01-04 12:56:16');
 
+INSERT INTO `user_extra` (`user_id`)
+VALUES
+    (5),
+    (6);
+
 INSERT INTO `jhi_user_authority` (`user_id`, `authority_name`)
 VALUES
     (5,'ROLE_USER'),
