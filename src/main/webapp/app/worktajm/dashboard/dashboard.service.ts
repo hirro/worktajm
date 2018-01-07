@@ -4,7 +4,6 @@ import { Observable } from 'rxjs/Rx';
 import { SERVER_API_URL } from '../../app.constants';
 
 import { Project } from '../../entities/project/project.model';
-import { ResponseWrapper} from '../../shared';
 import { UserExtra } from '../../entities/worktajm/user-extra.model';
 import {TimeEntry} from '../../entities/time-entry/time-entry.model';
 
@@ -32,19 +31,19 @@ export class WorktajmDashboardService {
         });
     }
 
-    stopProject(project: Project) : Observable<UserExtra> {
+    stopProject(project: Project): Observable<TimeEntry> {
         const copy = this.convertProject(project);
         return this.http.post(`${this.stopProjectResourceUrl}/${project.id}`, copy).map((res: Response) => {
             const jsonResponse = res.json();
-            return this.convertUserExtraFromServer(jsonResponse);
+            return this.convertTimeEntryFromServer(jsonResponse);
         });
     }
 
-    startProject(project: Project) : Observable<UserExtra>{
+    startProject(project: Project): Observable<TimeEntry> {
         const copy = this.convertProject(project);
         return this.http.post(`${this.startProjectResourceUrl}/${project.id}`, copy).map((res: Response) => {
             const jsonResponse = res.json();
-            return this.convertUserExtraFromServer(jsonResponse);
+            return this.convertTimeEntryFromServer(jsonResponse);
         });
     }
 
@@ -61,5 +60,10 @@ export class WorktajmDashboardService {
     private convertProject(project: Project) {
         const copy: Project = Object.assign({}, project);
         return copy;
+    }
+
+    private convertTimeEntryFromServer(json: any) {
+        const entity: TimeEntry = Object.assign(new TimeEntry(), json);
+        return entity;
     }
 }

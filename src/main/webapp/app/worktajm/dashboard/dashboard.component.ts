@@ -57,14 +57,6 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
     ngAfterViewInit() {
     }
 
-    private isProjectActive(project: Project) : boolean {
-        return project.id === this.activeTimeEntry.projectId;
-    }
-
-    private toggleProject(project: Project) {
-        console.log('Toggling project %s', project.name);
-    }
-
     private onListAllMyProjectsSuccess(data, headers) {
         this.projects = data;
     }
@@ -95,7 +87,7 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
     private onFindActiveTimeEntrySuccess(data, headers) {
         this.activeTimeEntry = data;
         if (this.activeTimeEntry.projectId) {
-            for (let p of this.projects) {
+            for (const p of this.projects) {
                 p.setActive(p.id === this.activeTimeEntry.projectId);
             }
         }
@@ -109,7 +101,7 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
         console.log('stopProject');
         this.dashboardService.stopProject(project)
             .subscribe(
-                (res: UserExtra) => this.onStopProjectSuccess(res),
+                (res: TimeEntry) => this.onStopProjectSuccess(res),
                 (res: ResponseWrapper) => this.onStopProjectError(res.json)
             );
     }
@@ -118,25 +110,30 @@ export class WorktajmDashboardComponent implements OnInit, AfterViewInit {
         console.log('startProject');
         this.dashboardService.startProject(project)
             .subscribe(
-                (res: UserExtra) => this.onStartProjectSuccess(res),
+                (res: TimeEntry) => this.onStartProjectSuccess(res),
                 (res: ResponseWrapper) => this.onStartProjectError(res.json)
             );
     }
 
-    private onStopProjectSuccess(res: UserExtra) {
-        this.userExtra = res;
-        this.updateProjecs(this.userExtra);
+    private onStopProjectSuccess(res: TimeEntry) {
+        console.log('onStopProjectSuccess: ' + res);
+        this.activeTimeEntry = null;
+        this.updateProjects();
     }
 
-    private updateProjecs(userExtra: UserExtra) {
+    private updateProjects() {
+        const activeProjectId = this.activeTimeEntry ? this.activeTimeEntry.projectId : 0;
+        for (const project of this.projects) {
+            project.setActive(activeProjectId === project.id);
+        }
     }
 
     private onStopProjectError(json: any) {
     }
 
-    private onStartProjectSuccess(res: UserExtra) {
-        this.userExtra = res;
-        updateProjecs(this.userExtra);
+    private onStartProjectSuccess(res: TimeEntry) {
+        this.activeTimeEntry = res;
+        this.updateProjects();
     }
 
     private onStartProjectError(json: any) {

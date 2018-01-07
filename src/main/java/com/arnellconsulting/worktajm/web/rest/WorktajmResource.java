@@ -7,6 +7,7 @@ import com.arnellconsulting.worktajm.repository.TimeEntryRepository;
 import com.arnellconsulting.worktajm.repository.UserExtraRepository;
 import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.security.SecurityUtils;
+import com.arnellconsulting.worktajm.service.dto.TimeEntryDTO;
 import com.arnellconsulting.worktajm.service.dto.UserExtraDTO;
 import com.arnellconsulting.worktajm.service.mapper.TimeEntryMapper;
 import com.arnellconsulting.worktajm.service.mapper.UserExtraMapper;
@@ -18,7 +19,6 @@ import com.arnellconsulting.worktajm.repository.ProjectRepository;
 import com.arnellconsulting.worktajm.repository.search.ProjectSearchRepository;
 import com.arnellconsulting.worktajm.web.rest.errors.BadRequestAlertException;
 import com.arnellconsulting.worktajm.web.rest.util.HeaderUtil;
-import com.arnellconsulting.worktajm.service.mapper.ProjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -58,18 +58,22 @@ public class WorktajmResource {
 
     private UserExtraMapper userExtraMapper;
 
+    private TimeEntryMapper timeEntryMapper;
+
     public WorktajmResource(ProjectRepository projectRepository,
                             UserRepository userRepository,
                             ProjectSearchRepository projectSearchRepository,
                             UserExtraRepository userExtraRepository,
                             TimeEntryRepository timeEntryRepository,
-                            UserExtraMapper userExtraMapper) {
+                            UserExtraMapper userExtraMapper,
+                            TimeEntryMapper timeEntryMapper) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.projectSearchRepository = projectSearchRepository;
         this.userExtraRepository = userExtraRepository;
         this.timeEntryRepository = timeEntryRepository;
         this.userExtraMapper = userExtraMapper;
+        this.timeEntryMapper = timeEntryMapper;
     }
 
     /**
@@ -81,7 +85,7 @@ public class WorktajmResource {
      */
     @PostMapping("/stopProject/{id}")
     @Timed
-    public ResponseEntity<UserExtraDTO> stopProject(@PathVariable Long id) throws URISyntaxException {
+    public ResponseEntity<TimeEntryDTO> stopProject(@PathVariable Long id) throws URISyntaxException {
         log.debug("REST request to stop Project : {}", id);
 
         User user = getLoggedInUser();
@@ -108,17 +112,22 @@ public class WorktajmResource {
         }
 
         // Stop the running time entry and clear active timer from user extra.
-        TimeEntry timeEntry = userExtra.getActiveTimeEntry();
-        timeEntry.setEnd(ZonedDateTime.now());
-        userExtra.setActiveTimeEntry(null);
-        userExtraRepository.save(userExtra);
-        timeEntryRepository.save(timeEntry);
-        UserExtraDTO result = userExtraMapper.toDto(userExtra);
-        projectSearchRepository.save(project);
+        TimeEntryDTO result;
+        if (userExtra.getActiveTimeEntry() == null) {
+            result = null;
+        } else {
+            TimeEntry timeEntry = userExtra.getActiveTimeEntry();
+            timeEntry.setEnd(ZonedDateTime.now());
+            userExtra.setActiveTimeEntry(null);
+            userExtraRepository.save(userExtra);
+            timeEntryRepository.save(timeEntry);
+            result = timeEntryMapper.toDto(timeEntry);
+            projectSearchRepository.save(project);
+        }
 
         // Return result
-        return ResponseEntity.created(new URI("/api/worktajm/stopProject/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
+        return ResponseEntity.created(new URI("/api/worktajm/stopProject/" + id))
+            .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, id.toString()))
             .body(result);
     }
 
@@ -131,7 +140,7 @@ public class WorktajmResource {
      */
     @PostMapping("/startProject/{id}")
     @Timed
-    public ResponseEntity<UserExtraDTO> startProject(@PathVariable Long id) throws URISyntaxException {
+    public ResponseEntity<TimeEntryDTO> startProject(@PathVariable Long id) throws URISyntaxException {
         log.debug("REST request to start Project : {}", id);
 
         User user = getLoggedInUser();
@@ -171,7 +180,7 @@ public class WorktajmResource {
         userExtra.setActiveTimeEntry(timeEntry);
         userExtraRepository.save(userExtra);
         timeEntryRepository.save(timeEntry);
-        UserExtraDTO result = userExtraMapper.toDto(userExtra);
+        TimeEntryDTO result = timeEntryMapper.toDto(timeEntry);
         projectSearchRepository.save(project);
 
         // Return result

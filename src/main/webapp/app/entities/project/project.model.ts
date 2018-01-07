@@ -17,7 +17,7 @@ export class Project implements BaseEntity {
         this.active = active;
     }
 
-    isActive() : boolean {
+    isActive(): boolean {
         return this.active;
     }
 }
