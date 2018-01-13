@@ -73,7 +73,7 @@ public class DomainResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final DomainResource domainResource = new DomainResource(domainRepository, domainMapper, domainSearchRepository);
+        final DomainResource domainResource = new DomainResource(domainRepository, domainMapper, domainSearchRepository, userService);
         this.restDomainMockMvc = MockMvcBuilders.standaloneSetup(domainResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)

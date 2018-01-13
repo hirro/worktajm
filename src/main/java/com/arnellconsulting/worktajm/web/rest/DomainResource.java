@@ -1,5 +1,7 @@
 package com.arnellconsulting.worktajm.web.rest;
 
+import com.arnellconsulting.worktajm.security.AuthoritiesConstants;
+import com.arnellconsulting.worktajm.service.UserService;
 import com.codahale.metrics.annotation.Timed;
 import com.arnellconsulting.worktajm.domain.Domain;
 
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +30,6 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
@@ -50,10 +51,13 @@ public class DomainResource {
 
     private final DomainSearchRepository domainSearchRepository;
 
-    public DomainResource(DomainRepository domainRepository, DomainMapper domainMapper, DomainSearchRepository domainSearchRepository) {
+    private final UserService userService;
+
+    public DomainResource(DomainRepository domainRepository, DomainMapper domainMapper, DomainSearchRepository domainSearchRepository, UserService userService) {
         this.domainRepository = domainRepository;
         this.domainMapper = domainMapper;
         this.domainSearchRepository = domainSearchRepository;
+        this.userService = userService;
     }
 
     /**
@@ -90,6 +94,7 @@ public class DomainResource {
      */
     @PutMapping("/domains")
     @Timed
+    @Secured(AuthoritiesConstants.ADMIN)
     public ResponseEntity<DomainDTO> updateDomain(@Valid @RequestBody DomainDTO domainDTO) throws URISyntaxException {
         log.debug("REST request to update Domain : {}", domainDTO);
         if (domainDTO.getId() == null) {
@@ -112,6 +117,7 @@ public class DomainResource {
      */
     @GetMapping("/domains")
     @Timed
+    @Secured({AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER})
     public ResponseEntity<List<DomainDTO>> getAllDomains(Pageable pageable) {
         log.debug("REST request to get a page of Domains");
         Page<Domain> page = domainRepository.findAll(pageable);
@@ -127,6 +133,7 @@ public class DomainResource {
      */
     @GetMapping("/domains/{id}")
     @Timed
+    @Secured({AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER})
     public ResponseEntity<DomainDTO> getDomain(@PathVariable Long id) {
         log.debug("REST request to get Domain : {}", id);
         Domain domain = domainRepository.findOneWithEagerRelationships(id);
@@ -142,6 +149,7 @@ public class DomainResource {
      */
     @DeleteMapping("/domains/{id}")
     @Timed
+    @Secured(AuthoritiesConstants.ADMIN)
     public ResponseEntity<Void> deleteDomain(@PathVariable Long id) {
         log.debug("REST request to delete Domain : {}", id);
         domainRepository.delete(id);
