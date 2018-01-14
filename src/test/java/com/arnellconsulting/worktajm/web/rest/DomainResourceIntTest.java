@@ -4,8 +4,11 @@ import com.arnellconsulting.worktajm.WorktajmApp;
 
 import com.arnellconsulting.worktajm.domain.Domain;
 import com.arnellconsulting.worktajm.domain.Address;
+import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.DomainRepository;
+import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.DomainSearchRepository;
+import com.arnellconsulting.worktajm.service.UserService;
 import com.arnellconsulting.worktajm.service.dto.DomainDTO;
 import com.arnellconsulting.worktajm.service.mapper.DomainMapper;
 import com.arnellconsulting.worktajm.web.rest.errors.ExceptionTranslator;
@@ -19,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -28,6 +32,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.arnellconsulting.worktajm.web.rest.TestUtil.createFormattingConversionService;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_A_LOGIN;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_B_LOGIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -55,6 +61,9 @@ public class DomainResourceIntTest {
     private DomainSearchRepository domainSearchRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Autowired
@@ -64,16 +73,23 @@ public class DomainResourceIntTest {
     private ExceptionTranslator exceptionTranslator;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private EntityManager em;
 
     private MockMvc restDomainMockMvc;
 
     private Domain domain;
 
+    private User userA;
+    private User userB;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final DomainResource domainResource = new DomainResource(domainRepository, domainMapper, domainSearchRepository, userService);
+        final DomainResource domainResource = new DomainResource(
+            domainRepository, domainMapper, domainSearchRepository, userService);
         this.restDomainMockMvc = MockMvcBuilders.standaloneSetup(domainResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -88,8 +104,7 @@ public class DomainResourceIntTest {
      * if they test an entity which requires the current entity.
      */
     public static Domain createEntity(EntityManager em) {
-        Domain domain = new Domain()
-            .name(DEFAULT_NAME);
+        Domain domain = new Domain().name(DEFAULT_NAME);
         // Add required entity
         Address address = AddressResourceIntTest.createEntity(em);
         em.persist(address);
@@ -102,6 +117,13 @@ public class DomainResourceIntTest {
     public void initTest() {
         domainSearchRepository.deleteAll();
         domain = createEntity(em);
+
+        // Create test users
+        userA = UserResourceIntTest.createEntity(em);
+        userA.setLogin(USER_A_LOGIN);
+
+        userB = UserResourceIntTest.createEntity(em);
+        userB.setLogin(USER_B_LOGIN);
     }
 
     @Test
@@ -151,6 +173,7 @@ public class DomainResourceIntTest {
     @Transactional
     public void checkNameIsRequired() throws Exception {
         int databaseSizeBeforeTest = domainRepository.findAll().size();
+
         // set the field null
         domain.setName(null);
 
@@ -168,8 +191,11 @@ public class DomainResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void getAllDomains() throws Exception {
         // Initialize the database
+        userRepository.saveAndFlush(userA);
+        domain.addAuthorizedUsers(this.userA);
         domainRepository.saveAndFlush(domain);
 
         // Get all the domainList
@@ -182,8 +208,11 @@ public class DomainResourceIntTest {
 
     @Test
     @Transactional
-    public void getDomain() throws Exception {
+    @WithMockUser(USER_A_LOGIN)
+    public void getDomainAuthorized() throws Exception {
         // Initialize the database
+        userRepository.saveAndFlush(userA);
+        domain.addAuthorizedUsers(this.userA);
         domainRepository.saveAndFlush(domain);
 
         // Get the domain
@@ -196,16 +225,33 @@ public class DomainResourceIntTest {
 
     @Test
     @Transactional
-    public void getNonExistingDomain() throws Exception {
+    @WithMockUser(USER_B_LOGIN)
+    public void getDomainUnauthorized() throws Exception {
+        // Initialize the database
+        domainRepository.saveAndFlush(domain);
+
         // Get the domain
-        restDomainMockMvc.perform(get("/api/domains/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
+        restDomainMockMvc.perform(get("/api/domains/{id}", domain.getId()))
+            .andExpect(status().isForbidden());
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_B_LOGIN)
+    public void getNonExistingDomain() throws Exception {
+        // Get the domain
+        restDomainMockMvc.perform(get("/api/domains/{id}", Long.MAX_VALUE))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateDomain() throws Exception {
+
         // Initialize the database
+        userRepository.saveAndFlush(userA);
+        domain.addAuthorizedUsers(this.userA);
         domainRepository.saveAndFlush(domain);
         domainSearchRepository.save(domain);
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
@@ -214,8 +260,7 @@ public class DomainResourceIntTest {
         Domain updatedDomain = domainRepository.findOne(domain.getId());
         // Disconnect from session so that the updates on updatedDomain are not directly saved in db
         em.detach(updatedDomain);
-        updatedDomain
-            .name(UPDATED_NAME);
+        updatedDomain.name(UPDATED_NAME);
         DomainDTO domainDTO = domainMapper.toDto(updatedDomain);
 
         restDomainMockMvc.perform(put("/api/domains")
@@ -236,6 +281,7 @@ public class DomainResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateNonExistingDomain() throws Exception {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
 
@@ -246,17 +292,20 @@ public class DomainResourceIntTest {
         restDomainMockMvc.perform(put("/api/domains")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(domainDTO)))
-            .andExpect(status().isCreated());
+            .andExpect(status().isForbidden());
 
         // Validate the Domain in the database
         List<Domain> domainList = domainRepository.findAll();
-        assertThat(domainList).hasSize(databaseSizeBeforeUpdate + 1);
+        assertThat(domainList).hasSize(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void deleteDomain() throws Exception {
         // Initialize the database
+        userRepository.saveAndFlush(userA);
+        domain.addAuthorizedUsers(this.userA);
         domainRepository.saveAndFlush(domain);
         domainSearchRepository.save(domain);
         int databaseSizeBeforeDelete = domainRepository.findAll().size();

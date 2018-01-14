@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * In many cases an organization is only one user.
@@ -183,5 +184,12 @@ public class Domain implements Serializable {
             "id=" + getId() +
             ", name='" + getName() + "'" +
             "}";
+    }
+
+    public boolean isUserIdAuthorized(long id) {
+        return getAuthorizedUsers().stream()
+            .filter(user -> user.getId() == id)
+            .findFirst()
+            .isPresent();
     }
 }
