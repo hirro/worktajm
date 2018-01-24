@@ -4,7 +4,7 @@
       "packageName": "com.arnellconsulting.worktajm",
       "nativeLanguage": "en"
     },
-    "jhipsterVersion": "4.13.0",
+    "jhipsterVersion": "4.13.3",
     "baseName": "worktajm",
     "packageName": "com.arnellconsulting.worktajm",
     "packageFolder": "com/arnellconsulting/worktajm",
@@ -54,6 +54,8 @@
     "languages": [
       "en",
       "sv"
-    ]
+    ],
+    "cacheProvider": "ehcache",
+    "enableHibernateCache": true
   }
 }

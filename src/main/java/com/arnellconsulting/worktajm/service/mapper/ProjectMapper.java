@@ -13,7 +13,7 @@ public interface ProjectMapper extends EntityMapper<ProjectDTO, Project> {
 
     @Mapping(source = "customer.id", target = "customerId")
     @Mapping(source = "customer.name", target = "customerName")
-    ProjectDTO toDto(Project project); 
+    ProjectDTO toDto(Project project);
 
     @Mapping(source = "customerId", target = "customer")
     Project toEntity(ProjectDTO projectDTO);

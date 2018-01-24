@@ -15,7 +15,7 @@ public interface TimeEntryMapper extends EntityMapper<TimeEntryDTO, TimeEntry> {
     @Mapping(source = "project.name", target = "projectName")
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "user.email", target = "userEmail")
-    TimeEntryDTO toDto(TimeEntry timeEntry); 
+    TimeEntryDTO toDto(TimeEntry timeEntry);
 
     @Mapping(source = "projectId", target = "project")
     @Mapping(source = "userId", target = "user")

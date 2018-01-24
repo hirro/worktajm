@@ -15,7 +15,7 @@ public interface CustomerMapper extends EntityMapper<CustomerDTO, Customer> {
     @Mapping(source = "address.addressLine1", target = "addressAddressLine1")
     @Mapping(source = "domain.id", target = "domainId")
     @Mapping(source = "domain.name", target = "domainName")
-    CustomerDTO toDto(Customer customer); 
+    CustomerDTO toDto(Customer customer);
 
     @Mapping(source = "addressId", target = "address")
     @Mapping(target = "projects", ignore = true)

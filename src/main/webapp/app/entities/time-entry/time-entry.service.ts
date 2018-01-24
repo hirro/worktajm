@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 import { SERVER_API_URL } from '../../app.constants';
 
 import { JhiDateUtils } from 'ng-jhipster';
@@ -11,7 +11,7 @@ import { ResponseWrapper, createRequestOption } from '../../shared';
 @Injectable()
 export class TimeEntryService {
 
-    private resourceUrl = SERVER_API_URL + 'api/time-entries';
+    private resourceUrl =  SERVER_API_URL + 'api/time-entries';
     private resourceSearchUrl = SERVER_API_URL + 'api/_search/time-entries';
 
     constructor(private http: Http, private dateUtils: JhiDateUtils) { }
