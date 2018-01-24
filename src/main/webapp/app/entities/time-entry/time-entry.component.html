@@ -1,0 +1,93 @@
+<div>
+    <h2>
+        <span jhiTranslate="worktajmApp.timeEntry.home.title">Time Entries</span>
+        <button class="btn btn-primary float-right jh-create-entity create-time-entry" [routerLink]="['/', { outlets: { popup: ['time-entry-new'] } }]">
+            <span class="fa fa-plus"></span>
+            <span class="hidden-sm-down"  jhiTranslate="worktajmApp.timeEntry.home.createLabel">
+            Create new Time Entry
+            </span>
+        </button>
+    </h2>
+    <jhi-alert></jhi-alert>
+    <div class="row">
+        <div class="col-sm-12">
+            <form name="searchForm" class="form-inline">
+                <div class="input-group w-100 mt-3">
+                    <input type="text" class="form-control" [(ngModel)]="currentSearch" id="currentSearch" name="currentSearch" placeholder="{{ 'worktajmApp.timeEntry.home.search' | translate }}">
+                    <button class="input-group-addon btn btn-info" (click)="search(currentSearch)">
+                        <span class="fa fa-search"></span>
+                    </button>
+                    <button class="input-group-addon btn btn-danger" (click)="clear()" *ngIf="currentSearch">
+                        <span class="fa fa-trash-o"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <br/>
+    <div class="table-responsive" *ngIf="timeEntries">
+        <table class="table table-striped">
+            <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="start"><span jhiTranslate="worktajmApp.timeEntry.start">Start</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="end"><span jhiTranslate="worktajmApp.timeEntry.end">End</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="comment"><span jhiTranslate="worktajmApp.timeEntry.comment">Comment</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="projectName"><span jhiTranslate="worktajmApp.timeEntry.project">Project</span> <span class="fa fa-sort"></span></th>
+            <th jhiSortBy="userEmail"><span jhiTranslate="worktajmApp.timeEntry.user">User</span> <span class="fa fa-sort"></span></th>
+            <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let timeEntry of timeEntries ;trackBy: trackId">
+                <td><a [routerLink]="['../time-entry', timeEntry.id ]">{{timeEntry.id}}</a></td>
+                <td>{{timeEntry.start | date:'medium'}}</td>
+                <td>{{timeEntry.end | date:'medium'}}</td>
+                <td>{{timeEntry.comment}}</td>
+                <td>
+                    <div *ngIf="timeEntry.projectId">
+                        <a [routerLink]="['../project', timeEntry.projectId  ]" >{{timeEntry.projectName}}</a>
+                    </div>
+                </td>
+                <td>
+                    {{timeEntry.userEmail}}
+                </td>
+                <td class="text-right">
+                    <div class="btn-group flex-btn-group-container">
+                        <button type="submit"
+                                [routerLink]="['../time-entry', timeEntry.id ]"
+                                class="btn btn-info btn-sm">
+                            <span class="fa fa-eye"></span>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/', { outlets: { popup: 'time-entry/'+ timeEntry.id + '/edit'} }]"
+                                replaceUrl="true"
+                                queryParamsHandling="merge"
+                                class="btn btn-primary btn-sm">
+                            <span class="fa fa-pencil"></span>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/', { outlets: { popup: 'time-entry/'+ timeEntry.id + '/delete'} }]"
+                                replaceUrl="true"
+                                queryParamsHandling="merge"
+                                class="btn btn-danger btn-sm">
+                            <span class="fa fa-remove"></span>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div *ngIf="timeEntries && timeEntries.length">
+        <div class="row justify-content-center">
+            <jhi-item-count [page]="page" [total]="queryCount" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+        </div>
+        <div class="row justify-content-center">
+            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,38 @@
+
+<div *ngIf="domain">
+    <h2><span jhiTranslate="worktajmApp.domain.detail.title">Domain</span> {{domain.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="row-md jh-entity-details">
+        <dt><span jhiTranslate="worktajmApp.domain.name">Name</span></dt>
+        <dd>
+            <span>{{domain.name}}</span>
+        </dd>
+        <dt><span jhiTranslate="worktajmApp.domain.address">Address</span></dt>
+        <dd>
+            <div *ngIf="domain.addressId">
+                <a [routerLink]="['/address', domain.addressId]">{{domain.addressAddressLine1}}</a>
+            </div>
+        </dd>
+        <dt><span jhiTranslate="worktajmApp.domain.authorizedUsers">Authorized Users</span></dt>
+        <dd>
+            <span *ngFor="let authorizedUsers of domain.authorizedUsers; let last = last">
+                {{authorizedUsers.email}}{{last ? '' : ', '}}
+            </span>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            (click)="previousState()"
+            class="btn btn-info">
+        <span class="fa fa-arrow-left"></span>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+    </button>
+
+    <button type="button"
+            [routerLink]="['/', { outlets: { popup: 'domain/'+ domain.id + '/edit'} }]"
+            replaceUrl="true"
+            queryParamsHandling="merge"
+            class="btn btn-primary">
+        <span class="fa fa-pencil"></span>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+    </button>
+</div>

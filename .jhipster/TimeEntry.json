@@ -1,0 +1,48 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "many-to-one",
+            "relationshipValidateRules": "required",
+            "javadoc": "TimeEntry belongs to one Project.\nm -> 1 (required)",
+            "relationshipName": "project",
+            "otherEntityName": "project",
+            "otherEntityField": "name"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipValidateRules": "required",
+            "javadoc": "TimeEntry belongs to one User.\nm -> 1 (required)",
+            "relationshipName": "user",
+            "otherEntityName": "user",
+            "otherEntityField": "email"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "start",
+            "javadoc": "Start time for the time entry (required)",
+            "fieldType": "ZonedDateTime",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "end",
+            "javadoc": "End time for the time entry (optional for running tasks)",
+            "fieldType": "ZonedDateTime"
+        },
+        {
+            "fieldName": "comment",
+            "javadoc": "Optional comment",
+            "fieldType": "String"
+        }
+    ],
+    "changelogDate": "20180103113355",
+    "javadoc": "The time entry that logs work on a particular project.\n\nEach time entry belongs to one user.",
+    "entityTableName": "time_entry",
+    "dto": "mapstruct",
+    "pagination": "pagination",
+    "service": "no",
+    "jpaMetamodelFiltering": false
+}
