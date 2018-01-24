@@ -1,6 +1,6 @@
 /* tslint:disable max-line-length */
 import { ComponentFixture, TestBed, async } from '@angular/core/testing';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 
 import { WorktajmTestModule } from '../../../test.module';
 import { AddressDetailComponent } from '../../../../../../main/webapp/app/entities/address/address-detail.component';

@@ -11,9 +11,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = {})
 public interface AddressMapper extends EntityMapper<AddressDTO, Address> {
 
-    
 
-    
 
     default Address fromId(Long id) {
         if (id == null) {

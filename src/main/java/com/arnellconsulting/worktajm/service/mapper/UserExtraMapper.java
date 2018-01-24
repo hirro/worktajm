@@ -13,7 +13,7 @@ public interface UserExtraMapper extends EntityMapper<UserExtraDTO, UserExtra> {
 
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "activeTimeEntry.id", target = "activeTimeEntryId")
-    UserExtraDTO toDto(UserExtra userExtra); 
+    UserExtraDTO toDto(UserExtra userExtra);
 
     @Mapping(source = "userId", target = "user")
     @Mapping(source = "activeTimeEntryId", target = "activeTimeEntry")
