@@ -164,6 +164,7 @@ public class WorktajmResource {
         UserExtra userExtra = userExtraRepository.findOne(user.getId());
         if (userExtra == null) {
             userExtra = new UserExtra();
+            userExtra.setUser(user);
         } else if (userExtra.getActiveTimeEntry() != null) {
             // Stop current timer
             userExtra.getActiveTimeEntry().setEnd(ZonedDateTime.now());
