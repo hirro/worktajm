@@ -12,7 +12,6 @@
                 "customer": "Customer",
                 "timeEntry": "Time Entry",
                 "domain": "Domain",
-                "userExtra": "User Extra",
                 "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
             },
             "account": {
@@ -35,7 +34,6 @@
                 "audits": "Audits",
                 "apidocs": "API",
                 "database": "Database",
-                "elasticsearch-reindex": "Reindex Elasticsearch",
                 "jhipster-needle-menu-add-admin-element": "JHipster will add additional menu entries here (do not translate!)"
             },
             "language": "Language"
