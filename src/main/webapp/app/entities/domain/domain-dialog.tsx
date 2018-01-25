@@ -28,7 +28,7 @@ export interface IDomainDialogState {
   isNew: boolean;
   idAddress: number;
   idCustomers: number;
-  idsAuthorized Users: any[];
+  idsAuthorizedUsers: any[];
 }
 
 export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDialogState> {
@@ -39,10 +39,10 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
       isNew: !this.props.match.params || !this.props.match.params.id,
       idAddress: 0,
       idCustomers: 0,
-      idsAuthorized Users: [],
+      idsAuthorizedUsers: [],
       showModal: true
     };
-    this.updateAuthorized Users = this.updateAuthorized Users.bind(this);
+    this.updateAuthorizedUsers = this.updateAuthorizedUsers.bind(this);
   }
 
   componentDidMount() {
@@ -65,7 +65,7 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
     this.props.history.push('/domain');
   }
 
-  updateAuthorized Users(element) {
+  updateAuthorizedUsers(element) {
     const email = element.target.value;
     const list = [];
     for (const i in element.target.selectedOptions) {
@@ -79,16 +79,16 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
         }
     }
     this.setState({
-        idsAuthorized Users: list
+        idsAuthorizedUsers: list
     });
   }
 
-  displayAuthorized Users(value: any) {
-    if (this.state.idsAuthorized Users && this.state.idsAuthorized Users.length !== 0) {
+  displayAuthorizedUsers(value: any) {
+    if (this.state.idsAuthorizedUsers && this.state.idsAuthorizedUsers.length !== 0) {
         const list = [];
-        for (const i in this.state.idsAuthorized Users) {
-            if (this.state.idsAuthorized Users[i]) {
-                list.push(this.state.idsAuthorized Users[i].email);
+        for (const i in this.state.idsAuthorizedUsers) {
+            if (this.state.idsAuthorizedUsers[i]) {
+                list.push(this.state.idsAuthorizedUsers[i].email);
             }
         }
         return list;
@@ -139,13 +139,13 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
                 TODO 4
             </div>
             <AvGroup>
-              <Label for="users"><Translate contentKey="worktajmApp.domain.authorizedUsers">Authorized Users</Translate></Label>
+              <Label for="users"><Translate contentKey="worktajmApp.domain.authorizedUsers">AuthorizedUsers</Translate></Label>
               <AvInput type="select"
                 multiple
                 className="form-control"
                 name="fakeusers"
-                value={this.displayAuthorized Users(domain)}
-                onChange={this.updateAuthorized Users}>
+                value={this.displayAuthorizedUsers(domain)}
+                onChange={this.updateAuthorizedUsers}>
                 <option value="" key="0" />
                 {
                   (users) ? (users.map(otherEntity =>
@@ -159,7 +159,7 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
               </AvInput>
               <AvInput type="hidden"
                 name="users"
-                value={this.state.idsAuthorized Users}
+                value={this.state.idsAuthorizedUsers}
               />
             </AvGroup>
           </ModalBody>

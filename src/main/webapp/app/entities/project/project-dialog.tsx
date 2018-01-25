@@ -25,7 +25,7 @@ export interface IProjectDialogProps {
 export interface IProjectDialogState {
   showModal: boolean;
   isNew: boolean;
-  idsProject Members: any[];
+  idsProjectMembers: any[];
   idCustomer: number;
 }
 
@@ -35,11 +35,11 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
     super(props);
     this.state = {
       isNew: !this.props.match.params || !this.props.match.params.id,
-      idsProject Members: [],
+      idsProjectMembers: [],
       idCustomer: 0,
       showModal: true
     };
-    this.updateProject Members = this.updateProject Members.bind(this);
+    this.updateProjectMembers = this.updateProjectMembers.bind(this);
     this.updateCustomer = this.updateCustomer.bind(this);
   }
 
@@ -63,7 +63,7 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
     this.props.history.push('/project');
   }
 
-  updateProject Members(element) {
+  updateProjectMembers(element) {
     const email = element.target.value;
     const list = [];
     for (const i in element.target.selectedOptions) {
@@ -77,7 +77,7 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
         }
     }
     this.setState({
-        idsProject Members: list
+        idsProjectMembers: list
     });
   }
 
@@ -92,12 +92,12 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
     }
   }
 
-  displayProject Members(value: any) {
-    if (this.state.idsProject Members && this.state.idsProject Members.length !== 0) {
+  displayProjectMembers(value: any) {
+    if (this.state.idsProjectMembers && this.state.idsProjectMembers.length !== 0) {
         const list = [];
-        for (const i in this.state.idsProject Members) {
-            if (this.state.idsProject Members[i]) {
-                list.push(this.state.idsProject Members[i].email);
+        for (const i in this.state.idsProjectMembers) {
+            if (this.state.idsProjectMembers[i]) {
+                list.push(this.state.idsProjectMembers[i].email);
             }
         }
         return list;
@@ -165,13 +165,13 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
             <AvGroup>
-              <Label for="users"><Translate contentKey="worktajmApp.project.projectMembers">Project Members</Translate></Label>
+              <Label for="users"><Translate contentKey="worktajmApp.project.projectMembers">ProjectMembers</Translate></Label>
               <AvInput type="select"
                 multiple
                 className="form-control"
                 name="fakeusers"
-                value={this.displayProject Members(project)}
-                onChange={this.updateProject Members}>
+                value={this.displayProjectMembers(project)}
+                onChange={this.updateProjectMembers}>
                 <option value="" key="0" />
                 {
                   (users) ? (users.map(otherEntity =>
@@ -185,7 +185,7 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
               </AvInput>
               <AvInput type="hidden"
                 name="users"
-                value={this.state.idsProject Members}
+                value={this.state.idsProjectMembers}
               />
             </AvGroup>
             <AvGroup>
