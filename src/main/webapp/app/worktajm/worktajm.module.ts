@@ -18,6 +18,9 @@ import {
 } from './';
 
 import {TimeEntryResolvePagingParams} from './dashboard/dashboard.route';
+import { ProjectsComponent } from './dashboard/projects/projects.component';
+import { TimeEntriesComponent } from './dashboard/time-entries/time-entries.component';
+import { DatepickerPopupComponent } from './dashboard/time-entries/datepicker-popup/datepicker-popup.component';
 
 @NgModule({
     imports: [
@@ -30,7 +33,10 @@ import {TimeEntryResolvePagingParams} from './dashboard/dashboard.route';
     ],
     declarations: [
         WorktajmReportsComponent,
-        WorktajmDashboardComponent
+        WorktajmDashboardComponent,
+        ProjectsComponent,
+        TimeEntriesComponent,
+        DatepickerPopupComponent,
     ],
     providers: [
         WorktajmReportsService,

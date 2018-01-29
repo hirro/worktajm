@@ -1,0 +1,32 @@
+<button class="btn btn-primary jh-create-entity create-project"
+        [routerLink]="['/', { outlets: { popup: ['project-new'] } }]">
+    <span class="fa fa-plus"></span>
+    <span class="hidden-sm-down"
+          jhiTranslate="worktajmApp.project.home.createLabel">Create new Project</span>
+</button>
+
+<hr/>
+
+<div class="table-responsive" *ngIf="projects">
+    <table class="table table-striped">
+        <tbody>
+        <tr *ngFor="let project of projects ;trackBy: trackId">
+            <td class="align-middle">{{project.name}}</td>
+            <td class="text-right">
+                <button *ngIf="!project.isActive()"
+                        class="btn btn-primary float-right btn-xs"
+                        (click)="start(project)">
+                    <span class="fa fa-play"></span> <span
+                    jhiTranslate="dashboard.projects.start">Start</span>
+                </button>
+                <button *ngIf="project.isActive()"
+                        class="btn btn-error float-right btn-xs"
+                        (click)="stop(project)">
+                    <span class="fa fa-stop"></span> <span
+                    jhiTranslate="dashboard.projects.stop">Stop</span>
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

@@ -7,6 +7,7 @@ import { JhiDateUtils } from 'ng-jhipster';
 
 import { TimeEntry } from './time-entry.model';
 import { ResponseWrapper, createRequestOption } from '../../shared';
+import moment = require('moment');
 
 @Injectable()
 export class TimeEntryService {
@@ -81,10 +82,19 @@ export class TimeEntryService {
      */
     private convert(timeEntry: TimeEntry): TimeEntry {
         const copy: TimeEntry = Object.assign({}, timeEntry);
-
         copy.start = this.dateUtils.toDate(timeEntry.start);
-
         copy.end = this.dateUtils.toDate(timeEntry.end);
         return copy;
+    }
+
+    getAllBetweenDates(fromDate: Date, toDate?: Date): Observable<ResponseWrapper> {
+        if (!toDate) {
+            toDate = moment(fromDate).add(1, 'd').toDate();
+        }
+        console.log(`Searching for time entries between: ${fromDate} and ${toDate}`);
+        const from: number = moment(fromDate).unix();
+        const to: number = moment(toDate).unix();
+        return this.http.get(`${this.resourceUrl}/searchBetweenDates?from=${from}&to=${to}`)
+            .map((res: Response) => this.convertResponse(res));
     }
 }

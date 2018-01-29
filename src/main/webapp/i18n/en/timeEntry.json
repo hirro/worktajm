@@ -18,6 +18,7 @@
             },
             "start": "Start",
             "end": "End",
+            "time": "Time",
             "comment": "Comment",
             "project": "Project",
             "user": "User"

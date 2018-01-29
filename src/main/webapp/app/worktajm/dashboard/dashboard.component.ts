@@ -9,6 +9,7 @@ import {TimeEntry} from '../../entities/time-entry/time-entry.model';
 import { Project, ProjectService } from '../../entities/project';
 import {WorktajmDashboardService} from './dashboard.service';
 import { ITEMS_PER_PAGE, Principal, ResponseWrapper } from '../../shared';
+import {collectDeepNodes} from '@ngtools/webpack/src/transformers';
 
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
@@ -26,7 +27,6 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
     error: any;
     success: any;
     eventSubscriber: Subscription;
-    currentSearch: string;
     routeData: any;
     links: any;
     totalItems: any;
@@ -54,6 +54,8 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
         private eventManager: JhiEventManager
     ) {
         this.date = new Date();
+        this.date.setHours(0, 0, 0, 0);
+        this.timeEntries = [];
         this.itemsPerPage = ITEMS_PER_PAGE;
         this.routeData = this.activatedRoute.data.subscribe((data) => {
             this.page = data.pagingParams.page;
@@ -61,8 +63,6 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
             this.reverse = data.pagingParams.ascending;
             this.predicate = data.pagingParams.predicate;
         });
-        this.currentSearch = this.activatedRoute.snapshot && this.activatedRoute.snapshot.params['search'] ?
-            this.activatedRoute.snapshot.params['search'] : '';
     }
 
     loadAll() {
@@ -79,37 +79,21 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
                 (res: ResponseWrapper) => this.onGetUserExtrasError(res.json)
             );
 
-        if (this.currentSearch) {
-            this.timeEntryService.search({
-                page: this.page - 1,
-                query: this.currentSearch,
-                size: this.itemsPerPage,
-                sort: this.sort()}).subscribe(
-                (res: ResponseWrapper) => this.onLoadedTimeEntriesSuccess(res.json, res.headers),
-                (res: ResponseWrapper) => this.onLoadedTimeEntriesError(res.json)
-            );
-            return;
-        }
-        this.timeEntryService.query({
-            page: this.page - 1,
-            size: this.itemsPerPage,
-            sort: this.sort()}).subscribe(
-            (res: ResponseWrapper) => this.onLoadedTimeEntriesSuccess(res.json, res.headers),
-            (res: ResponseWrapper) => this.onLoadedTimeEntriesError(res.json)
-        );
+        this.selectedDateChanged(this.date);
     }
+
     loadPage(page: number) {
         if (page !== this.previousPage) {
             this.previousPage = page;
             this.transition();
         }
     }
+
     transition() {
         this.router.navigate(['/time-entry'], {queryParams:
             {
                 page: this.page,
                 size: this.itemsPerPage,
-                search: this.currentSearch,
                 sort: this.predicate + ',' + (this.reverse ? 'asc' : 'desc')
             }
         });
@@ -118,7 +102,6 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
 
     clear() {
         this.page = 0;
-        this.currentSearch = '';
         this.router.navigate(['/time-entry', {
             page: this.page,
             sort: this.predicate + ',' + (this.reverse ? 'asc' : 'desc')
@@ -131,14 +114,13 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
             return this.clear();
         }
         this.page = 0;
-        this.currentSearch = query;
         this.router.navigate(['/time-entry', {
-            search: this.currentSearch,
             page: this.page,
             sort: this.predicate + ',' + (this.reverse ? 'asc' : 'desc')
         }]);
         this.loadAll();
     }
+
     ngOnInit() {
         this.loadAll();
         this.principal.identity().then((account) => {
@@ -166,36 +148,41 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
         return result;
     }
 
-    stopProject(project: Project) {
+    onProjectStarted(project: Project) {
+        console.log('onProjectStarted');
+        this.dashboardService.startProject(project)
+            .subscribe(
+                (res: TimeEntry) => {
+                    this.activeTimeEntry = res;
+                    this.updateProjects();
+                    this.timeEntries.push(res);
+                },
+                (error: any) => {
+                    this.jhiAlertService.error(error.message, null, null);
+                }
+            );
+    }
+
+    onProjectStopped(project: Project) {
         console.log('stopProject');
         this.dashboardService.stopProject(project)
             .subscribe(
-                (res: TimeEntry) => this.onStopProjectSuccess(res),
-                (res: ResponseWrapper) => this.onStopProjectError(res.json)
-            );
-    }
-
-    startProject(project: Project) {
-        console.log('startProject');
-        this.dashboardService.startProject(project)
-            .subscribe(
-                (res: TimeEntry) => this.onStartProjectSuccess(res),
-                (res: ResponseWrapper) => this.onStartProjectError(res.json)
-            );
-    }
-
-    private onStopProjectSuccess(res: TimeEntry) {
-        console.log('onStopProjectSuccess: ' + res);
-        if (res) {
-            // Find time entry in time entries and stop it
-            for (const timeEntry of this.timeEntries) {
-                if (timeEntry.id === res.id) {
-                    timeEntry.end = res.end;
+                (res: TimeEntry) => {
+                    if (res) {
+                        // Find time entry in time entries and stop it
+                        for (const timeEntry of this.timeEntries) {
+                            if (timeEntry.id === res.id) {
+                                timeEntry.end = res.end;
+                            }
+                        }
+                    }
+                    this.activeTimeEntry = null;
+                    this.updateProjects();
+                },
+                (error: any) => {
+                    this.jhiAlertService.error(error.message, null, null);
                 }
-            }
-        }
-        this.activeTimeEntry = null;
-        this.updateProjects();
+            );
     }
 
     private updateProjects() {
@@ -203,18 +190,6 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
         for (const project of this.projects) {
             project.setActive(activeProjectId === project.id);
         }
-    }
-
-    private onStopProjectError(json: any) {
-    }
-
-    private onStartProjectSuccess(res: TimeEntry) {
-        this.activeTimeEntry = res;
-        this.updateProjects();
-        this.timeEntries.push(res);
-    }
-
-    private onStartProjectError(json: any) {
     }
 
     private onListAllMyProjectsSuccess(data, headers) {
@@ -269,18 +244,11 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
         this.jhiAlertService.error(error.message, null, null);
     }
 
-    duration(timeEntry: TimeEntry): string {
-        let duration;
-        if (timeEntry.end) {
-            const start = moment(timeEntry.start);
-            const end = moment(timeEntry.end);
-            duration = moment.duration(end.diff(start));
-        } else {
-            const start = moment(timeEntry.start);
-            const now = moment(new Date());
-            duration = moment.duration(now.diff(start));
-        }
-
-        return duration.format('h:mm:ss');
+    selectedDateChanged(date: Date) {
+        console.log(`WorktajmDashboardComponent::selectedDateChanged: ${date}`);
+        this.timeEntryService.getAllBetweenDates(date).subscribe(
+            (res: ResponseWrapper) => this.onLoadedTimeEntriesSuccess(res.json, res.headers),
+            (res: ResponseWrapper) => this.onLoadedTimeEntriesError(res.json)
+        );
     }
 }

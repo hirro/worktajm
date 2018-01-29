@@ -1,0 +1,107 @@
+<div class="row">
+
+    <div class="col-md-8">
+        <jhi-datepicker-popup [(model)]="date" [showIcon]="false" (onDateUpdated)="onChangedDate($event)" ></jhi-datepicker-popup>
+    </div>
+    <div class="col-md-4">
+        <button class="btn btn-primary float-right jh-create-entity create-time-entry"
+                [routerLink]="['/', { outlets: { popup: ['time-entry-new'] } }]">
+            <span class="fa fa-plus"></span>
+            <span class="d-none d-md-inline" jhfiTranslate="worktajmApp.timeEntry.home.createLabel">Create new Time Entry</span>
+        </button>
+    </div>
+    {{date}}
+</div>
+
+<hr/>
+
+<div class="row">
+
+    <div class="table-responsive" *ngIf="timeEntries">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        <span jhiTranslate="worktajmApp.timeEntry.project">Project</span>
+                    </th>
+                    <th>
+                        <span jhiTranslate="worktajmApp.timeEntry.time">Time</span>
+                    </th>
+                    <th>Duration</th>
+                    <th class="fit"></th>
+                    <th class="fit"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let timeEntry of timeEntries ;trackBy: trackId">
+                    <td>
+                        <div *ngIf="timeEntry.projectId">
+                            <a [routerLink]="['../project', timeEntry.projectId  ]">{{timeEntry.projectName}}</a>
+                        </div>
+                    </td>
+                    <td>{{timeEntry.start | date:'HH:mm:ss'}}-{{timeEntry.end | date:'HH:mm:ss'}}</td>
+                    <td>{{this.duration(timeEntry)}}</td>
+                    <td class="table-fit">
+                        <div *ngIf="timeEntry.comment;then has_comment else has_no_comment">
+                        </div>
+                        <ng-template #has_comment>
+                            <i class="fa fa-comment fa-lg"
+                               [ngbPopover]="timeEntry.comment"
+                               triggers="mouseenter:mouseleave"
+                               popoverTitle="Comment"
+                               aria-hidden="true"
+                               placement="top">
+                            </i>
+                        </ng-template>
+                        <ng-template #has_no_comment>
+                            <i class="fa fa-comment fa-lg disabled" aria-hidden="true"></i>
+                        </ng-template>
+                    </td>
+                    <td class="text-right">
+                        <div class="btn-group flex-btn-group-container">
+                            <button type="submit"
+                                    [routerLink]="['/', { outlets: { popup: 'time-entry/'+ timeEntry.id + '/edit'} }]"
+                                    replaceUrl="true"
+                                    queryParamsHandling="merge"
+                                    class="btn btn-primary btn-sm">
+                                <span class="fa fa-pencil-square-o"></span>
+                                <span class="d-none d-lg-inline"
+                                      jhiTranslate="entity.action.edit">Edit</span>
+                            </button>
+                            <button type="submit"
+                                    [routerLink]="['/', { outlets: { popup: 'time-entry/'+ timeEntry.id + '/delete'} }]"
+                                    replaceUrl="true"
+                                    queryParamsHandling="merge"
+                                    class="btn btn-danger btn-sm">
+                                <span class="fa fa-trash-o"></span>
+                                <span class="d-none d-lg-inline"
+                                      jhiTranslate="entity.action.delete">Delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><h5>Sum</h5></td>
+                    <td></td>
+                    <td>{{sum()}}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div *ngIf="timeEntries && (totalItems > itemsPerPage)">
+        <div class="row justify-content-center">
+            <jhi-item-count [page]="page" [total]="queryCount" [maxSize]="5"
+                            [itemsPerPage]="itemsPerPage"></jhi-item-count>
+        </div>
+        <div class="row justify-content-center">
+            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage"
+                            [maxSize]="5" [rotate]="true" [boundaryLinks]="true"
+                            (pageChange)="loadPage(page)"></ngb-pagination>
+        </div>
+    </div>
+</div>
+<div class="row">
+
+</div>

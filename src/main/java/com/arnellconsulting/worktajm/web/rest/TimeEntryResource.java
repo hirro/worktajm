@@ -29,6 +29,11 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -185,6 +190,24 @@ public class TimeEntryResource {
         log.debug("REST request to search for a page of TimeEntries for query {}", query);
         Page<TimeEntry> page = timeEntrySearchRepository.search(queryStringQuery(query), pageable);
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/time-entries");
+        return new ResponseEntity<>(timeEntryMapper.toDto(page.getContent()), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/time-entries/searchBetweenDates")
+    @Timed
+    public ResponseEntity<List<TimeEntryDTO>> findBetweenDates(
+        @RequestParam Long from,
+        @RequestParam Long to,
+        Pageable pageable)
+    {
+        final ZonedDateTime fromDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(from), ZoneOffset.UTC);
+        final ZonedDateTime toDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(to), ZoneOffset.UTC);
+        log.debug("REST request to search for a page of TimeEntries between {} and {}", fromDateTime, toDateTime);
+        Page<TimeEntry> page = timeEntryRepository.findByUserIsCurrentUserBetween(
+            fromDateTime,
+            toDateTime,
+            pageable);
+        HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders("", page, "/api/_search/time-entries");
         return new ResponseEntity<>(timeEntryMapper.toDto(page.getContent()), headers, HttpStatus.OK);
     }
 
