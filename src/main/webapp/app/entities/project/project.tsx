@@ -1,15 +1,17 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'reactstrap';
+import { Button, InputGroup } from 'reactstrap';
+import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
 // TODO import TextFormat only when fieldContainsDate
 // tslint:disable-next-line:no-unused-variable
-import { Translate, ICrudGetAction, TextFormat } from 'react-jhipster';
-import { FaPlus, FaEye, FaPencil, FaTrash } from 'react-icons/lib/fa';
+import { Translate, translate, ICrudGetAction, TextFormat } from 'react-jhipster';
+import { FaPlus, FaEye, FaPencil, FaTrash, FaSearch } from 'react-icons/lib/fa';
 
 import {
   getusers,
   getcustomers,
+  getSearchEntities,
   getEntities
 } from './project.reducer';
  // tslint:disable-next-line:no-unused-variable
@@ -17,16 +19,23 @@ import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from '../../config/constants';
 
 export interface IProjectProps {
   getEntities: ICrudGetAction;
+  getSearchEntities: ICrudGetAction;
   projects: any[];
   getusers: ICrudGetAction;
   getcustomers: ICrudGetAction;
   match: any;
 }
 
-export class Project extends React.Component<IProjectProps, undefined> {
+export interface IProjectState {
+  search: string;
+}
 
+export class Project extends React.Component<IProjectProps, IProjectState> {
   constructor(props) {
     super(props);
+    this.state = {
+      search: ''
+    };
   }
 
   componentDidMount() {
@@ -34,6 +43,21 @@ export class Project extends React.Component<IProjectProps, undefined> {
     this.props.getusers();
     this.props.getcustomers();
   }
+
+  search = () => {
+    if (this.state.search) {
+      this.props.getSearchEntities(this.state.search);
+    }
+  }
+
+  clear = () => {
+    this.props.getEntities();
+    this.setState({
+      search: ''
+    });
+  }
+
+  handleSearch = event => this.setState({ search: event.target.value });
 
   render() {
     const { projects, match } = this.props;
@@ -45,6 +69,23 @@ export class Project extends React.Component<IProjectProps, undefined> {
             <FaPlus /> <Translate contentKey="worktajmApp.project.home.createLabel" />
           </Link>
         </h2>
+        <div className="row">
+          <div className="col-sm-12">
+            <AvForm onSubmit={this.search}>
+              <AvGroup>
+                <InputGroup>
+                  <AvInput type="text" name="search" value={this.state.search} onChange={this.handleSearch} placeholder={translate('worktajmApp.project.home.search')} />
+                  <Button className="input-group-addon">
+                    <FaSearch/>
+                  </Button>
+                  <Button type="reset" className="input-group-addon" onClick={this.clear}>
+                    <FaTrash/>
+                  </Button>
+                </InputGroup>
+              </AvGroup>
+            </AvForm>
+          </div>
+        </div>
         <div className="table-responsive">
           <table className="table table-striped">
             <thead>
@@ -76,7 +117,10 @@ export class Project extends React.Component<IProjectProps, undefined> {
                     {project.hourlyRate}
                   </td>
                   <td>
-                    TODO
+                    {project.customerName ?
+                    <Link to={`customer/${project.customerId}`}>
+                      {project.customerName}
+                    </Link> : ''}
                   </td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">
@@ -106,6 +150,6 @@ const mapStateToProps = storeState => ({
   projects: storeState.project.entities
 });
 
-const mapDispatchToProps = { getusers, getcustomers, getEntities };
+const mapDispatchToProps = { getusers, getcustomers, getSearchEntities, getEntities };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Project);

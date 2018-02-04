@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'reactstrap';
+import { Button, UncontrolledTooltip } from 'reactstrap';
 // TODO import TextFormat only when fieldContainsDate
 // tslint:disable-next-line:no-unused-variable
 import { Translate, ICrudGetAction, TextFormat } from 'react-jhipster';
@@ -32,25 +32,40 @@ export class ProjectDetail extends React.Component<IProjectDetailProps> {
         </h2>
         <dl className="row-md jh-entity-details">
           <dt>
-            <Translate contentKey="worktajmApp.project.name">
+            <span id="name">
+              <Translate contentKey="worktajmApp.project.name">
               name
-            </Translate>
+              </Translate>
+            </span>
+            <UncontrolledTooltip target="name">
+              <Translate contentKey="worktajmApp.project.help.name"/>
+            </UncontrolledTooltip>
           </dt>
           <dd>
             {project.name}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.project.description">
+            <span id="description">
+              <Translate contentKey="worktajmApp.project.description">
               description
-            </Translate>
+              </Translate>
+            </span>
+            <UncontrolledTooltip target="description">
+              <Translate contentKey="worktajmApp.project.help.description"/>
+            </UncontrolledTooltip>
           </dt>
           <dd>
             {project.description}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.project.hourlyRate">
+            <span id="hourlyRate">
+              <Translate contentKey="worktajmApp.project.hourlyRate">
               hourlyRate
-            </Translate>
+              </Translate>
+            </span>
+            <UncontrolledTooltip target="hourlyRate">
+              <Translate contentKey="worktajmApp.project.help.hourlyRate"/>
+            </UncontrolledTooltip>
           </dt>
           <dd>
             {project.hourlyRate}
@@ -61,15 +76,20 @@ export class ProjectDetail extends React.Component<IProjectDetailProps> {
             </Translate>
           </dt>
           <dd>
-                      TODO
-          </dd>
+  {
+    (project.projectMembers) ?
+        (project.projectMembers.map((val, i) =>
+            <span key={val.id}><a>{val.email}</a>{(i === project.projectMembers.length - 1) ? '' : ', '}</span>
+        )
+    ) : null
+  }          </dd>
           <dt>
             <Translate contentKey="worktajmApp.project.customer">
               Customer
             </Translate>
           </dt>
           <dd>
-                          TODO
+              {project.customerName ? project.customerName : ''}
           </dd>
         </dl>
         <Button tag={Link} to="/project" replace color="info">

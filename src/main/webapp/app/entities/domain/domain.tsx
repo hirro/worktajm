@@ -1,16 +1,18 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'reactstrap';
+import { Button, InputGroup } from 'reactstrap';
+import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
 // TODO import TextFormat only when fieldContainsDate
 // tslint:disable-next-line:no-unused-variable
-import { Translate, ICrudGetAction, TextFormat } from 'react-jhipster';
-import { FaPlus, FaEye, FaPencil, FaTrash } from 'react-icons/lib/fa';
+import { Translate, translate, ICrudGetAction, TextFormat } from 'react-jhipster';
+import { FaPlus, FaEye, FaPencil, FaTrash, FaSearch } from 'react-icons/lib/fa';
 
 import {
   getaddresses,
   getcustomers,
   getusers,
+  getSearchEntities,
   getEntities
 } from './domain.reducer';
  // tslint:disable-next-line:no-unused-variable
@@ -18,6 +20,7 @@ import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from '../../config/constants';
 
 export interface IDomainProps {
   getEntities: ICrudGetAction;
+  getSearchEntities: ICrudGetAction;
   domains: any[];
   getaddresses: ICrudGetAction;
   getcustomers: ICrudGetAction;
@@ -25,10 +28,16 @@ export interface IDomainProps {
   match: any;
 }
 
-export class Domain extends React.Component<IDomainProps, undefined> {
+export interface IDomainState {
+  search: string;
+}
 
+export class Domain extends React.Component<IDomainProps, IDomainState> {
   constructor(props) {
     super(props);
+    this.state = {
+      search: ''
+    };
   }
 
   componentDidMount() {
@@ -37,6 +46,21 @@ export class Domain extends React.Component<IDomainProps, undefined> {
     this.props.getcustomers();
     this.props.getusers();
   }
+
+  search = () => {
+    if (this.state.search) {
+      this.props.getSearchEntities(this.state.search);
+    }
+  }
+
+  clear = () => {
+    this.props.getEntities();
+    this.setState({
+      search: ''
+    });
+  }
+
+  handleSearch = event => this.setState({ search: event.target.value });
 
   render() {
     const { domains, match } = this.props;
@@ -48,6 +72,23 @@ export class Domain extends React.Component<IDomainProps, undefined> {
             <FaPlus /> <Translate contentKey="worktajmApp.domain.home.createLabel" />
           </Link>
         </h2>
+        <div className="row">
+          <div className="col-sm-12">
+            <AvForm onSubmit={this.search}>
+              <AvGroup>
+                <InputGroup>
+                  <AvInput type="text" name="search" value={this.state.search} onChange={this.handleSearch} placeholder={translate('worktajmApp.domain.home.search')} />
+                  <Button className="input-group-addon">
+                    <FaSearch/>
+                  </Button>
+                  <Button type="reset" className="input-group-addon" onClick={this.clear}>
+                    <FaTrash/>
+                  </Button>
+                </InputGroup>
+              </AvGroup>
+            </AvForm>
+          </div>
+        </div>
         <div className="table-responsive">
           <table className="table table-striped">
             <thead>
@@ -71,7 +112,10 @@ export class Domain extends React.Component<IDomainProps, undefined> {
                     {domain.name}
                   </td>
                   <td>
-                    TODO
+                    {domain.addressAddressLine1 ?
+                    <Link to={`address/${domain.addressId}`}>
+                      {domain.addressAddressLine1}
+                    </Link> : ''}
                   </td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">
@@ -101,6 +145,6 @@ const mapStateToProps = storeState => ({
   domains: storeState.domain.entities
 });
 
-const mapDispatchToProps = { getaddresses, getcustomers, getusers, getEntities };
+const mapDispatchToProps = { getaddresses, getcustomers, getusers, getSearchEntities, getEntities };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Domain);

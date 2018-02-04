@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label, UncontrolledTooltip } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
 import { Translate, ICrudGetAction, ICrudPutAction } from 'react-jhipster';
 import { FaBan, FaFloppyO } from 'react-icons/lib/fa';
@@ -25,8 +25,8 @@ export interface ITimeEntryDialogProps {
 export interface ITimeEntryDialogState {
   showModal: boolean;
   isNew: boolean;
-  idProject: number;
-  idUser: number;
+  projectId: number;
+  userId: number;
 }
 
 export class TimeEntryDialog extends React.Component<ITimeEntryDialogProps, ITimeEntryDialogState> {
@@ -35,12 +35,10 @@ export class TimeEntryDialog extends React.Component<ITimeEntryDialogProps, ITim
     super(props);
     this.state = {
       isNew: !this.props.match.params || !this.props.match.params.id,
-      idProject: 0,
-      idUser: 0,
+      projectId: 0,
+      userId: 0,
       showModal: true
     };
-    this.updateProject = this.updateProject.bind(this);
-    this.updateUser = this.updateUser.bind(this);
   }
 
   componentDidMount() {
@@ -65,23 +63,23 @@ export class TimeEntryDialog extends React.Component<ITimeEntryDialogProps, ITim
     this.props.history.push('/time-entry');
   }
 
-  updateProject(element) {
+  projectUpdate = element => {
     const name = element.target.value;
     for (const i in this.props.projects) {
         if (name.toString() === this.props.projects[i].name.toString()) {
             this.setState({
-                idProject: this.props.projects[i].id
+                projectId: this.props.projects[i].id
             });
         }
     }
   }
 
-  updateUser(element) {
+  userUpdate = element => {
     const email = element.target.value;
     for (const i in this.props.users) {
         if (email.toString() === this.props.users[i].email.toString()) {
             this.setState({
-                idUser: this.props.users[i].id
+                userId: this.props.users[i].id
             });
         }
     }
@@ -108,7 +106,7 @@ export class TimeEntryDialog extends React.Component<ITimeEntryDialogProps, ITim
               : null
             }
             <AvGroup>
-              <Label for="start">
+              <Label id="startLabel" for="start">
                 <Translate contentKey="worktajmApp.timeEntry.start">
                   start
                 </Translate>
@@ -118,9 +116,12 @@ export class TimeEntryDialog extends React.Component<ITimeEntryDialogProps, ITim
                 value={convertDateTimeFromServer(this.props.timeEntry.start)} required
               />
               <AvFeedback>This field is required.</AvFeedback>
+            <UncontrolledTooltip target="startLabel">
+              <Translate contentKey="worktajmApp.timeEntry.help.start"/>
+            </UncontrolledTooltip>
             </AvGroup>
             <AvGroup>
-              <Label for="end">
+              <Label id="endLabel" for="end">
                 <Translate contentKey="worktajmApp.timeEntry.end">
                   end
                 </Translate>
@@ -130,9 +131,12 @@ export class TimeEntryDialog extends React.Component<ITimeEntryDialogProps, ITim
                 value={convertDateTimeFromServer(this.props.timeEntry.end)} required
               />
               <AvFeedback>This field is required.</AvFeedback>
+            <UncontrolledTooltip target="endLabel">
+              <Translate contentKey="worktajmApp.timeEntry.help.end"/>
+            </UncontrolledTooltip>
             </AvGroup>
             <AvGroup>
-              <Label for="comment">
+              <Label id="commentLabel" for="comment">
                 <Translate contentKey="worktajmApp.timeEntry.comment">
                   comment
                 </Translate>
@@ -140,18 +144,47 @@ export class TimeEntryDialog extends React.Component<ITimeEntryDialogProps, ITim
               <AvInput type="text" className="form-control" name="comment" required />
               <AvFeedback>This field is required.</AvFeedback>
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
+            <UncontrolledTooltip target="commentLabel">
+              <Translate contentKey="worktajmApp.timeEntry.help.comment"/>
+            </UncontrolledTooltip>
             </AvGroup>
             <AvGroup>
               <Label for="project.name">
                 <Translate contentKey="worktajmApp.timeEntry.project">Project</Translate>
               </Label>
-                  TODO 3
+                  <AvInput type="select"
+                    className="form-control"
+                    name="projectId"
+                    onChange={this.projectUpdate}>
+                    {
+                      projects.map(otherEntity =>
+                        <option
+                          value={otherEntity.id}
+                          key={otherEntity.id}>
+                          {otherEntity.name}
+                        </option>
+                      )
+                    }
+                  </AvInput>
             </AvGroup>
             <AvGroup>
               <Label for="user.email">
                 <Translate contentKey="worktajmApp.timeEntry.user">User</Translate>
               </Label>
-                  TODO 3
+                  <AvInput type="select"
+                    className="form-control"
+                    name="userId"
+                    onChange={this.userUpdate}>
+                    {
+                      users.map(otherEntity =>
+                        <option
+                          value={otherEntity.id}
+                          key={otherEntity.id}>
+                          {otherEntity.email}
+                        </option>
+                      )
+                    }
+                  </AvInput>
             </AvGroup>
           </ModalBody>
           <ModalFooter>

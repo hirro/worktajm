@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label, UncontrolledTooltip } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
 import { Translate, ICrudGetAction, ICrudPutAction } from 'react-jhipster';
 import { FaBan, FaFloppyO } from 'react-icons/lib/fa';
@@ -76,7 +76,7 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               : null
             }
             <AvGroup>
-              <Label for="organizationNumber">
+              <Label id="organizationNumberLabel" for="organizationNumber">
                 <Translate contentKey="worktajmApp.address.organizationNumber">
                   organizationNumber
                 </Translate>
@@ -84,9 +84,12 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               <AvInput type="text" className="form-control" name="organizationNumber" required />
               <AvFeedback>This field is required.</AvFeedback>
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
+            <UncontrolledTooltip target="organizationNumberLabel">
+              <Translate contentKey="worktajmApp.address.help.organizationNumber"/>
+            </UncontrolledTooltip>
             </AvGroup>
             <AvGroup>
-              <Label for="addressLine1">
+              <Label id="addressLine1Label" for="addressLine1">
                 <Translate contentKey="worktajmApp.address.addressLine1">
                   addressLine1
                 </Translate>
@@ -96,7 +99,7 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
             <AvGroup>
-              <Label for="addressLine2">
+              <Label id="addressLine2Label" for="addressLine2">
                 <Translate contentKey="worktajmApp.address.addressLine2">
                   addressLine2
                 </Translate>
@@ -106,7 +109,7 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
             <AvGroup>
-              <Label for="addressLine3">
+              <Label id="addressLine3Label" for="addressLine3">
                 <Translate contentKey="worktajmApp.address.addressLine3">
                   addressLine3
                 </Translate>
@@ -116,7 +119,7 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
             <AvGroup>
-              <Label for="city">
+              <Label id="cityLabel" for="city">
                 <Translate contentKey="worktajmApp.address.city">
                   city
                 </Translate>
@@ -126,7 +129,7 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
             <AvGroup>
-              <Label for="zipOrPostcode">
+              <Label id="zipOrPostcodeLabel" for="zipOrPostcode">
                 <Translate contentKey="worktajmApp.address.zipOrPostcode">
                   zipOrPostcode
                 </Translate>
@@ -136,7 +139,7 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
             <AvGroup>
-              <Label for="stateProvinceCounty">
+              <Label id="stateProvinceCountyLabel" for="stateProvinceCounty">
                 <Translate contentKey="worktajmApp.address.stateProvinceCounty">
                   stateProvinceCounty
                 </Translate>
@@ -146,7 +149,7 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
             <AvGroup>
-              <Label for="country">
+              <Label id="countryLabel" for="country">
                 <Translate contentKey="worktajmApp.address.country">
                   country
                 </Translate>
@@ -156,7 +159,7 @@ export class AddressDialog extends React.Component<IAddressDialogProps, IAddress
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
             <AvGroup>
-              <Label for="addressDetails">
+              <Label id="addressDetailsLabel" for="addressDetails">
                 <Translate contentKey="worktajmApp.address.addressDetails">
                   addressDetails
                 </Translate>

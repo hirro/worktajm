@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'reactstrap';
+import { Button, UncontrolledTooltip } from 'reactstrap';
 // TODO import TextFormat only when fieldContainsDate
 // tslint:disable-next-line:no-unused-variable
 import { Translate, ICrudGetAction, TextFormat } from 'react-jhipster';
@@ -32,25 +32,40 @@ export class TimeEntryDetail extends React.Component<ITimeEntryDetailProps> {
         </h2>
         <dl className="row-md jh-entity-details">
           <dt>
-            <Translate contentKey="worktajmApp.timeEntry.start">
+            <span id="start">
+              <Translate contentKey="worktajmApp.timeEntry.start">
               start
-            </Translate>
+              </Translate>
+            </span>
+            <UncontrolledTooltip target="start">
+              <Translate contentKey="worktajmApp.timeEntry.help.start"/>
+            </UncontrolledTooltip>
           </dt>
           <dd>
             <TextFormat value={timeEntry.start} type="date" format={APP_DATE_FORMAT} />
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.timeEntry.end">
+            <span id="end">
+              <Translate contentKey="worktajmApp.timeEntry.end">
               end
-            </Translate>
+              </Translate>
+            </span>
+            <UncontrolledTooltip target="end">
+              <Translate contentKey="worktajmApp.timeEntry.help.end"/>
+            </UncontrolledTooltip>
           </dt>
           <dd>
             <TextFormat value={timeEntry.end} type="date" format={APP_DATE_FORMAT} />
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.timeEntry.comment">
+            <span id="comment">
+              <Translate contentKey="worktajmApp.timeEntry.comment">
               comment
-            </Translate>
+              </Translate>
+            </span>
+            <UncontrolledTooltip target="comment">
+              <Translate contentKey="worktajmApp.timeEntry.help.comment"/>
+            </UncontrolledTooltip>
           </dt>
           <dd>
             {timeEntry.comment}
@@ -61,7 +76,7 @@ export class TimeEntryDetail extends React.Component<ITimeEntryDetailProps> {
             </Translate>
           </dt>
           <dd>
-                          TODO
+              {timeEntry.projectName ? timeEntry.projectName : ''}
           </dd>
           <dt>
             <Translate contentKey="worktajmApp.timeEntry.user">
@@ -69,7 +84,7 @@ export class TimeEntryDetail extends React.Component<ITimeEntryDetailProps> {
             </Translate>
           </dt>
           <dd>
-                              TODO
+              {timeEntry.userEmail ? timeEntry.userEmail : ''}
           </dd>
         </dl>
         <Button tag={Link} to="/time-entry" replace color="info">

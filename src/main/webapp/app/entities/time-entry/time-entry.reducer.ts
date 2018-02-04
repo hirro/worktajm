@@ -9,6 +9,7 @@ import { messages, SERVER_API_URL } from '../../config/constants';
 
 export const ACTION_TYPES = {
   FETCH_TIMEENTRIES: 'timeEntry/FETCH_TIMEENTRIES',
+  SEARCH_TIMEENTRIES: 'timeEntry/SEARCH_TIMEENTRIES',
   FETCH_projects: 'projects/FETCH_projects',
   FETCH_users: 'users/FETCH_users',
   FETCH_TIMEENTRY:  'timeEntry/FETCH_TIMEENTRY',
@@ -34,6 +35,7 @@ export default (state = initialState, action) => {
     case REQUEST(ACTION_TYPES.FETCH_projects):
     case REQUEST(ACTION_TYPES.FETCH_users):
     case REQUEST(ACTION_TYPES.FETCH_TIMEENTRIES):
+    case REQUEST(ACTION_TYPES.SEARCH_TIMEENTRIES):
     case REQUEST(ACTION_TYPES.FETCH_TIMEENTRY):
       return {
         ...state,
@@ -53,6 +55,7 @@ export default (state = initialState, action) => {
     case FAILURE(ACTION_TYPES.FETCH_projects):
     case FAILURE(ACTION_TYPES.FETCH_users):
     case FAILURE(ACTION_TYPES.FETCH_TIMEENTRIES):
+    case FAILURE(ACTION_TYPES.SEARCH_TIMEENTRIES):
     case FAILURE(ACTION_TYPES.FETCH_TIMEENTRY):
     case FAILURE(ACTION_TYPES.CREATE_TIMEENTRY):
     case FAILURE(ACTION_TYPES.UPDATE_TIMEENTRY):
@@ -82,6 +85,12 @@ export default (state = initialState, action) => {
         loading: false,
         entities: action.payload.data
       };
+    case SUCCESS(ACTION_TYPES.SEARCH_TIMEENTRIES):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
+    };
     case SUCCESS(ACTION_TYPES.FETCH_TIMEENTRY):
       return {
         ...state,
@@ -109,6 +118,7 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/time-entries';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/time-entries';
 
 // Actions
 
@@ -125,6 +135,11 @@ export const getusers: ICrudGetAction = () => ({
 export const getEntities: ICrudGetAction = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_TIMEENTRIES,
   payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
+});
+
+export const getSearchEntities: ICrudGetAction = query => ({
+  type: ACTION_TYPES.SEARCH_TIMEENTRIES,
+  payload: axios.get(`${apiSearchUrl}?query=` + query)
 });
 
 export const getEntity: ICrudGetAction = id => {

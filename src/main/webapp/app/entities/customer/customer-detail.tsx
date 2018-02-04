@@ -32,9 +32,11 @@ export class CustomerDetail extends React.Component<ICustomerDetailProps> {
         </h2>
         <dl className="row-md jh-entity-details">
           <dt>
-            <Translate contentKey="worktajmApp.customer.name">
+            <span id="name">
+              <Translate contentKey="worktajmApp.customer.name">
               name
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {customer.name}
@@ -45,7 +47,7 @@ export class CustomerDetail extends React.Component<ICustomerDetailProps> {
             </Translate>
           </dt>
           <dd>
-                          TODO
+              {customer.addressAddressLine1 ? customer.addressAddressLine1 : ''}
           </dd>
           <dt>
             <Translate contentKey="worktajmApp.customer.domain">
@@ -53,7 +55,7 @@ export class CustomerDetail extends React.Component<ICustomerDetailProps> {
             </Translate>
           </dt>
           <dd>
-                          TODO
+              {customer.domainName ? customer.domainName : ''}
           </dd>
         </dl>
         <Button tag={Link} to="/customer" replace color="info">

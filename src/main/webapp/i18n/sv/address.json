@@ -1,3 +1,4 @@
+
 {
     "worktajmApp": {
         "address" : {
@@ -24,7 +25,10 @@
             "zipOrPostcode": "Zip Or Postcode",
             "stateProvinceCounty": "State Province County",
             "country": "Country",
-            "addressDetails": "Address Details"
+            "addressDetails": "Address Details",
+            "help": {
+                "organizationNumber": "Organizational number (optional)"
+            }
         }
     }
 }

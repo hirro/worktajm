@@ -1,16 +1,18 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'reactstrap';
+import { Button, InputGroup } from 'reactstrap';
+import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
 // TODO import TextFormat only when fieldContainsDate
 // tslint:disable-next-line:no-unused-variable
-import { Translate, ICrudGetAction, TextFormat } from 'react-jhipster';
-import { FaPlus, FaEye, FaPencil, FaTrash } from 'react-icons/lib/fa';
+import { Translate, translate, ICrudGetAction, TextFormat } from 'react-jhipster';
+import { FaPlus, FaEye, FaPencil, FaTrash, FaSearch } from 'react-icons/lib/fa';
 
 import {
   getaddresses,
   getprojects,
   getdomains,
+  getSearchEntities,
   getEntities
 } from './customer.reducer';
  // tslint:disable-next-line:no-unused-variable
@@ -18,6 +20,7 @@ import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from '../../config/constants';
 
 export interface ICustomerProps {
   getEntities: ICrudGetAction;
+  getSearchEntities: ICrudGetAction;
   customers: any[];
   getaddresses: ICrudGetAction;
   getprojects: ICrudGetAction;
@@ -25,10 +28,16 @@ export interface ICustomerProps {
   match: any;
 }
 
-export class Customer extends React.Component<ICustomerProps, undefined> {
+export interface ICustomerState {
+  search: string;
+}
 
+export class Customer extends React.Component<ICustomerProps, ICustomerState> {
   constructor(props) {
     super(props);
+    this.state = {
+      search: ''
+    };
   }
 
   componentDidMount() {
@@ -37,6 +46,21 @@ export class Customer extends React.Component<ICustomerProps, undefined> {
     this.props.getprojects();
     this.props.getdomains();
   }
+
+  search = () => {
+    if (this.state.search) {
+      this.props.getSearchEntities(this.state.search);
+    }
+  }
+
+  clear = () => {
+    this.props.getEntities();
+    this.setState({
+      search: ''
+    });
+  }
+
+  handleSearch = event => this.setState({ search: event.target.value });
 
   render() {
     const { customers, match } = this.props;
@@ -48,6 +72,23 @@ export class Customer extends React.Component<ICustomerProps, undefined> {
             <FaPlus /> <Translate contentKey="worktajmApp.customer.home.createLabel" />
           </Link>
         </h2>
+        <div className="row">
+          <div className="col-sm-12">
+            <AvForm onSubmit={this.search}>
+              <AvGroup>
+                <InputGroup>
+                  <AvInput type="text" name="search" value={this.state.search} onChange={this.handleSearch} placeholder={translate('worktajmApp.customer.home.search')} />
+                  <Button className="input-group-addon">
+                    <FaSearch/>
+                  </Button>
+                  <Button type="reset" className="input-group-addon" onClick={this.clear}>
+                    <FaTrash/>
+                  </Button>
+                </InputGroup>
+              </AvGroup>
+            </AvForm>
+          </div>
+        </div>
         <div className="table-responsive">
           <table className="table table-striped">
             <thead>
@@ -72,10 +113,16 @@ export class Customer extends React.Component<ICustomerProps, undefined> {
                     {customer.name}
                   </td>
                   <td>
-                    TODO
+                    {customer.addressAddressLine1 ?
+                    <Link to={`address/${customer.addressId}`}>
+                      {customer.addressAddressLine1}
+                    </Link> : ''}
                   </td>
                   <td>
-                    TODO
+                    {customer.domainName ?
+                    <Link to={`domain/${customer.domainId}`}>
+                      {customer.domainName}
+                    </Link> : ''}
                   </td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">
@@ -105,6 +152,6 @@ const mapStateToProps = storeState => ({
   customers: storeState.customer.entities
 });
 
-const mapDispatchToProps = { getaddresses, getprojects, getdomains, getEntities };
+const mapDispatchToProps = { getaddresses, getprojects, getdomains, getSearchEntities, getEntities };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Customer);

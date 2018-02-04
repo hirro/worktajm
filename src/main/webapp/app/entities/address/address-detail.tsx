@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'reactstrap';
+import { Button, UncontrolledTooltip } from 'reactstrap';
 // TODO import TextFormat only when fieldContainsDate
 // tslint:disable-next-line:no-unused-variable
 import { Translate, ICrudGetAction, TextFormat } from 'react-jhipster';
@@ -32,73 +32,94 @@ export class AddressDetail extends React.Component<IAddressDetailProps> {
         </h2>
         <dl className="row-md jh-entity-details">
           <dt>
-            <Translate contentKey="worktajmApp.address.organizationNumber">
+            <span id="organizationNumber">
+              <Translate contentKey="worktajmApp.address.organizationNumber">
               organizationNumber
-            </Translate>
+              </Translate>
+            </span>
+            <UncontrolledTooltip target="organizationNumber">
+              <Translate contentKey="worktajmApp.address.help.organizationNumber"/>
+            </UncontrolledTooltip>
           </dt>
           <dd>
             {address.organizationNumber}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.address.addressLine1">
+            <span id="addressLine1">
+              <Translate contentKey="worktajmApp.address.addressLine1">
               addressLine1
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {address.addressLine1}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.address.addressLine2">
+            <span id="addressLine2">
+              <Translate contentKey="worktajmApp.address.addressLine2">
               addressLine2
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {address.addressLine2}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.address.addressLine3">
+            <span id="addressLine3">
+              <Translate contentKey="worktajmApp.address.addressLine3">
               addressLine3
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {address.addressLine3}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.address.city">
+            <span id="city">
+              <Translate contentKey="worktajmApp.address.city">
               city
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {address.city}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.address.zipOrPostcode">
+            <span id="zipOrPostcode">
+              <Translate contentKey="worktajmApp.address.zipOrPostcode">
               zipOrPostcode
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {address.zipOrPostcode}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.address.stateProvinceCounty">
+            <span id="stateProvinceCounty">
+              <Translate contentKey="worktajmApp.address.stateProvinceCounty">
               stateProvinceCounty
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {address.stateProvinceCounty}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.address.country">
+            <span id="country">
+              <Translate contentKey="worktajmApp.address.country">
               country
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {address.country}
           </dd>
           <dt>
-            <Translate contentKey="worktajmApp.address.addressDetails">
+            <span id="addressDetails">
+              <Translate contentKey="worktajmApp.address.addressDetails">
               addressDetails
-            </Translate>
+              </Translate>
+            </span>
           </dt>
           <dd>
             {address.addressDetails}

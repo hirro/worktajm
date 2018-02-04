@@ -8,6 +8,7 @@ import { messages, SERVER_API_URL } from '../../config/constants';
 
 export const ACTION_TYPES = {
   FETCH_CUSTOMERS: 'customer/FETCH_CUSTOMERS',
+  SEARCH_CUSTOMERS: 'customer/SEARCH_CUSTOMERS',
   FETCH_addresses: 'addresses/FETCH_addresses',
   FETCH_projects: 'projects/FETCH_projects',
   FETCH_domains: 'domains/FETCH_domains',
@@ -36,6 +37,7 @@ export default (state = initialState, action) => {
     case REQUEST(ACTION_TYPES.FETCH_projects):
     case REQUEST(ACTION_TYPES.FETCH_domains):
     case REQUEST(ACTION_TYPES.FETCH_CUSTOMERS):
+    case REQUEST(ACTION_TYPES.SEARCH_CUSTOMERS):
     case REQUEST(ACTION_TYPES.FETCH_CUSTOMER):
       return {
         ...state,
@@ -56,6 +58,7 @@ export default (state = initialState, action) => {
     case FAILURE(ACTION_TYPES.FETCH_projects):
     case FAILURE(ACTION_TYPES.FETCH_domains):
     case FAILURE(ACTION_TYPES.FETCH_CUSTOMERS):
+    case FAILURE(ACTION_TYPES.SEARCH_CUSTOMERS):
     case FAILURE(ACTION_TYPES.FETCH_CUSTOMER):
     case FAILURE(ACTION_TYPES.CREATE_CUSTOMER):
     case FAILURE(ACTION_TYPES.UPDATE_CUSTOMER):
@@ -91,6 +94,12 @@ export default (state = initialState, action) => {
         loading: false,
         entities: action.payload.data
       };
+    case SUCCESS(ACTION_TYPES.SEARCH_CUSTOMERS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
+    };
     case SUCCESS(ACTION_TYPES.FETCH_CUSTOMER):
       return {
         ...state,
@@ -118,6 +127,7 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/customers';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/customers';
 
 // Actions
 
@@ -139,6 +149,11 @@ export const getdomains: ICrudGetAction = () => ({
 export const getEntities: ICrudGetAction = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_CUSTOMERS,
   payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
+});
+
+export const getSearchEntities: ICrudGetAction = query => ({
+  type: ACTION_TYPES.SEARCH_CUSTOMERS,
+  payload: axios.get(`${apiSearchUrl}?query=` + query)
 });
 
 export const getEntity: ICrudGetAction = id => {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'reactstrap';
+import { Button, UncontrolledTooltip } from 'reactstrap';
 // TODO import TextFormat only when fieldContainsDate
 // tslint:disable-next-line:no-unused-variable
 import { Translate, ICrudGetAction, TextFormat } from 'react-jhipster';
@@ -32,9 +32,14 @@ export class DomainDetail extends React.Component<IDomainDetailProps> {
         </h2>
         <dl className="row-md jh-entity-details">
           <dt>
-            <Translate contentKey="worktajmApp.domain.name">
+            <span id="name">
+              <Translate contentKey="worktajmApp.domain.name">
               name
-            </Translate>
+              </Translate>
+            </span>
+            <UncontrolledTooltip target="name">
+              <Translate contentKey="worktajmApp.domain.help.name"/>
+            </UncontrolledTooltip>
           </dt>
           <dd>
             {domain.name}
@@ -45,7 +50,7 @@ export class DomainDetail extends React.Component<IDomainDetailProps> {
             </Translate>
           </dt>
           <dd>
-                          TODO
+              {domain.addressAddressLine1 ? domain.addressAddressLine1 : ''}
           </dd>
           <dt>
             <Translate contentKey="worktajmApp.domain.authorizedUsers">
@@ -53,8 +58,14 @@ export class DomainDetail extends React.Component<IDomainDetailProps> {
             </Translate>
           </dt>
           <dd>
-                      TODO
-          </dd>
+  {
+    (domain.authorizedUsers) ?
+        (domain.authorizedUsers.map((val, i) =>
+            <span key={val.id}><a>{val.email}</a>{(i === domain.authorizedUsers.length - 1) ? '' : ', '}</span>
+        )
+    ) : null
+  }
+        </dd>
         </dl>
         <Button tag={Link} to="/domain" replace color="info">
           <FaArrowLeft/> <span className="d-none d-md-inline" ><Translate contentKey="entity.action.back">Back</Translate></span>

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label, UncontrolledTooltip } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
 import { Translate, ICrudGetAction, ICrudPutAction } from 'react-jhipster';
 import { FaBan, FaFloppyO } from 'react-icons/lib/fa';
@@ -26,7 +26,7 @@ export interface IProjectDialogState {
   showModal: boolean;
   isNew: boolean;
   idsProjectMembers: any[];
-  idCustomer: number;
+  customerId: number;
 }
 
 export class ProjectDialog extends React.Component<IProjectDialogProps, IProjectDialogState> {
@@ -36,11 +36,9 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
     this.state = {
       isNew: !this.props.match.params || !this.props.match.params.id,
       idsProjectMembers: [],
-      idCustomer: 0,
+      customerId: 0,
       showModal: true
     };
-    this.updateProjectMembers = this.updateProjectMembers.bind(this);
-    this.updateCustomer = this.updateCustomer.bind(this);
   }
 
   componentDidMount() {
@@ -63,7 +61,7 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
     this.props.history.push('/project');
   }
 
-  updateProjectMembers(element) {
+  projectMembersUpdate = element => {
     const email = element.target.value;
     const list = [];
     for (const i in element.target.selectedOptions) {
@@ -81,12 +79,12 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
     });
   }
 
-  updateCustomer(element) {
+  customerUpdate = element => {
     const name = element.target.value;
     for (const i in this.props.customers) {
         if (name.toString() === this.props.customers[i].name.toString()) {
             this.setState({
-                idCustomer: this.props.customers[i].id
+                customerId: this.props.customers[i].id
             });
         }
     }
@@ -135,7 +133,7 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
               : null
             }
             <AvGroup>
-              <Label for="name">
+              <Label id="nameLabel" for="name">
                 <Translate contentKey="worktajmApp.project.name">
                   name
                 </Translate>
@@ -143,9 +141,12 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
               <AvInput type="text" className="form-control" name="name" required />
               <AvFeedback>This field is required.</AvFeedback>
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
+            <UncontrolledTooltip target="nameLabel">
+              <Translate contentKey="worktajmApp.project.help.name"/>
+            </UncontrolledTooltip>
             </AvGroup>
             <AvGroup>
-              <Label for="description">
+              <Label id="descriptionLabel" for="description">
                 <Translate contentKey="worktajmApp.project.description">
                   description
                 </Translate>
@@ -153,9 +154,12 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
               <AvInput type="text" className="form-control" name="description" required />
               <AvFeedback>This field is required.</AvFeedback>
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
+            <UncontrolledTooltip target="descriptionLabel">
+              <Translate contentKey="worktajmApp.project.help.description"/>
+            </UncontrolledTooltip>
             </AvGroup>
             <AvGroup>
-              <Label for="hourlyRate">
+              <Label id="hourlyRateLabel" for="hourlyRate">
                 <Translate contentKey="worktajmApp.project.hourlyRate">
                   hourlyRate
                 </Translate>
@@ -163,6 +167,9 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
               <AvInput type="text" className="form-control" name="hourlyRate" required />
               <AvFeedback>This field is required.</AvFeedback>
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
+            <UncontrolledTooltip target="hourlyRateLabel">
+              <Translate contentKey="worktajmApp.project.help.hourlyRate"/>
+            </UncontrolledTooltip>
             </AvGroup>
             <AvGroup>
               <Label for="users"><Translate contentKey="worktajmApp.project.projectMembers">ProjectMembers</Translate></Label>
@@ -171,7 +178,7 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
                 className="form-control"
                 name="fakeusers"
                 value={this.displayProjectMembers(project)}
-                onChange={this.updateProjectMembers}>
+                onChange={this.projectMembersUpdate}>
                 <option value="" key="0" />
                 {
                   (users) ? (users.map(otherEntity =>
@@ -192,7 +199,20 @@ export class ProjectDialog extends React.Component<IProjectDialogProps, IProject
               <Label for="customer.name">
                 <Translate contentKey="worktajmApp.project.customer">Customer</Translate>
               </Label>
-                  TODO 3
+                  <AvInput type="select"
+                    className="form-control"
+                    name="customerId"
+                    onChange={this.customerUpdate}>
+                    {
+                      customers.map(otherEntity =>
+                        <option
+                          value={otherEntity.id}
+                          key={otherEntity.id}>
+                          {otherEntity.name}
+                        </option>
+                      )
+                    }
+                  </AvInput>
             </AvGroup>
           </ModalBody>
           <ModalFooter>

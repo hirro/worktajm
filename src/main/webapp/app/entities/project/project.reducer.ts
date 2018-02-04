@@ -8,6 +8,7 @@ import { messages, SERVER_API_URL } from '../../config/constants';
 
 export const ACTION_TYPES = {
   FETCH_PROJECTS: 'project/FETCH_PROJECTS',
+  SEARCH_PROJECTS: 'project/SEARCH_PROJECTS',
   FETCH_users: 'users/FETCH_users',
   FETCH_customers: 'customers/FETCH_customers',
   FETCH_PROJECT:  'project/FETCH_PROJECT',
@@ -33,6 +34,7 @@ export default (state = initialState, action) => {
     case REQUEST(ACTION_TYPES.FETCH_users):
     case REQUEST(ACTION_TYPES.FETCH_customers):
     case REQUEST(ACTION_TYPES.FETCH_PROJECTS):
+    case REQUEST(ACTION_TYPES.SEARCH_PROJECTS):
     case REQUEST(ACTION_TYPES.FETCH_PROJECT):
       return {
         ...state,
@@ -52,6 +54,7 @@ export default (state = initialState, action) => {
     case FAILURE(ACTION_TYPES.FETCH_users):
     case FAILURE(ACTION_TYPES.FETCH_customers):
     case FAILURE(ACTION_TYPES.FETCH_PROJECTS):
+    case FAILURE(ACTION_TYPES.SEARCH_PROJECTS):
     case FAILURE(ACTION_TYPES.FETCH_PROJECT):
     case FAILURE(ACTION_TYPES.CREATE_PROJECT):
     case FAILURE(ACTION_TYPES.UPDATE_PROJECT):
@@ -81,6 +84,12 @@ export default (state = initialState, action) => {
         loading: false,
         entities: action.payload.data
       };
+    case SUCCESS(ACTION_TYPES.SEARCH_PROJECTS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
+    };
     case SUCCESS(ACTION_TYPES.FETCH_PROJECT):
       return {
         ...state,
@@ -108,6 +117,7 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/projects';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/projects';
 
 // Actions
 
@@ -124,6 +134,11 @@ export const getcustomers: ICrudGetAction = () => ({
 export const getEntities: ICrudGetAction = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_PROJECTS,
   payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
+});
+
+export const getSearchEntities: ICrudGetAction = query => ({
+  type: ACTION_TYPES.SEARCH_PROJECTS,
+  payload: axios.get(`${apiSearchUrl}?query=` + query)
 });
 
 export const getEntity: ICrudGetAction = id => {

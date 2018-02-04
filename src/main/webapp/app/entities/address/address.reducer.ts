@@ -8,6 +8,7 @@ import { messages, SERVER_API_URL } from '../../config/constants';
 
 export const ACTION_TYPES = {
   FETCH_ADDRESSES: 'address/FETCH_ADDRESSES',
+  SEARCH_ADDRESSES: 'address/SEARCH_ADDRESSES',
   FETCH_ADDRESS:  'address/FETCH_ADDRESS',
   CREATE_ADDRESS: 'address/CREATE_ADDRESS',
   UPDATE_ADDRESS: 'address/UPDATE_ADDRESS',
@@ -27,6 +28,7 @@ const initialState = {
 export default (state = initialState, action) => {
   switch (action.type) {
     case REQUEST(ACTION_TYPES.FETCH_ADDRESSES):
+    case REQUEST(ACTION_TYPES.SEARCH_ADDRESSES):
     case REQUEST(ACTION_TYPES.FETCH_ADDRESS):
       return {
         ...state,
@@ -44,6 +46,7 @@ export default (state = initialState, action) => {
         updating: true
       };
     case FAILURE(ACTION_TYPES.FETCH_ADDRESSES):
+    case FAILURE(ACTION_TYPES.SEARCH_ADDRESSES):
     case FAILURE(ACTION_TYPES.FETCH_ADDRESS):
     case FAILURE(ACTION_TYPES.CREATE_ADDRESS):
     case FAILURE(ACTION_TYPES.UPDATE_ADDRESS):
@@ -61,6 +64,12 @@ export default (state = initialState, action) => {
         loading: false,
         entities: action.payload.data
       };
+    case SUCCESS(ACTION_TYPES.SEARCH_ADDRESSES):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
+    };
     case SUCCESS(ACTION_TYPES.FETCH_ADDRESS):
       return {
         ...state,
@@ -88,12 +97,18 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/addresses';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/addresses';
 
 // Actions
 
 export const getEntities: ICrudGetAction = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_ADDRESSES,
   payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
+});
+
+export const getSearchEntities: ICrudGetAction = query => ({
+  type: ACTION_TYPES.SEARCH_ADDRESSES,
+  payload: axios.get(`${apiSearchUrl}?query=` + query)
 });
 
 export const getEntity: ICrudGetAction = id => {

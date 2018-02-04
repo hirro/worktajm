@@ -26,9 +26,9 @@ export interface ICustomerDialogProps {
 export interface ICustomerDialogState {
   showModal: boolean;
   isNew: boolean;
-  idAddress: number;
-  idProjects: number;
-  idDomain: number;
+  addressId: number;
+  projectsId: number;
+  domainId: number;
 }
 
 export class CustomerDialog extends React.Component<ICustomerDialogProps, ICustomerDialogState> {
@@ -37,12 +37,11 @@ export class CustomerDialog extends React.Component<ICustomerDialogProps, ICusto
     super(props);
     this.state = {
       isNew: !this.props.match.params || !this.props.match.params.id,
-      idAddress: 0,
-      idProjects: 0,
-      idDomain: 0,
+      addressId: 0,
+      projectsId: 0,
+      domainId: 0,
       showModal: true
     };
-    this.updateDomain = this.updateDomain.bind(this);
   }
 
   componentDidMount() {
@@ -65,12 +64,23 @@ export class CustomerDialog extends React.Component<ICustomerDialogProps, ICusto
     this.props.history.push('/customer');
   }
 
-  updateDomain(element) {
+  addressUpdate = element => {
+    const addressLine1 = element.target.value;
+    for (const i in this.props.addresses) {
+        if (addressLine1.toString() === this.props.addresses[i].addressLine1.toString()) {
+            this.setState({
+                addressId: this.props.addresses[i].id
+            });
+        }
+    }
+  }
+
+  domainUpdate = element => {
     const name = element.target.value;
     for (const i in this.props.domains) {
         if (name.toString() === this.props.domains[i].name.toString()) {
             this.setState({
-                idDomain: this.props.domains[i].id
+                domainId: this.props.domains[i].id
             });
         }
     }
@@ -97,7 +107,7 @@ export class CustomerDialog extends React.Component<ICustomerDialogProps, ICusto
               : null
             }
             <AvGroup>
-              <Label for="name">
+              <Label id="nameLabel" for="name">
                 <Translate contentKey="worktajmApp.customer.name">
                   name
                 </Translate>
@@ -106,14 +116,44 @@ export class CustomerDialog extends React.Component<ICustomerDialogProps, ICusto
               <AvFeedback>This field is required.</AvFeedback>
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
             </AvGroup>
-            <div className="form-group">
-                TODO 4
-            </div>
+            <AvGroup>
+              <Label for="address.addressLine1">
+                <Translate contentKey="worktajmApp.customer.address">Address</Translate>
+              </Label>
+                  <AvInput type="select"
+                    className="form-control"
+                    name="addressId"
+                    onChange={this.addressUpdate}>
+                    <option value="" key="0" />
+                    {
+                      addresses.map(otherEntity =>
+                        <option
+                          value={otherEntity.id}
+                          key={otherEntity.id}>
+                          {otherEntity.addressLine1}
+                        </option>
+                      )
+                    }
+                  </AvInput>
+            </AvGroup>
             <AvGroup>
               <Label for="domain.name">
                 <Translate contentKey="worktajmApp.customer.domain">Domain</Translate>
               </Label>
-                  TODO 3
+                  <AvInput type="select"
+                    className="form-control"
+                    name="domainId"
+                    onChange={this.domainUpdate}>
+                    {
+                      domains.map(otherEntity =>
+                        <option
+                          value={otherEntity.id}
+                          key={otherEntity.id}>
+                          {otherEntity.name}
+                        </option>
+                      )
+                    }
+                  </AvInput>
             </AvGroup>
           </ModalBody>
           <ModalFooter>

@@ -1,13 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Button } from 'reactstrap';
+import { Button, InputGroup } from 'reactstrap';
+import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
 // TODO import TextFormat only when fieldContainsDate
 // tslint:disable-next-line:no-unused-variable
-import { Translate, ICrudGetAction, TextFormat } from 'react-jhipster';
-import { FaPlus, FaEye, FaPencil, FaTrash } from 'react-icons/lib/fa';
+import { Translate, translate, ICrudGetAction, TextFormat } from 'react-jhipster';
+import { FaPlus, FaEye, FaPencil, FaTrash, FaSearch } from 'react-icons/lib/fa';
 
 import {
+  getSearchEntities,
   getEntities
 } from './address.reducer';
  // tslint:disable-next-line:no-unused-variable
@@ -15,19 +17,41 @@ import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from '../../config/constants';
 
 export interface IAddressProps {
   getEntities: ICrudGetAction;
+  getSearchEntities: ICrudGetAction;
   addresses: any[];
   match: any;
 }
 
-export class Address extends React.Component<IAddressProps, undefined> {
+export interface IAddressState {
+  search: string;
+}
 
+export class Address extends React.Component<IAddressProps, IAddressState> {
   constructor(props) {
     super(props);
+    this.state = {
+      search: ''
+    };
   }
 
   componentDidMount() {
     this.props.getEntities();
   }
+
+  search = () => {
+    if (this.state.search) {
+      this.props.getSearchEntities(this.state.search);
+    }
+  }
+
+  clear = () => {
+    this.props.getEntities();
+    this.setState({
+      search: ''
+    });
+  }
+
+  handleSearch = event => this.setState({ search: event.target.value });
 
   render() {
     const { addresses, match } = this.props;
@@ -39,6 +63,23 @@ export class Address extends React.Component<IAddressProps, undefined> {
             <FaPlus /> <Translate contentKey="worktajmApp.address.home.createLabel" />
           </Link>
         </h2>
+        <div className="row">
+          <div className="col-sm-12">
+            <AvForm onSubmit={this.search}>
+              <AvGroup>
+                <InputGroup>
+                  <AvInput type="text" name="search" value={this.state.search} onChange={this.handleSearch} placeholder={translate('worktajmApp.address.home.search')} />
+                  <Button className="input-group-addon">
+                    <FaSearch/>
+                  </Button>
+                  <Button type="reset" className="input-group-addon" onClick={this.clear}>
+                    <FaTrash/>
+                  </Button>
+                </InputGroup>
+              </AvGroup>
+            </AvForm>
+          </div>
+        </div>
         <div className="table-responsive">
           <table className="table table-striped">
             <thead>
@@ -120,6 +161,6 @@ const mapStateToProps = storeState => ({
   addresses: storeState.address.entities
 });
 
-const mapDispatchToProps = { getEntities };
+const mapDispatchToProps = { getSearchEntities, getEntities };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Address);

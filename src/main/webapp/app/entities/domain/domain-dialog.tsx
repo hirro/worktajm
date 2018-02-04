@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label, UncontrolledTooltip } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
 import { Translate, ICrudGetAction, ICrudPutAction } from 'react-jhipster';
 import { FaBan, FaFloppyO } from 'react-icons/lib/fa';
@@ -26,8 +26,8 @@ export interface IDomainDialogProps {
 export interface IDomainDialogState {
   showModal: boolean;
   isNew: boolean;
-  idAddress: number;
-  idCustomers: number;
+  addressId: number;
+  customersId: number;
   idsAuthorizedUsers: any[];
 }
 
@@ -37,12 +37,11 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
     super(props);
     this.state = {
       isNew: !this.props.match.params || !this.props.match.params.id,
-      idAddress: 0,
-      idCustomers: 0,
+      addressId: 0,
+      customersId: 0,
       idsAuthorizedUsers: [],
       showModal: true
     };
-    this.updateAuthorizedUsers = this.updateAuthorizedUsers.bind(this);
   }
 
   componentDidMount() {
@@ -65,7 +64,18 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
     this.props.history.push('/domain');
   }
 
-  updateAuthorizedUsers(element) {
+  addressUpdate = element => {
+    const addressLine1 = element.target.value;
+    for (const i in this.props.addresses) {
+        if (addressLine1.toString() === this.props.addresses[i].addressLine1.toString()) {
+            this.setState({
+                addressId: this.props.addresses[i].id
+            });
+        }
+    }
+  }
+
+  authorizedUsersUpdate = element => {
     const email = element.target.value;
     const list = [];
     for (const i in element.target.selectedOptions) {
@@ -126,7 +136,7 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
               : null
             }
             <AvGroup>
-              <Label for="name">
+              <Label id="nameLabel" for="name">
                 <Translate contentKey="worktajmApp.domain.name">
                   name
                 </Translate>
@@ -134,10 +144,30 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
               <AvInput type="text" className="form-control" name="name" required />
               <AvFeedback>This field is required.</AvFeedback>
               <AvFeedback>This field cannot be longer than 50 characters.</AvFeedback>
+            <UncontrolledTooltip target="nameLabel">
+              <Translate contentKey="worktajmApp.domain.help.name"/>
+            </UncontrolledTooltip>
             </AvGroup>
-            <div className="form-group">
-                TODO 4
-            </div>
+            <AvGroup>
+              <Label for="address.addressLine1">
+                <Translate contentKey="worktajmApp.domain.address">Address</Translate>
+              </Label>
+                  <AvInput type="select"
+                    className="form-control"
+                    name="addressId"
+                    onChange={this.addressUpdate}>
+                    <option value="" key="0" />
+                    {
+                      addresses.map(otherEntity =>
+                        <option
+                          value={otherEntity.id}
+                          key={otherEntity.id}>
+                          {otherEntity.addressLine1}
+                        </option>
+                      )
+                    }
+                  </AvInput>
+            </AvGroup>
             <AvGroup>
               <Label for="users"><Translate contentKey="worktajmApp.domain.authorizedUsers">AuthorizedUsers</Translate></Label>
               <AvInput type="select"
@@ -145,7 +175,7 @@ export class DomainDialog extends React.Component<IDomainDialogProps, IDomainDia
                 className="form-control"
                 name="fakeusers"
                 value={this.displayAuthorizedUsers(domain)}
-                onChange={this.updateAuthorizedUsers}>
+                onChange={this.authorizedUsersUpdate}>
                 <option value="" key="0" />
                 {
                   (users) ? (users.map(otherEntity =>
