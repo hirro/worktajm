@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <!--
+        Added the constraints for entity Domain.
+    -->
+    <changeSet id="20180103113356-2" author="jhipster">
+        
+        <addForeignKeyConstraint baseColumnNames="address_id"
+                                 baseTableName="domain"
+                                 constraintName="fk_domain_address_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="address"/>
+
+        <addForeignKeyConstraint baseColumnNames="domains_id"
+                                 baseTableName="domain_authorized_users"
+                                 constraintName="fk_domain_authorized_users_domains_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="domain"/>
+        <addForeignKeyConstraint baseColumnNames="authorized_users_id"
+                                 baseTableName="domain_authorized_users"
+                                 constraintName="fk_domain_authorized_users_authorized_users_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
+        
+    </changeSet>
+</databaseChangeLog>

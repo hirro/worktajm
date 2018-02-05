@@ -1,0 +1,48 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-one",
+            "relationshipValidateRules": "required",
+            "javadoc": "1 -> 1 (unidirectional)\nDomain has an address (required).",
+            "relationshipName": "address",
+            "otherEntityName": "address",
+            "otherEntityField": "addressLine1",
+            "ownerSide": true,
+            "otherEntityRelationshipName": "domain"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "javadoc": "1 -> m (bidirectional)\nDomain has zero or more customers.\nCustomer belongs to one domain (required).",
+            "relationshipName": "customers",
+            "otherEntityName": "customer",
+            "otherEntityRelationshipName": "domain"
+        },
+        {
+            "relationshipType": "many-to-many",
+            "javadoc": "m -> m (unidirectional many-to-many)\nOne user can be registered at many domains.\nNatural order would be User<->Domain but can't extend User.",
+            "otherEntityRelationshipName": "",
+            "relationshipName": "authorizedUsers",
+            "otherEntityName": "user",
+            "otherEntityField": "email",
+            "ownerSide": true
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "name",
+            "javadoc": "Name of the domain (required)",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        }
+    ],
+    "changelogDate": "20180103113356",
+    "javadoc": "In many cases an organization is only one user.",
+    "entityTableName": "domain",
+    "dto": "mapstruct",
+    "pagination": "pagination",
+    "service": "no",
+    "jpaMetamodelFiltering": false
+}
