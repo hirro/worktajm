@@ -1,6 +1,7 @@
 import { Injectable, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { HttpResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { TimeEntry } from './time-entry.model';
 import { TimeEntryService } from './time-entry.service';
@@ -27,14 +28,16 @@ export class TimeEntryPopupService {
             }
 
             if (id) {
-                this.timeEntryService.find(id).subscribe((timeEntry) => {
-                    timeEntry.start = this.datePipe
-                        .transform(timeEntry.start, 'yyyy-MM-ddTHH:mm:ss');
-                    timeEntry.end = this.datePipe
-                        .transform(timeEntry.end, 'yyyy-MM-ddTHH:mm:ss');
-                    this.ngbModalRef = this.timeEntryModalRef(component, timeEntry);
-                    resolve(this.ngbModalRef);
-                });
+                this.timeEntryService.find(id)
+                    .subscribe((timeEntryResponse: HttpResponse<TimeEntry>) => {
+                        const timeEntry: TimeEntry = timeEntryResponse.body;
+                        timeEntry.start = this.datePipe
+                            .transform(timeEntry.start, 'yyyy-MM-ddTHH:mm:ss');
+                        timeEntry.end = this.datePipe
+                            .transform(timeEntry.end, 'yyyy-MM-ddTHH:mm:ss');
+                        this.ngbModalRef = this.timeEntryModalRef(component, timeEntry);
+                        resolve(this.ngbModalRef);
+                    });
             } else {
                 // setTimeout used as a workaround for getting ExpressionChangedAfterItHasBeenCheckedError
                 setTimeout(() => {

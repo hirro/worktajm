@@ -4,15 +4,15 @@
     <hr>
     <jhi-alert-error></jhi-alert-error>
     <dl class="row-md jh-entity-details">
-        <dt><span jhiTranslate="worktajmApp.project.name">Name</span></dt>
+        <dt><span jhiTranslate="worktajmApp.project.name" [ngbTooltip]="'worktajmApp.project.help.name' | translate">Name</span></dt>
         <dd>
             <span>{{project.name}}</span>
         </dd>
-        <dt><span jhiTranslate="worktajmApp.project.description">Description</span></dt>
+        <dt><span jhiTranslate="worktajmApp.project.description" [ngbTooltip]="'worktajmApp.project.help.description' | translate">Description</span></dt>
         <dd>
             <span>{{project.description}}</span>
         </dd>
-        <dt><span jhiTranslate="worktajmApp.project.hourlyRate">Hourly Rate</span></dt>
+        <dt><span jhiTranslate="worktajmApp.project.hourlyRate" [ngbTooltip]="'worktajmApp.project.help.hourlyRate' | translate">Hourly Rate</span></dt>
         <dd>
             <span>{{project.hourlyRate}}</span>
         </dd>

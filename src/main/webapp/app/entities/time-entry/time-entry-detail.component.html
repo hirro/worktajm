@@ -4,15 +4,15 @@
     <hr>
     <jhi-alert-error></jhi-alert-error>
     <dl class="row-md jh-entity-details">
-        <dt><span jhiTranslate="worktajmApp.timeEntry.start">Start</span></dt>
+        <dt><span jhiTranslate="worktajmApp.timeEntry.start" [ngbTooltip]="'worktajmApp.timeEntry.help.start' | translate">Start</span></dt>
         <dd>
             <span>{{timeEntry.start | date:'medium'}}</span>
         </dd>
-        <dt><span jhiTranslate="worktajmApp.timeEntry.end">End</span></dt>
+        <dt><span jhiTranslate="worktajmApp.timeEntry.end" [ngbTooltip]="'worktajmApp.timeEntry.help.end' | translate">End</span></dt>
         <dd>
             <span>{{timeEntry.end | date:'medium'}}</span>
         </dd>
-        <dt><span jhiTranslate="worktajmApp.timeEntry.comment">Comment</span></dt>
+        <dt><span jhiTranslate="worktajmApp.timeEntry.comment" [ngbTooltip]="'worktajmApp.timeEntry.help.comment' | translate">Comment</span></dt>
         <dd>
             <span>{{timeEntry.comment}}</span>
         </dd>

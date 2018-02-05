@@ -1,3 +1,4 @@
+
 {
     "worktajmApp": {
         "domain" : {
@@ -19,7 +20,10 @@
             "name": "Name",
             "address": "Address",
             "customers": "Customers",
-            "authorizedUsers": "Authorized Users"
+            "authorizedUsers": "Authorized Users",
+            "help": {
+                "name": "Name of the domain (required)"
+            }
         }
     }
 }

@@ -13,7 +13,7 @@
                    [(ngModel)]="timeEntry.id" readonly />
         </div>
         <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.timeEntry.start" for="field_start">Start</label>
+            <label class="form-control-label" jhiTranslate="worktajmApp.timeEntry.start" for="field_start" [ngbTooltip]="'worktajmApp.timeEntry.help.start' | translate">Start</label>
             <div class="d-flex">
                 <input id="field_start" type="datetime-local" class="form-control" name="start" [(ngModel)]="timeEntry.start"
                 required/>
@@ -30,14 +30,14 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.timeEntry.end" for="field_end">End</label>
+            <label class="form-control-label" jhiTranslate="worktajmApp.timeEntry.end" for="field_end" [ngbTooltip]="'worktajmApp.timeEntry.help.end' | translate">End</label>
             <div class="d-flex">
                 <input id="field_end" type="datetime-local" class="form-control" name="end" [(ngModel)]="timeEntry.end"
                 />
             </div>
         </div>
         <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.timeEntry.comment" for="field_comment">Comment</label>
+            <label class="form-control-label" jhiTranslate="worktajmApp.timeEntry.comment" for="field_comment" [ngbTooltip]="'worktajmApp.timeEntry.help.comment' | translate">Comment</label>
             <input type="text" class="form-control" name="comment" id="field_comment"
                 [(ngModel)]="timeEntry.comment" />
         </div>
