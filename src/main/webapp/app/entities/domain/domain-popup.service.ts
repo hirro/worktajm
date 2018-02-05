@@ -1,6 +1,7 @@
 import { Injectable, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { HttpResponse } from '@angular/common/http';
 import { Domain } from './domain.model';
 import { DomainService } from './domain.service';
 
@@ -25,10 +26,12 @@ export class DomainPopupService {
             }
 
             if (id) {
-                this.domainService.find(id).subscribe((domain) => {
-                    this.ngbModalRef = this.domainModalRef(component, domain);
-                    resolve(this.ngbModalRef);
-                });
+                this.domainService.find(id)
+                    .subscribe((domainResponse: HttpResponse<Domain>) => {
+                        const domain: Domain = domainResponse.body;
+                        this.ngbModalRef = this.domainModalRef(component, domain);
+                        resolve(this.ngbModalRef);
+                    });
             } else {
                 // setTimeout used as a workaround for getting ExpressionChangedAfterItHasBeenCheckedError
                 setTimeout(() => {

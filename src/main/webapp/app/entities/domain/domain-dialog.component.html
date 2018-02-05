@@ -13,7 +13,7 @@
                    [(ngModel)]="domain.id" readonly />
         </div>
         <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.domain.name" for="field_name">Name</label>
+            <label class="form-control-label" jhiTranslate="worktajmApp.domain.name" for="field_name" [ngbTooltip]="'worktajmApp.domain.help.name' | translate">Name</label>
             <input type="text" class="form-control" name="name" id="field_name"
                 [(ngModel)]="domain.name" required/>
             <div [hidden]="!(editForm.controls.name?.dirty && editForm.controls.name?.invalid)">

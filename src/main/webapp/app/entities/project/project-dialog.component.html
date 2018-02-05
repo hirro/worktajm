@@ -13,7 +13,7 @@
                    [(ngModel)]="project.id" readonly />
         </div>
         <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.project.name" for="field_name">Name</label>
+            <label class="form-control-label" jhiTranslate="worktajmApp.project.name" for="field_name" [ngbTooltip]="'worktajmApp.project.help.name' | translate">Name</label>
             <input type="text" class="form-control" name="name" id="field_name"
                 [(ngModel)]="project.name" required/>
             <div [hidden]="!(editForm.controls.name?.dirty && editForm.controls.name?.invalid)">
@@ -24,12 +24,12 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.project.description" for="field_description">Description</label>
+            <label class="form-control-label" jhiTranslate="worktajmApp.project.description" for="field_description" [ngbTooltip]="'worktajmApp.project.help.description' | translate">Description</label>
             <input type="text" class="form-control" name="description" id="field_description"
                 [(ngModel)]="project.description" />
         </div>
         <div class="form-group">
-            <label class="form-control-label" jhiTranslate="worktajmApp.project.hourlyRate" for="field_hourlyRate">Hourly Rate</label>
+            <label class="form-control-label" jhiTranslate="worktajmApp.project.hourlyRate" for="field_hourlyRate" [ngbTooltip]="'worktajmApp.project.help.hourlyRate' | translate">Hourly Rate</label>
             <input type="number" class="form-control" name="hourlyRate" id="field_hourlyRate"
                 [(ngModel)]="project.hourlyRate" />
         </div>

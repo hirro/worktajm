@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Response } from '@angular/http';
+import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -11,7 +11,6 @@ import { UserExtraPopupService } from './user-extra-popup.service';
 import { UserExtraService } from './user-extra.service';
 import { User, UserService } from '../../shared';
 import { TimeEntry, TimeEntryService } from '../time-entry';
-import { ResponseWrapper } from '../../shared';
 
 @Component({
     selector: 'jhi-user-extra-dialog',
@@ -39,20 +38,20 @@ export class UserExtraDialogComponent implements OnInit {
     ngOnInit() {
         this.isSaving = false;
         this.userService.query()
-            .subscribe((res: ResponseWrapper) => { this.users = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
+            .subscribe((res: HttpResponse<User[]>) => { this.users = res.body; }, (res: HttpErrorResponse) => this.onError(res.message));
         this.timeEntryService
             .query({filter: 'userextra-is-null'})
-            .subscribe((res: ResponseWrapper) => {
+            .subscribe((res: HttpResponse<TimeEntry[]>) => {
                 if (!this.userExtra.activeTimeEntryId) {
-                    this.activetimeentries = res.json;
+                    this.activetimeentries = res.body;
                 } else {
                     this.timeEntryService
                         .find(this.userExtra.activeTimeEntryId)
-                        .subscribe((subRes: TimeEntry) => {
-                            this.activetimeentries = [subRes].concat(res.json);
-                        }, (subRes: ResponseWrapper) => this.onError(subRes.json));
+                        .subscribe((subRes: HttpResponse<TimeEntry>) => {
+                            this.activetimeentries = [subRes.body].concat(res.body);
+                        }, (subRes: HttpErrorResponse) => this.onError(subRes.message));
                 }
-            }, (res: ResponseWrapper) => this.onError(res.json));
+            }, (res: HttpErrorResponse) => this.onError(res.message));
     }
 
     clear() {
@@ -70,9 +69,9 @@ export class UserExtraDialogComponent implements OnInit {
         }
     }
 
-    private subscribeToSaveResponse(result: Observable<UserExtra>) {
-        result.subscribe((res: UserExtra) =>
-            this.onSaveSuccess(res), (res: Response) => this.onSaveError());
+    private subscribeToSaveResponse(result: Observable<HttpResponse<UserExtra>>) {
+        result.subscribe((res: HttpResponse<UserExtra>) =>
+            this.onSaveSuccess(res.body), (res: HttpErrorResponse) => this.onSaveError());
     }
 
     private onSaveSuccess(result: UserExtra) {

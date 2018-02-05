@@ -1,3 +1,4 @@
+
 {
     "worktajmApp": {
         "timeEntry" : {
@@ -20,7 +21,12 @@
             "end": "End",
             "comment": "Comment",
             "project": "Project",
-            "user": "User"
+            "user": "User",
+            "help": {
+                "start": "Start time for the time entry (required)",
+                "end": "End time for the time entry (optional for running tasks)",
+                "comment": "Optional comment"
+            }
         }
     }
 }

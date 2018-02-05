@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { HttpResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs/Subscription';
 import { JhiEventManager } from 'ng-jhipster';
 
@@ -31,9 +32,10 @@ export class UserExtraDetailComponent implements OnInit, OnDestroy {
     }
 
     load(id) {
-        this.userExtraService.find(id).subscribe((userExtra) => {
-            this.userExtra = userExtra;
-        });
+        this.userExtraService.find(id)
+            .subscribe((userExtraResponse: HttpResponse<UserExtra>) => {
+                this.userExtra = userExtraResponse.body;
+            });
     }
     previousState() {
         window.history.back();

@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { JhiTrackerService } from './../shared/tracker/tracker.service';
 
 import { WorktajmSharedModule } from '../shared';
+import { WorktajmElasticsearchReindexModule } from './elasticsearch-reindex/elasticsearch-reindex.module';
 /* jhipster-needle-add-admin-module-import - JHipster will add admin modules imports here */
 
 import {
@@ -36,6 +37,7 @@ import {
     imports: [
         WorktajmSharedModule,
         RouterModule.forChild(adminState),
+        WorktajmElasticsearchReindexModule,
         /* jhipster-needle-add-admin-module - JHipster will add admin modules here */
     ],
     declarations: [

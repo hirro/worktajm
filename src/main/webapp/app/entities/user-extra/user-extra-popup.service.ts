@@ -1,6 +1,7 @@
 import { Injectable, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { HttpResponse } from '@angular/common/http';
 import { UserExtra } from './user-extra.model';
 import { UserExtraService } from './user-extra.service';
 
@@ -25,10 +26,12 @@ export class UserExtraPopupService {
             }
 
             if (id) {
-                this.userExtraService.find(id).subscribe((userExtra) => {
-                    this.ngbModalRef = this.userExtraModalRef(component, userExtra);
-                    resolve(this.ngbModalRef);
-                });
+                this.userExtraService.find(id)
+                    .subscribe((userExtraResponse: HttpResponse<UserExtra>) => {
+                        const userExtra: UserExtra = userExtraResponse.body;
+                        this.ngbModalRef = this.userExtraModalRef(component, userExtra);
+                        resolve(this.ngbModalRef);
+                    });
             } else {
                 // setTimeout used as a workaround for getting ExpressionChangedAfterItHasBeenCheckedError
                 setTimeout(() => {

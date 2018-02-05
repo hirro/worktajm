@@ -1,3 +1,4 @@
+
 {
     "worktajmApp": {
         "project" : {
@@ -20,7 +21,12 @@
             "description": "Description",
             "hourlyRate": "Hourly Rate",
             "projectMembers": "Project Members",
-            "customer": "Customer"
+            "customer": "Customer",
+            "help": {
+                "name": "Name of the project (required)",
+                "description": "Description of the project (optional)",
+                "hourlyRate": "Hourly rate of the project (optional)"
+            }
         }
     }
 }

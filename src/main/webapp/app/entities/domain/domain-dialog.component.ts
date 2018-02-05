@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Response } from '@angular/http';
+import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -11,7 +11,6 @@ import { DomainPopupService } from './domain-popup.service';
 import { DomainService } from './domain.service';
 import { Address, AddressService } from '../address';
 import { User, UserService } from '../../shared';
-import { ResponseWrapper } from '../../shared';
 
 @Component({
     selector: 'jhi-domain-dialog',
@@ -40,19 +39,19 @@ export class DomainDialogComponent implements OnInit {
         this.isSaving = false;
         this.addressService
             .query({filter: 'domain-is-null'})
-            .subscribe((res: ResponseWrapper) => {
+            .subscribe((res: HttpResponse<Address[]>) => {
                 if (!this.domain.addressId) {
-                    this.addresses = res.json;
+                    this.addresses = res.body;
                 } else {
                     this.addressService
                         .find(this.domain.addressId)
-                        .subscribe((subRes: Address) => {
-                            this.addresses = [subRes].concat(res.json);
-                        }, (subRes: ResponseWrapper) => this.onError(subRes.json));
+                        .subscribe((subRes: HttpResponse<Address>) => {
+                            this.addresses = [subRes.body].concat(res.body);
+                        }, (subRes: HttpErrorResponse) => this.onError(subRes.message));
                 }
-            }, (res: ResponseWrapper) => this.onError(res.json));
+            }, (res: HttpErrorResponse) => this.onError(res.message));
         this.userService.query()
-            .subscribe((res: ResponseWrapper) => { this.users = res.json; }, (res: ResponseWrapper) => this.onError(res.json));
+            .subscribe((res: HttpResponse<User[]>) => { this.users = res.body; }, (res: HttpErrorResponse) => this.onError(res.message));
     }
 
     clear() {
@@ -70,9 +69,9 @@ export class DomainDialogComponent implements OnInit {
         }
     }
 
-    private subscribeToSaveResponse(result: Observable<Domain>) {
-        result.subscribe((res: Domain) =>
-            this.onSaveSuccess(res), (res: Response) => this.onSaveError());
+    private subscribeToSaveResponse(result: Observable<HttpResponse<Domain>>) {
+        result.subscribe((res: HttpResponse<Domain>) =>
+            this.onSaveSuccess(res.body), (res: HttpErrorResponse) => this.onSaveError());
     }
 
     private onSaveSuccess(result: Domain) {

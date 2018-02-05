@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { SERVER_API_URL } from '../../app.constants';
 
 import { JhiDateUtils } from 'ng-jhipster';
 
 import { TimeEntry } from './time-entry.model';
-import { ResponseWrapper, createRequestOption } from '../../shared';
+import { createRequestOption } from '../../shared';
+
+export type EntityResponseType = HttpResponse<TimeEntry>;
 
 @Injectable()
 export class TimeEntryService {
@@ -14,66 +16,65 @@ export class TimeEntryService {
     private resourceUrl =  SERVER_API_URL + 'api/time-entries';
     private resourceSearchUrl = SERVER_API_URL + 'api/_search/time-entries';
 
-    constructor(private http: Http, private dateUtils: JhiDateUtils) { }
+    constructor(private http: HttpClient, private dateUtils: JhiDateUtils) { }
 
-    create(timeEntry: TimeEntry): Observable<TimeEntry> {
+    create(timeEntry: TimeEntry): Observable<EntityResponseType> {
         const copy = this.convert(timeEntry);
-        return this.http.post(this.resourceUrl, copy).map((res: Response) => {
-            const jsonResponse = res.json();
-            return this.convertItemFromServer(jsonResponse);
-        });
+        return this.http.post<TimeEntry>(this.resourceUrl, copy, { observe: 'response' })
+            .map((res: EntityResponseType) => this.convertResponse(res));
     }
 
-    update(timeEntry: TimeEntry): Observable<TimeEntry> {
+    update(timeEntry: TimeEntry): Observable<EntityResponseType> {
         const copy = this.convert(timeEntry);
-        return this.http.put(this.resourceUrl, copy).map((res: Response) => {
-            const jsonResponse = res.json();
-            return this.convertItemFromServer(jsonResponse);
-        });
+        return this.http.put<TimeEntry>(this.resourceUrl, copy, { observe: 'response' })
+            .map((res: EntityResponseType) => this.convertResponse(res));
     }
 
-    find(id: number): Observable<TimeEntry> {
-        return this.http.get(`${this.resourceUrl}/${id}`).map((res: Response) => {
-            const jsonResponse = res.json();
-            return this.convertItemFromServer(jsonResponse);
-        });
+    find(id: number): Observable<EntityResponseType> {
+        return this.http.get<TimeEntry>(`${this.resourceUrl}/${id}`, { observe: 'response'})
+            .map((res: EntityResponseType) => this.convertResponse(res));
     }
 
-    query(req?: any): Observable<ResponseWrapper> {
+    query(req?: any): Observable<HttpResponse<TimeEntry[]>> {
         const options = createRequestOption(req);
-        return this.http.get(this.resourceUrl, options)
-            .map((res: Response) => this.convertResponse(res));
+        return this.http.get<TimeEntry[]>(this.resourceUrl, { params: options, observe: 'response' })
+            .map((res: HttpResponse<TimeEntry[]>) => this.convertArrayResponse(res));
     }
 
-    delete(id: number): Observable<Response> {
-        return this.http.delete(`${this.resourceUrl}/${id}`);
+    delete(id: number): Observable<HttpResponse<any>> {
+        return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response'});
     }
 
-    search(req?: any): Observable<ResponseWrapper> {
+    search(req?: any): Observable<HttpResponse<TimeEntry[]>> {
         const options = createRequestOption(req);
-        return this.http.get(this.resourceSearchUrl, options)
-            .map((res: any) => this.convertResponse(res));
+        return this.http.get<TimeEntry[]>(this.resourceSearchUrl, { params: options, observe: 'response' })
+            .map((res: HttpResponse<TimeEntry[]>) => this.convertArrayResponse(res));
     }
 
-    private convertResponse(res: Response): ResponseWrapper {
-        const jsonResponse = res.json();
-        const result = [];
+    private convertResponse(res: EntityResponseType): EntityResponseType {
+        const body: TimeEntry = this.convertItemFromServer(res.body);
+        return res.clone({body});
+    }
+
+    private convertArrayResponse(res: HttpResponse<TimeEntry[]>): HttpResponse<TimeEntry[]> {
+        const jsonResponse: TimeEntry[] = res.body;
+        const body: TimeEntry[] = [];
         for (let i = 0; i < jsonResponse.length; i++) {
-            result.push(this.convertItemFromServer(jsonResponse[i]));
+            body.push(this.convertItemFromServer(jsonResponse[i]));
         }
-        return new ResponseWrapper(res.headers, result, res.status);
+        return res.clone({body});
     }
 
     /**
      * Convert a returned JSON object to TimeEntry.
      */
-    private convertItemFromServer(json: any): TimeEntry {
-        const entity: TimeEntry = Object.assign(new TimeEntry(), json);
-        entity.start = this.dateUtils
-            .convertDateTimeFromServer(json.start);
-        entity.end = this.dateUtils
-            .convertDateTimeFromServer(json.end);
-        return entity;
+    private convertItemFromServer(timeEntry: TimeEntry): TimeEntry {
+        const copy: TimeEntry = Object.assign({}, timeEntry);
+        copy.start = this.dateUtils
+            .convertDateTimeFromServer(timeEntry.start);
+        copy.end = this.dateUtils
+            .convertDateTimeFromServer(timeEntry.end);
+        return copy;
     }
 
     /**

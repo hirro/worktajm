@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { HttpResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs/Subscription';
 import { JhiEventManager } from 'ng-jhipster';
 
@@ -31,9 +32,10 @@ export class TimeEntryDetailComponent implements OnInit, OnDestroy {
     }
 
     load(id) {
-        this.timeEntryService.find(id).subscribe((timeEntry) => {
-            this.timeEntry = timeEntry;
-        });
+        this.timeEntryService.find(id)
+            .subscribe((timeEntryResponse: HttpResponse<TimeEntry>) => {
+                this.timeEntry = timeEntryResponse.body;
+            });
     }
     previousState() {
         window.history.back();
