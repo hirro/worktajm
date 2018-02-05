@@ -6,10 +6,11 @@ import { SERVER_API_URL } from '../../app.constants';
 import { JhiDateUtils } from 'ng-jhipster';
 
 import { TimeEntry } from './time-entry.model';
-import { ResponseWrapper, createRequestOption } from '../../shared';
+import { createRequestOption } from '../../shared';
 import moment = require('moment');
 
 export type EntityResponseType = HttpResponse<TimeEntry>;
+export type EntityResponseTypes = HttpResponse<TimeEntry[]>;
 
 @Injectable()
 export class TimeEntryService {
@@ -88,14 +89,17 @@ export class TimeEntryService {
         return copy;
     }
 
-    getAllBetweenDates(fromDate: Date, toDate?: Date): Observable<ResponseWrapper> {
+    getAllBetweenDates(fromDate: Date, toDate?: Date): Observable<EntityResponseTypes> {
+        const options = createRequestOption();
         if (!toDate) {
             toDate = moment(fromDate).add(1, 'd').toDate();
         }
         console.log(`Searching for time entries between: ${fromDate} and ${toDate}`);
         const from: number = moment(fromDate).unix();
         const to: number = moment(toDate).unix();
-        return this.http.get(`${this.resourceUrl}/searchBetweenDates?from=${from}&to=${to}`)
-            .map((res: Response) => this.convertResponse(res));
+        return this.http.get<TimeEntry[]>(
+            `${this.resourceUrl}/searchBetweenDates?from=${from}&to=${to}`,
+            { params: options, observe: 'response' })
+            .map((res: HttpResponse<TimeEntry[]>) => this.convertArrayResponse(res));
     }
 }

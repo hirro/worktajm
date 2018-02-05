@@ -34,7 +34,7 @@
     "tether": "1.4.0",
     "webstomp-client": "1.0.6",
     "tether": "1.4.0",
-    "zone.js": "0.8.19"
+    "zone.js": "0.8.19",
     "moment": "^2.20.1",
     "moment-duration-format": "^2.1.1"
   },

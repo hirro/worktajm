@@ -1,9 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {TimeEntry} from '../../../entities/time-entry';
-import {TimeEntryService} from '../../../entities/time-entry/time-entry.service';
 import moment = require('moment');
-import {ResponseWrapper} from '../../../shared';
-import {Duration} from 'moment';
 
 @Component({
     selector: 'jhi-time-entries',
@@ -47,7 +44,7 @@ export class TimeEntriesComponent implements OnInit {
             duration = moment.duration(now.diff(start));
         }
 
-        return moment.utc(duration.as('milliseconds')).format('HH:mm:ss')
+        return moment.utc(duration.as('milliseconds')).format('HH:mm:ss');
     }
 
     onChangedDate(date: Date) {
@@ -63,7 +60,7 @@ export class TimeEntriesComponent implements OnInit {
             const end = moment(t.end);
             duration.add(moment.duration(end.diff(start)));
         }
-        return moment.utc(duration.as('milliseconds')).format('HH:mm:ss')
+        return moment.utc(duration.as('milliseconds')).format('HH:mm:ss');
     }
 
 }

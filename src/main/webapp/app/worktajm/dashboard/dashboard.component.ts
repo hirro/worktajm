@@ -3,13 +3,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs/Rx';
 import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
 
-import {UserExtra} from '../../entities/worktajm/user-extra.model';
-import {TimeEntryService} from '../../entities/time-entry/time-entry.service';
-import {TimeEntry} from '../../entities/time-entry/time-entry.model';
+import {UserExtra} from '../../entities/worktajm';
+import {TimeEntryService} from '../../entities/time-entry';
+import {TimeEntry} from '../../entities/time-entry';
 import { Project, ProjectService } from '../../entities/project';
 import {WorktajmDashboardService} from './dashboard.service';
-import { ITEMS_PER_PAGE, Principal, ResponseWrapper } from '../../shared';
-import {collectDeepNodes} from '@ngtools/webpack/src/transformers';
+import { ITEMS_PER_PAGE, Principal } from '../../shared';
+import {HttpResponse} from '@angular/common/http';
 
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
@@ -69,14 +69,14 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
 
         this.projectService.query()
             .subscribe(
-                (res: ResponseWrapper) => this.onListAllMyProjectsSuccess(res.json, res.headers),
-                (res: ResponseWrapper) => this.onListAllMyProjectsError(res.json)
+                (res: HttpResponse<Project[]>) => this.onListAllMyProjectsSuccess(res.body),
+                (error: any) => this.onListAllMyProjectsError(error)
             );
 
         this.dashboardService.find()
             .subscribe(
                 (res: UserExtra) => this.onGetUserExtrasSuccess(res),
-                (res: ResponseWrapper) => this.onGetUserExtrasError(res.json)
+                (error: any) => this.onGetUserExtrasError(error)
             );
 
         this.selectedDateChanged(this.date);
@@ -192,7 +192,7 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
         }
     }
 
-    private onListAllMyProjectsSuccess(data, headers) {
+    private onListAllMyProjectsSuccess(data: Project[]) {
         this.projects = data;
     }
 
@@ -207,8 +207,8 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
             // Fetching
             this.timeEntryService.find(this.userExtra.activeTimeEntryId)
                 .subscribe(
-                    (res: TimeEntry) => this.onFindActiveTimeEntrySuccess(res, null),
-                    (res: ResponseWrapper) => this.onFindActiveTimeEntryError(res.json)
+                    (res: HttpResponse<TimeEntry>) => this.onFindActiveTimeEntrySuccess(res),
+                    (error: any) => this.onFindActiveTimeEntryError(error)
                 );
         } else {
             console.log('Has no active time entry!');
@@ -219,7 +219,7 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
         this.jhiAlertService.error(error.message, null, null);
     }
 
-    private onFindActiveTimeEntrySuccess(data, headers) {
+    private onFindActiveTimeEntrySuccess(data) {
         this.activeTimeEntry = data;
         if (this.activeTimeEntry.projectId) {
             for (const p of this.projects) {
@@ -232,7 +232,7 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
         this.jhiAlertService.error(error.message, null, null);
     }
 
-    private onLoadedTimeEntriesSuccess(data, headers) {
+    private onLoadedTimeEntriesSuccess(data: TimeEntry[], headers) {
         this.links = this.parseLinks.parse(headers.get('link'));
         this.totalItems = headers.get('X-Total-Count');
         this.queryCount = this.totalItems;
@@ -247,8 +247,8 @@ export class WorktajmDashboardComponent implements OnInit, OnDestroy {
     selectedDateChanged(date: Date) {
         console.log(`WorktajmDashboardComponent::selectedDateChanged: ${date}`);
         this.timeEntryService.getAllBetweenDates(date).subscribe(
-            (res: ResponseWrapper) => this.onLoadedTimeEntriesSuccess(res.json, res.headers),
-            (res: ResponseWrapper) => this.onLoadedTimeEntriesError(res.json)
+            (res: HttpResponse<TimeEntry[]>) => this.onLoadedTimeEntriesSuccess(res.body, res.headers),
+            (error: any) => this.onLoadedTimeEntriesError(error)
         );
     }
 }

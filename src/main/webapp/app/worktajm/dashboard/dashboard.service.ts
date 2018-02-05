@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Rx';
 import { SERVER_API_URL } from '../../app.constants';
 
-import { Project } from '../../entities/project/project.model';
-import { UserExtra } from '../../entities/worktajm/user-extra.model';
-import {TimeEntry} from '../../entities/time-entry/time-entry.model';
+import { Project } from '../../entities/project';
+import { UserExtra } from '../../entities/worktajm';
+import { TimeEntry } from '../../entities/time-entry';
 
 @Injectable()
 export class WorktajmDashboardService {
@@ -14,56 +14,51 @@ export class WorktajmDashboardService {
     private startProjectResourceUrl = SERVER_API_URL + 'api/worktajm/startProject';
     private stopProjectResourceUrl = SERVER_API_URL + 'api/worktajm/stopProject';
 
-    constructor(private http: Http) { }
+    private static convertUserExtraFromServer(json: any): UserExtra {
+        return Object.assign(new UserExtra(), json);
+    }
+
+    private static convertUserExtra(userExtra: UserExtra): UserExtra {
+        return Object.assign({}, userExtra);
+    }
+
+    private static convertProject(project: Project) {
+        return Object.assign({}, project);
+    }
+
+    private static convertTimeEntryFromServer(json: any) {
+        return Object.assign(new TimeEntry(), json);
+    }
+
+    constructor(private http: HttpClient) { }
 
     update(userExtra: UserExtra): Observable<UserExtra> {
-        const copy = this.convertUserExtra(userExtra);
-        return this.http.put(this.userExtraResourceUrl, copy).map((res: Response) => {
-            const jsonResponse = res.json();
-            return this.convertUserExtraFromServer(jsonResponse);
+        const copy = WorktajmDashboardService.convertUserExtra(userExtra);
+        return this.http.put<UserExtra>(this.userExtraResourceUrl, copy).map((res: UserExtra) => {
+            return WorktajmDashboardService.convertUserExtraFromServer(res);
         });
     }
 
     find(): Observable<UserExtra> {
-        return this.http.get(`${this.userExtraResourceUrl}`).map((res: Response) => {
-            const jsonResponse = res.json();
-            return this.convertUserExtraFromServer(jsonResponse);
+        return this.http.get<UserExtra>(`${this.userExtraResourceUrl}`).map((res: UserExtra) => {
+            return WorktajmDashboardService.convertUserExtraFromServer(res);
         });
     }
 
     stopProject(project: Project): Observable<TimeEntry> {
-        const copy = this.convertProject(project);
-        return this.http.post(`${this.stopProjectResourceUrl}/${project.id}`, copy).map((res: Response) => {
-            const jsonResponse = res.json();
-            return this.convertTimeEntryFromServer(jsonResponse);
-        });
+        const copy = WorktajmDashboardService.convertProject(project);
+        return this.http.post<TimeEntry>(`${this.stopProjectResourceUrl}/${project.id}`, copy)
+            .map((res: TimeEntry) => {
+                return WorktajmDashboardService.convertTimeEntryFromServer(res);
+            });
     }
 
     startProject(project: Project): Observable<TimeEntry> {
-        const copy = this.convertProject(project);
-        return this.http.post(`${this.startProjectResourceUrl}/${project.id}`, copy).map((res: Response) => {
-            const jsonResponse = res.json();
-            return this.convertTimeEntryFromServer(jsonResponse);
-        });
+        const copy = WorktajmDashboardService.convertProject(project);
+        return this.http.post<TimeEntry>(`${this.startProjectResourceUrl}/${project.id}`, copy)
+            .map((res: TimeEntry) => {
+                return WorktajmDashboardService.convertTimeEntryFromServer(res);
+            });
     }
 
-    private convertUserExtraFromServer(json: any): UserExtra {
-        const entity: UserExtra = Object.assign(new UserExtra(), json);
-        return entity;
-    }
-
-    private convertUserExtra(userExtra: UserExtra): UserExtra {
-        const copy: UserExtra = Object.assign({}, userExtra);
-        return copy;
-    }
-
-    private convertProject(project: Project) {
-        const copy: Project = Object.assign({}, project);
-        return copy;
-    }
-
-    private convertTimeEntryFromServer(json: any) {
-        const entity: TimeEntry = Object.assign(new TimeEntry(), json);
-        return entity;
-    }
 }
