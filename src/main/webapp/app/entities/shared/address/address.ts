@@ -1,8 +1,5 @@
-import { BaseEntity } from './../../shared';
-
-export class Address implements BaseEntity {
+export class Address {
     constructor(
-        public id?: number,
         public organizationNumber?: string,
         public addressLine1?: string,
         public addressLine2?: string,

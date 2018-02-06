@@ -92,7 +92,7 @@ public class CustomerResourceIntTest {
         Customer customer = new Customer()
             .name(DEFAULT_NAME);
         // Add required entity
-        Address address = AddressResourceIntTest.createEntity(em);
+        Address address = TestUtil.createAddressEntity();
         em.persist(address);
         em.flush();
         customer.setAddress(address);

@@ -9,7 +9,6 @@ import { WorktajmTestModule } from '../../../test.module';
 import { CustomerDialogComponent } from '../../../../../../main/webapp/app/entities/customer/customer-dialog.component';
 import { CustomerService } from '../../../../../../main/webapp/app/entities/customer/customer.service';
 import { Customer } from '../../../../../../main/webapp/app/entities/customer/customer.model';
-import { AddressService } from '../../../../../../main/webapp/app/entities/address';
 import { DomainService } from '../../../../../../main/webapp/app/entities/domain';
 
 describe('Component Tests', () => {
@@ -26,7 +25,6 @@ describe('Component Tests', () => {
                 imports: [WorktajmTestModule],
                 declarations: [CustomerDialogComponent],
                 providers: [
-                    AddressService,
                     DomainService,
                     CustomerService
                 ]

@@ -25,12 +25,9 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="address_id" type="bigint">
-                <constraints unique="true" nullable="false" />
-            </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
-        
+
         <createTable tableName="domain_authorized_users">
             <column name="authorized_users_id" type="bigint">
                 <constraints nullable="false"/>
@@ -41,7 +38,7 @@
         </createTable>
 
         <addPrimaryKey columnNames="domains_id, authorized_users_id" tableName="domain_authorized_users"/>
-        
+
     </changeSet>
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here, do not remove-->
 </databaseChangeLog>

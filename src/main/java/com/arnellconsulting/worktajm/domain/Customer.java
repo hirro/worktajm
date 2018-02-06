@@ -33,14 +33,7 @@ public class Customer implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
-    /**
-     * 1 -> 1 (unidirectional)
-     * Domain has one billing address.
-     */
-    @ApiModelProperty(value = "1 -> 1 (unidirectional) Domain has one billing address.")
-    @OneToOne(optional = false)
-    @NotNull
-    @JoinColumn(unique = true)
+    @Embedded
     private Address address;
 
     /**

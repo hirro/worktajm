@@ -3,22 +3,6 @@
 #padding: 10
 
 /**
- * Billing address for customer or domain.
- */
-entity Address {
-    /** Organizational number (optional) */
-    organizationNumber String,
-    addressLine1 String required,
-    addressLine2 String
-    addressLine3 String,
-    city String required,
-    zipOrPostcode String required,
-    stateProvinceCounty String,
-    country String required,
-    addressDetails String
-}
-
-/**
  * The project associated with a time entry.
  *
  * Each project belongs to either an user or an organization.
@@ -100,13 +84,6 @@ relationship ManyToMany {
      */
     Domain{authorizedUsers(email)} to User
 }
-relationship OneToOne {
-    /**
-     * 1 -> 1 (unidirectional)
-     * Domain has an address (required).
-     */
-    Domain{address(addressLine1) required} to Address
-}
 
 // Customer relationships
 relationship OneToMany {
@@ -116,13 +93,6 @@ relationship OneToMany {
      * Project belongs to one customer (required).
      */
     Customer{projects} to Project{customer(name) required}
-}
-relationship OneToOne {
-    /**
-     * 1 -> 1 (unidirectional)
-     * Domain has one billing address.
-     */
-    Customer{address(addressLine1) required} to Address
 }
 
 // Project relationships

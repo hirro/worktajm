@@ -40,14 +40,7 @@ public class Domain implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
-    /**
-     * 1 -> 1 (unidirectional)
-     * Domain has an address (required).
-     */
-    @ApiModelProperty(value = "1 -> 1 (unidirectional) Domain has an address (required).")
-    @OneToOne(optional = false)
-    @NotNull
-    @JoinColumn(unique = true)
+    @Embedded
     private Address address;
 
     /**

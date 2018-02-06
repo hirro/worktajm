@@ -106,7 +106,7 @@ public class DomainResourceIntTest {
     public static Domain createEntity(EntityManager em) {
         Domain domain = new Domain().name(DEFAULT_NAME);
         // Add required entity
-        Address address = AddressResourceIntTest.createEntity(em);
+        Address address = TestUtil.createAddressEntity();
         em.persist(address);
         em.flush();
         domain.setAddress(address);

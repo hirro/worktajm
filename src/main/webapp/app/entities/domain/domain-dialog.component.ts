@@ -9,8 +9,8 @@ import { JhiEventManager, JhiAlertService } from 'ng-jhipster';
 import { Domain } from './domain.model';
 import { DomainPopupService } from './domain-popup.service';
 import { DomainService } from './domain.service';
-import { Address, AddressService } from '../address';
 import { User, UserService } from '../../shared';
+import { Address } from '../shared/address/address';
 
 @Component({
     selector: 'jhi-domain-dialog',
@@ -29,7 +29,6 @@ export class DomainDialogComponent implements OnInit {
         public activeModal: NgbActiveModal,
         private jhiAlertService: JhiAlertService,
         private domainService: DomainService,
-        private addressService: AddressService,
         private userService: UserService,
         private eventManager: JhiEventManager
     ) {
@@ -37,19 +36,6 @@ export class DomainDialogComponent implements OnInit {
 
     ngOnInit() {
         this.isSaving = false;
-        this.addressService
-            .query({filter: 'domain-is-null'})
-            .subscribe((res: HttpResponse<Address[]>) => {
-                if (!this.domain.addressId) {
-                    this.addresses = res.body;
-                } else {
-                    this.addressService
-                        .find(this.domain.addressId)
-                        .subscribe((subRes: HttpResponse<Address>) => {
-                            this.addresses = [subRes.body].concat(res.body);
-                        }, (subRes: HttpErrorResponse) => this.onError(subRes.message));
-                }
-            }, (res: HttpErrorResponse) => this.onError(res.message));
         this.userService.query()
             .subscribe((res: HttpResponse<User[]>) => { this.users = res.body; }, (res: HttpErrorResponse) => this.onError(res.message));
     }
@@ -86,10 +72,6 @@ export class DomainDialogComponent implements OnInit {
 
     private onError(error: any) {
         this.jhiAlertService.error(error.message, null, null);
-    }
-
-    trackAddressById(index: number, item: Address) {
-        return item.id;
     }
 
     trackUserById(index: number, item: User) {
