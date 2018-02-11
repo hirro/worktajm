@@ -1,0 +1,14 @@
+Simple registration flow
+
+
+* General
+    * Email
+    * Password
+    * Domain/company name
+    * (optional) Address for billing info.
+*  Customers 
+    * Name
+    * (optional) Address for billing
+    * Projects
+    * -^ Repeat (optional)
+

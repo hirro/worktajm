@@ -8,6 +8,7 @@ import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.ProjectRepository;
 import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.ProjectSearchRepository;
+import com.arnellconsulting.worktajm.service.UserService;
 import com.arnellconsulting.worktajm.service.dto.ProjectDTO;
 import com.arnellconsulting.worktajm.service.mapper.ProjectMapper;
 import com.arnellconsulting.worktajm.web.rest.errors.ExceptionTranslator;
@@ -80,6 +81,9 @@ public class ProjectResourceIntTest {
     @Autowired
     private EntityManager em;
 
+    @Autowired
+    private UserService userService;
+
     private MockMvc restProjectMockMvc;
 
     private Project project;
@@ -91,7 +95,7 @@ public class ProjectResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final ProjectResource projectResource = new ProjectResource(projectRepository, userRepository, projectMapper, projectSearchRepository);
+        final ProjectResource projectResource = new ProjectResource(projectRepository, userRepository, projectMapper, projectSearchRepository, userService);
         this.restProjectMockMvc = MockMvcBuilders.standaloneSetup(projectResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)

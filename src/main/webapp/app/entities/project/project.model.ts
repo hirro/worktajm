@@ -1,7 +1,6 @@
 import { BaseEntity, User } from './../../shared';
 
 export class Project implements BaseEntity {
-    private active: boolean;
     constructor(
         public id?: number,
         public name?: string,
@@ -9,15 +8,8 @@ export class Project implements BaseEntity {
         public hourlyRate?: number,
         public projectMembers?: User[],
         public customerId?: number,
+        public active?: boolean,
     ) {
         this.active = false;
-    }
-
-    setActive(active: boolean) {
-        this.active = active;
-    }
-
-    isActive(): boolean {
-        return this.active;
     }
 }

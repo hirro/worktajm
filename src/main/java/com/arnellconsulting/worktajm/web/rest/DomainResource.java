@@ -1,18 +1,17 @@
 package com.arnellconsulting.worktajm.web.rest;
 
-import com.arnellconsulting.worktajm.domain.User;
-import com.arnellconsulting.worktajm.security.AuthoritiesConstants;
-import com.arnellconsulting.worktajm.service.UserService;
-import com.codahale.metrics.annotation.Timed;
 import com.arnellconsulting.worktajm.domain.Domain;
-
+import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.DomainRepository;
 import com.arnellconsulting.worktajm.repository.search.DomainSearchRepository;
+import com.arnellconsulting.worktajm.security.AuthoritiesConstants;
+import com.arnellconsulting.worktajm.service.UserService;
+import com.arnellconsulting.worktajm.service.dto.DomainDTO;
+import com.arnellconsulting.worktajm.service.mapper.DomainMapper;
 import com.arnellconsulting.worktajm.web.rest.errors.BadRequestAlertException;
 import com.arnellconsulting.worktajm.web.rest.util.HeaderUtil;
 import com.arnellconsulting.worktajm.web.rest.util.PaginationUtil;
-import com.arnellconsulting.worktajm.service.dto.DomainDTO;
-import com.arnellconsulting.worktajm.service.mapper.DomainMapper;
+import com.codahale.metrics.annotation.Timed;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +28,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * REST controller for managing Domain.
@@ -72,13 +69,22 @@ public class DomainResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/domains")
+    @Secured({AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER})
     @Timed
-    public ResponseEntity<DomainDTO> createDomain(@Valid @RequestBody DomainDTO domainDTO) throws URISyntaxException {
+    public ResponseEntity<DomainDTO> createDomain(@Valid @RequestBody DomainDTO domainDTO,
+                                                  Principal principal)
+        throws URISyntaxException
+    {
         log.debug("REST request to save Domain : {}", domainDTO);
         if (domainDTO.getId() != null) {
             throw new BadRequestAlertException("A new domain cannot already have an ID", ENTITY_NAME, "idexists");
         }
         Domain domain = domainMapper.toEntity(domainDTO);
+
+        // Add current user as authorized
+        User user = userService.getLoggedInUser();
+        domain.addAuthorizedUsers(user);
+
         domain = domainRepository.save(domain);
         DomainDTO result = domainMapper.toDto(domain);
         domainSearchRepository.save(domain);
@@ -98,7 +104,7 @@ public class DomainResource {
      */
     @PutMapping("/domains")
     @Timed
-    @Secured(AuthoritiesConstants.ADMIN)
+    @Secured({AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER})
     public ResponseEntity<DomainDTO> updateDomain(@Valid @RequestBody DomainDTO domainDTO) throws URISyntaxException {
         log.debug("REST request to update Domain : {}", domainDTO);
 
@@ -107,6 +113,11 @@ public class DomainResource {
 
         // Update
         Domain domain = domainMapper.toEntity(domainDTO);
+
+        // Add current user as authorized
+        User user = userService.getLoggedInUser();
+        domain.addAuthorizedUsers(user);
+
         domain = domainRepository.save(domain);
         DomainDTO result = domainMapper.toDto(domain);
         domainSearchRepository.save(domain);
@@ -208,4 +219,5 @@ public class DomainResource {
             throw new AccessDeniedException("User is not allowed to access domain");
         }
     }
+
 }

@@ -1,17 +1,16 @@
 package com.arnellconsulting.worktajm.service;
 
-import com.arnellconsulting.worktajm.config.CacheConfiguration;
+import com.arnellconsulting.worktajm.config.Constants;
 import com.arnellconsulting.worktajm.domain.Authority;
 import com.arnellconsulting.worktajm.domain.User;
+import com.arnellconsulting.worktajm.domain.UserExtra;
 import com.arnellconsulting.worktajm.repository.AuthorityRepository;
-import com.arnellconsulting.worktajm.config.Constants;
 import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.UserSearchRepository;
 import com.arnellconsulting.worktajm.security.AuthoritiesConstants;
 import com.arnellconsulting.worktajm.security.SecurityUtils;
-import com.arnellconsulting.worktajm.service.util.RandomUtil;
 import com.arnellconsulting.worktajm.service.dto.UserDTO;
-
+import com.arnellconsulting.worktajm.service.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -24,7 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -150,6 +152,10 @@ public class UserService {
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
         user.setActivated(true);
+
+        // Create user extra
+        UserExtra userExtra = new UserExtra();
+        userExtra.setUser(user);
         userRepository.save(user);
         userSearchRepository.save(user);
         cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).evict(user.getLogin());
@@ -279,6 +285,16 @@ public class UserService {
      */
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the currently logged in user.
+     *
+     * @return
+     */
+    public User getLoggedInUser() {
+        Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
+        return userRepository.findOneByLogin(userLogin.get()).get();
     }
 
 }
