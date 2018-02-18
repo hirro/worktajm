@@ -7,7 +7,7 @@ import { JhiDateUtils } from 'ng-jhipster';
 
 import { TimeEntry } from './time-entry.model';
 import { createRequestOption } from '../../shared';
-import moment = require('moment');
+import * as moment from 'moment';
 
 export type EntityResponseType = HttpResponse<TimeEntry>;
 export type EntityResponseTypes = HttpResponse<TimeEntry[]>;

@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {TimeEntry} from '../../../entities/time-entry';
-import moment = require('moment');
+import * as moment from 'moment';
 
 @Component({
     selector: 'jhi-time-entries',

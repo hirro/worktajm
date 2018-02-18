@@ -13,16 +13,24 @@ import com.arnellconsulting.worktajm.service.dto.DomainDTO;
 import com.arnellconsulting.worktajm.service.mapper.DomainMapper;
 import com.arnellconsulting.worktajm.web.rest.errors.ExceptionTranslator;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mapstruct.Context;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -46,6 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = WorktajmApp.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DomainResourceIntTest {
 
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
@@ -97,6 +106,10 @@ public class DomainResourceIntTest {
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
+    @After
+    public void cleanup() {
+    }
+
     /**
      * Create an entity for this test.
      *
@@ -107,14 +120,14 @@ public class DomainResourceIntTest {
         Domain domain = new Domain().name(DEFAULT_NAME);
         // Add required entity
         Address address = TestUtil.createAddressEntity();
-        em.persist(address);
-        em.flush();
         domain.setAddress(address);
         return domain;
     }
 
     @Before
     public void initTest() {
+        userRepository.deleteAll();
+        domainRepository.deleteAll();
         domainSearchRepository.deleteAll();
         domain = createEntity(em);
 
@@ -146,7 +159,8 @@ public class DomainResourceIntTest {
 
         // Validate the Domain in Elasticsearch
         Domain domainEs = domainSearchRepository.findOne(testDomain.getId());
-        assertThat(domainEs).isEqualToIgnoringGivenFields(testDomain);
+        assertThat(domainEs).isEqualToIgnoringGivenFields(testDomain, "address");
+        assertThat(domainEs.getAddress()).isEqualToIgnoringGivenFields(testDomain.getAddress());
     }
 
     @Test
@@ -276,7 +290,8 @@ public class DomainResourceIntTest {
 
         // Validate the Domain in Elasticsearch
         Domain domainEs = domainSearchRepository.findOne(testDomain.getId());
-        assertThat(domainEs).isEqualToIgnoringGivenFields(testDomain);
+        assertThat(domainEs).isEqualToIgnoringGivenFields(testDomain, "address");
+        assertThat(domainEs.getAddress()).isEqualToIgnoringGivenFields(testDomain.getAddress());
     }
 
     @Test
@@ -375,5 +390,18 @@ public class DomainResourceIntTest {
     public void testEntityFromId() {
         assertThat(domainMapper.fromId(42L).getId()).isEqualTo(42);
         assertThat(domainMapper.fromId(null)).isNull();
+    }
+
+    public void resetAll(ApplicationContext applicationContext) throws Exception {
+        for (String name : applicationContext.getBeanDefinitionNames()) {
+            Object bean = applicationContext.getBean(name);
+            if (AopUtils.isAopProxy(bean) && bean instanceof Advised) {
+                bean = ((Advised) bean).getTargetSource().getTarget();
+            }
+            if (Mockito.mockingDetails(bean).isMock()) {
+                Mockito.reset(bean);
+            }
+
+        }
     }
 }

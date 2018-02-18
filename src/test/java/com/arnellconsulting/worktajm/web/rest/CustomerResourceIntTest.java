@@ -93,8 +93,6 @@ public class CustomerResourceIntTest {
             .name(DEFAULT_NAME);
         // Add required entity
         Address address = TestUtil.createAddressEntity();
-        em.persist(address);
-        em.flush();
         customer.setAddress(address);
         // Add required entity
         Domain domain = DomainResourceIntTest.createEntity(em);
@@ -130,7 +128,7 @@ public class CustomerResourceIntTest {
 
         // Validate the Customer in Elasticsearch
         Customer customerEs = customerSearchRepository.findOne(testCustomer.getId());
-        assertThat(customerEs).isEqualToIgnoringGivenFields(testCustomer);
+        assertThat(customerEs).isEqualToIgnoringGivenFields(testCustomer, "address");
     }
 
     @Test
@@ -237,7 +235,7 @@ public class CustomerResourceIntTest {
 
         // Validate the Customer in Elasticsearch
         Customer customerEs = customerSearchRepository.findOne(testCustomer.getId());
-        assertThat(customerEs).isEqualToIgnoringGivenFields(testCustomer);
+        assertThat(customerEs).isEqualToIgnoringGivenFields(testCustomer, "address");
     }
 
     @Test
