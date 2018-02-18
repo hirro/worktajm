@@ -5,11 +5,7 @@
                 <h5>Projects</h5>
             </div>
             <div class="card-body">
-                <jhi-projects [projects]="projects"
-                              [activeTimeEntry]="activeTimeEntry"
-                              (startProject)="onProjectStarted($event)"
-                              (stopProject)="onProjectStopped($event)">
-                </jhi-projects>
+                <jhi-projects></jhi-projects>
             </div>
         </div>
     </div>
@@ -20,7 +16,7 @@
                 <h5>Time Entries</h5>
             </div>
             <div class="card-body">
-                <jhi-time-entries [timeEntries]="timeEntries" (onSelectedDateChanged)="selectedDateChanged($event)"></jhi-time-entries>
+                <jhi-time-entries></jhi-time-entries>
             </div>
         </div>
     </div>

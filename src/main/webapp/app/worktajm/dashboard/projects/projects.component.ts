@@ -1,32 +1,46 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Project} from '../../../entities/project';
 import {TimeEntry} from '../../../entities/time-entry';
+import {WorktajmDashboardService} from '../dashboard.service';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
-  selector: 'jhi-projects',
-  templateUrl: './projects.component.html',
-  styles: []
+    selector: 'jhi-projects',
+    templateUrl: './projects.component.html',
+    styles: []
 })
-export class ProjectsComponent implements OnInit {
+export class ProjectsComponent implements OnInit, OnDestroy {
 
-  @Input() projects: Project[];
-  @Input() activeTimeEntry: TimeEntry;
-  @Output() startProject = new EventEmitter<Project>();
-  @Output() stopProject = new EventEmitter<Project>();
+    projects: Project[];
+    private projectsUpdatesSubscription: Subscription;
 
-  constructor() {
-  }
+    constructor(private dashboardService: WorktajmDashboardService) {
+    }
 
-  ngOnInit() {
-  }
+    ngOnInit() {
+        console.log('ngOnInit');
+        this.projects = this.dashboardService.getProjects();
+        this.projectsUpdatesSubscription = this.dashboardService.projectsUpdated$.subscribe(
+            (value: Project[]) => {
+                console.log('Got updated projects list');
+                this.projects = value;
+            },
+            (error: any) => {
+                console.error('Failed to get project list');
+            });
+    }
 
-  start(project: Project) {
-    console.log(`start: ${project.name}`);
-    this.startProject.emit(project);
-  }
+    ngOnDestroy(): void {
+        this.projectsUpdatesSubscription.unsubscribe();
+    }
 
-  stop(project: Project) {
-    console.log(`stop: ${project.name}`);
-    this.stopProject.emit(project);
-  }
+    start(project: Project) {
+        console.log(`start: ${project.name}`);
+        this.dashboardService.onProjectStarted(project);
+    }
+
+    stop(project: Project) {
+        console.log(`stop: ${project.name}`);
+        this.dashboardService.onProjectStopped(project);
+    }
 }

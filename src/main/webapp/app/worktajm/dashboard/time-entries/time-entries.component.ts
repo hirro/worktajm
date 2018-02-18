@@ -1,5 +1,7 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {TimeEntry} from '../../../entities/time-entry';
+import {WorktajmDashboardService} from '../dashboard.service';
+import {Subscription} from 'rxjs/Subscription';
 import * as moment from 'moment';
 
 @Component({
@@ -20,16 +22,31 @@ import * as moment from 'moment';
         }
     `]
 })
-export class TimeEntriesComponent implements OnInit {
+export class TimeEntriesComponent implements OnInit, OnDestroy {
+    date: Date;
+    timeEntries: TimeEntry[];
+    private timeEntriesUpdatedSubscription: Subscription;
 
-    @Input() date: Date;
-    @Input() timeEntries: TimeEntry[];
-    @Output() onSelectedDateChanged = new EventEmitter<Date>();
-
-    constructor() {
+    constructor(private dashboardService: WorktajmDashboardService) {
+        this.date = new Date();
+        this.date.setHours(0, 0, 0, 0);
     }
 
     ngOnInit() {
+        this.timeEntriesUpdatedSubscription = this.dashboardService.timeEntriesUpdated$.subscribe(
+            (value: TimeEntry[]) => {
+                console.log('Got updated time entry list');
+                this.timeEntries = value;
+            },
+            (any) => {
+                console.error('Failed to get time entries');
+            }
+        );
+        this.dashboardService.setSelectedDate(this.date);
+    }
+
+    ngOnDestroy(): void {
+        this.timeEntriesUpdatedSubscription.unsubscribe();
     }
 
     duration(timeEntry: TimeEntry): string {
@@ -49,7 +66,7 @@ export class TimeEntriesComponent implements OnInit {
 
     onChangedDate(date: Date) {
         console.log(`TimeEntriesComponent::onChangedDate: ${date}`);
-        this.onSelectedDateChanged.emit(date);
+        this.dashboardService.setSelectedDate(date);
     }
 
     sum(): string {

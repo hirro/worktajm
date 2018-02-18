@@ -1,18 +1,17 @@
 package com.arnellconsulting.worktajm.web.rest;
 
-import com.arnellconsulting.worktajm.domain.User;
-import com.arnellconsulting.worktajm.repository.UserRepository;
-import com.arnellconsulting.worktajm.security.SecurityUtils;
-import com.codahale.metrics.annotation.Timed;
 import com.arnellconsulting.worktajm.domain.Project;
-
+import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.ProjectRepository;
+import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.ProjectSearchRepository;
+import com.arnellconsulting.worktajm.service.UserService;
+import com.arnellconsulting.worktajm.service.dto.ProjectDTO;
+import com.arnellconsulting.worktajm.service.mapper.ProjectMapper;
 import com.arnellconsulting.worktajm.web.rest.errors.BadRequestAlertException;
 import com.arnellconsulting.worktajm.web.rest.util.HeaderUtil;
 import com.arnellconsulting.worktajm.web.rest.util.PaginationUtil;
-import com.arnellconsulting.worktajm.service.dto.ProjectDTO;
-import com.arnellconsulting.worktajm.service.mapper.ProjectMapper;
+import com.codahale.metrics.annotation.Timed;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +26,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * REST controller for managing Project.
@@ -54,11 +52,14 @@ public class ProjectResource {
 
     private final ProjectSearchRepository projectSearchRepository;
 
-    public ProjectResource(ProjectRepository projectRepository, UserRepository userRepository, ProjectMapper projectMapper, ProjectSearchRepository projectSearchRepository) {
+    private final UserService userService;
+
+    public ProjectResource(ProjectRepository projectRepository, UserRepository userRepository, ProjectMapper projectMapper, ProjectSearchRepository projectSearchRepository, UserService userService) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.projectMapper = projectMapper;
         this.projectSearchRepository = projectSearchRepository;
+        this.userService = userService;
     }
 
     /**
@@ -76,6 +77,11 @@ public class ProjectResource {
             throw new BadRequestAlertException("A new project cannot already have an ID", ENTITY_NAME, "idexists");
         }
         Project project = projectMapper.toEntity(projectDTO);
+
+        // Add current user as authorized
+        User user = userService.getLoggedInUser();
+        project.addProjectMembers(user);
+
         project = projectRepository.save(project);
         ProjectDTO result = projectMapper.toDto(project);
         projectSearchRepository.save(project);
@@ -101,6 +107,11 @@ public class ProjectResource {
             return createProject(projectDTO);
         }
         Project project = projectMapper.toEntity(projectDTO);
+
+        // Add current user as authorized
+        User user = userService.getLoggedInUser();
+        project.addProjectMembers(user);
+
         project = projectRepository.save(project);
         ProjectDTO result = projectMapper.toDto(project);
         projectSearchRepository.save(project);
@@ -121,7 +132,7 @@ public class ProjectResource {
         log.debug("REST request to get a page of Projects");
 
         // Find currently logged in user
-        List<User> users = Arrays.asList(getLoggedInUser());
+        List<User> users = Arrays.asList(userService.getLoggedInUser());
 
         Page<Project> page = projectRepository.findAllByProjectMembersIn(users, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/projects");
@@ -142,7 +153,7 @@ public class ProjectResource {
         final ProjectDTO projectDTO;
 
         // Only projects that is authorized to the logged in user may be returned
-        if ((project != null) && project.getProjectMembers().contains(getLoggedInUser())) {
+        if ((project != null) && project.getProjectMembers().contains(userService.getLoggedInUser())) {
             projectDTO = projectMapper.toDto(project);
         } else {
             projectDTO = null;
@@ -161,9 +172,15 @@ public class ProjectResource {
     @Timed
     public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
         log.debug("REST request to delete Project : {}", id);
-        projectRepository.delete(id);
-        projectSearchRepository.delete(id);
-        return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+
+        Project project = projectRepository.findOne(id);
+        if (isAuthorized(project)) {
+            projectRepository.delete(id);
+            projectSearchRepository.delete(id);
+            return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     /**
@@ -183,8 +200,15 @@ public class ProjectResource {
         return new ResponseEntity<>(projectMapper.toDto(page.getContent()), headers, HttpStatus.OK);
     }
 
-    private User getLoggedInUser() {
-        Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
-        return userRepository.findOneByLogin(userLogin.get()).get();
+    private boolean isAuthorized(final Project project) {
+        User currentUser = userService.getLoggedInUser();
+        if ((project != null) && (project.getProjectMembers() != null)) {
+            for (User u : project.getProjectMembers()) {
+                if (u.getLogin().equalsIgnoreCase(currentUser.getLogin())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
