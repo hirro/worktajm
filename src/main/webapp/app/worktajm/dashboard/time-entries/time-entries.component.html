@@ -10,7 +10,6 @@
             <span class="d-none d-md-inline" jhfiTranslate="worktajmApp.timeEntry.home.createLabel">Create new Time Entry</span>
         </button>
     </div>
-    {{date}}
 </div>
 
 <hr/>
@@ -89,17 +88,6 @@
                 </tr>
             </tbody>
         </table>
-    </div>
-    <div *ngIf="timeEntries && (totalItems > itemsPerPage)">
-        <div class="row justify-content-center">
-            <jhi-item-count [page]="page" [total]="queryCount" [maxSize]="5"
-                            [itemsPerPage]="itemsPerPage"></jhi-item-count>
-        </div>
-        <div class="row justify-content-center">
-            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage"
-                            [maxSize]="5" [rotate]="true" [boundaryLinks]="true"
-                            (pageChange)="loadPage(page)"></ngb-pagination>
-        </div>
     </div>
 </div>
 <div class="row">

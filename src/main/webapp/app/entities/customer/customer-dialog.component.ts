@@ -9,7 +9,7 @@ import { JhiEventManager, JhiAlertService } from 'ng-jhipster';
 import { Customer } from './customer.model';
 import { CustomerPopupService } from './customer-popup.service';
 import { CustomerService } from './customer.service';
-import { Address, AddressService } from '../address';
+import { Address } from '../shared/address/address';
 import { Domain, DomainService } from '../domain';
 
 @Component({
@@ -29,7 +29,6 @@ export class CustomerDialogComponent implements OnInit {
         public activeModal: NgbActiveModal,
         private jhiAlertService: JhiAlertService,
         private customerService: CustomerService,
-        private addressService: AddressService,
         private domainService: DomainService,
         private eventManager: JhiEventManager
     ) {
@@ -37,19 +36,6 @@ export class CustomerDialogComponent implements OnInit {
 
     ngOnInit() {
         this.isSaving = false;
-        this.addressService
-            .query({filter: 'customer-is-null'})
-            .subscribe((res: HttpResponse<Address[]>) => {
-                if (!this.customer.addressId) {
-                    this.addresses = res.body;
-                } else {
-                    this.addressService
-                        .find(this.customer.addressId)
-                        .subscribe((subRes: HttpResponse<Address>) => {
-                            this.addresses = [subRes.body].concat(res.body);
-                        }, (subRes: HttpErrorResponse) => this.onError(subRes.message));
-                }
-            }, (res: HttpErrorResponse) => this.onError(res.message));
         this.domainService.query()
             .subscribe((res: HttpResponse<Domain[]>) => { this.domains = res.body; }, (res: HttpErrorResponse) => this.onError(res.message));
     }
@@ -86,10 +72,6 @@ export class CustomerDialogComponent implements OnInit {
 
     private onError(error: any) {
         this.jhiAlertService.error(error.message, null, null);
-    }
-
-    trackAddressById(index: number, item: Address) {
-        return item.id;
     }
 
     trackDomainById(index: number, item: Domain) {

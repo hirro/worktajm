@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <property name="now" value="now()" dbms="h2"/>
+
+    <property name="now" value="now()" dbms="mysql"/>
+    <property name="autoIncrement" value="true"/>
+
+    <property name="floatType" value="float4" dbms="postgresql, h2"/>
+    <property name="floatType" value="float" dbms="mysql, oracle, mssql"/>
+
+    <changeSet id="20180207152000-1" author="hirro">
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/sample_data/domains.csv"
+                  separator=";"
+                  tableName="sample_domains">
+        </loadData>
+    </changeSet>
+    <changeSet id="20180207152000-2" author="hirro">
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/sample_data/customers.csv"
+                  separator=";"
+                  tableName="sample_customers">
+        </loadData>
+    </changeSet>
+    <changeSet id="20180207152000-3" author="hirro">
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/sample_data/projects.csv"
+                  separator=";"
+                  tableName="sample_projects">
+        </loadData>
+    </changeSet>
+    <changeSet id="20180207152000-4" author="hirro">
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/sample_data/timeentries.csv"
+                  separator=";"
+                  tableName="sample_timeentries">
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

@@ -17,9 +17,7 @@ public class DomainDTO implements Serializable {
     @NotNull
     private String name;
 
-    private Long addressId;
-
-    private String addressAddressLine1;
+    private AddressDTO address;
 
     private Set<UserDTO> authorizedUsers = new HashSet<>();
 
@@ -37,22 +35,6 @@ public class DomainDTO implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Long getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(Long addressId) {
-        this.addressId = addressId;
-    }
-
-    public String getAddressAddressLine1() {
-        return addressAddressLine1;
-    }
-
-    public void setAddressAddressLine1(String addressAddressLine1) {
-        this.addressAddressLine1 = addressAddressLine1;
     }
 
     public Set<UserDTO> getAuthorizedUsers() {
@@ -90,5 +72,13 @@ public class DomainDTO implements Serializable {
             "id=" + getId() +
             ", name='" + getName() + "'" +
             "}";
+    }
+
+    public AddressDTO getAddress() {
+        return address;
+    }
+
+    public void setAddress(AddressDTO address) {
+        this.address = address;
     }
 }

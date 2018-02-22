@@ -48,6 +48,7 @@ public class UserExtraResourceIntTest {
 
     private static final String DEFAULT_PHONE = "AAAAAAAAAA";
     private static final String UPDATED_PHONE = "BBBBBBBBBB";
+    private static final String GET_USER_EXTRA_EXISTING = "getUserExtraExisting";
 
     @Autowired
     private UserExtraRepository userExtraRepository;
@@ -89,6 +90,7 @@ public class UserExtraResourceIntTest {
             .setControllerAdvice(exceptionTranslator)
             .setConversionService(createFormattingConversionService())
             .setMessageConverters(jacksonMessageConverter).build();
+        userExtra = createEntity(em);
     }
 
     /**
@@ -105,28 +107,27 @@ public class UserExtraResourceIntTest {
 
     @Before
     public void initTest() {
-        userExtraSearchRepository.deleteAll();
-        userRepository.deleteAll();
-
         // Create test users
-        userExtra = createEntity(em);
-        userA = UserResourceIntTest.createEntity(em);
-        userA.setLogin(USER_A_LOGIN);
-        userB = UserResourceIntTest.createEntity(em);
-        userB.setLogin(USER_B_LOGIN);
+        userA = userRepository.findOneByLogin(USER_A_LOGIN).get();
+        userB = userRepository.findOneByLogin(USER_B_LOGIN).get();
     }
 
     @Test
     @Transactional
-    @WithMockUser(USER_A_LOGIN)
+    @WithMockUser(GET_USER_EXTRA_EXISTING)
     public void getUserExtraExisting() throws Exception {
         // Initialize the database
-        userRepository.saveAndFlush(userA);
-        userExtra.setUser(userA);
-        userExtraRepository.saveAndFlush(userExtra);
+        User user = UserResourceIntTest.createEntity(null);
+        user.setLogin(GET_USER_EXTRA_EXISTING);
+        user = userRepository.saveAndFlush(user);
+        List<User> users = userRepository.findAll();
+
+        userExtra = createEntity(null);
+        userExtra.setUser(user);
+        userExtra = userExtraRepository.saveAndFlush(userExtra);
 
         // Get the userExtra
-        restUserExtraMockMvc.perform(get("/api/user-extras", userExtra.getId()))
+        restUserExtraMockMvc.perform(get("/api/user-extras"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(userExtra.getId().intValue()))
@@ -137,14 +138,7 @@ public class UserExtraResourceIntTest {
     @Transactional
     @WithMockUser(USER_B_LOGIN)
     public void getUserExtraNotExisting() throws Exception {
-        // Initialize the database
-        userRepository.saveAndFlush(userA);
-        userRepository.saveAndFlush(userB);
-        userExtra.setUser(userA);
-        userExtraRepository.saveAndFlush(userExtra);
-
-        // Get the userExtra
-        restUserExtraMockMvc.perform(get("/api/user-extras", userExtra.getId()))
+        restUserExtraMockMvc.perform(get("/api/user-extras", Long.MAX_VALUE))
             .andExpect(status().isNotFound());
     }
 
@@ -153,7 +147,7 @@ public class UserExtraResourceIntTest {
     @WithMockUser(USER_B_LOGIN)
     public void getUserExtraUnknownUser() throws Exception {
         // Get the userExtra
-        restUserExtraMockMvc.perform(get("/api/user-extras", userExtra.getId()))
+        restUserExtraMockMvc.perform(get("/api/user-extras", Long.MAX_VALUE))
             .andExpect(status().isNotFound());
     }
 
@@ -162,9 +156,12 @@ public class UserExtraResourceIntTest {
     @WithMockUser(USER_A_LOGIN)
     public void updateUserExtra() throws Exception {
         // Initialize the database
-        userRepository.saveAndFlush(userA);
-        userExtra.setUser(userA);
-        userExtraRepository.saveAndFlush(userExtra);
+        User user = UserResourceIntTest.createEntity(null);
+        userRepository.saveAndFlush(user);
+
+        userExtra = createEntity(em);
+        userExtra.setUser(user);
+        userExtra = userExtraRepository.saveAndFlush(userExtra);
 
         int databaseSizeBeforeUpdate = userExtraRepository.findAll().size();
 
@@ -184,7 +181,7 @@ public class UserExtraResourceIntTest {
         // Validate the UserExtra in the database
         List<UserExtra> userExtraList = userExtraRepository.findAll();
         assertThat(userExtraList).hasSize(databaseSizeBeforeUpdate);
-        UserExtra testUserExtra = userExtraList.get(userExtraList.size() - 1);
+        UserExtra testUserExtra = userExtraRepository.findOne(userExtra.getId());
         assertThat(testUserExtra.getPhone()).isEqualTo(UPDATED_PHONE);
 
         // Validate the UserExtra in Elasticsearch

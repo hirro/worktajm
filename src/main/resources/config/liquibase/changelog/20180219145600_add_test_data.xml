@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <property name="now" value="now()" dbms="h2"/>
+
+    <property name="now" value="now()" dbms="mysql"/>
+    <property name="autoIncrement" value="true"/>
+
+    <property name="floatType" value="float4" dbms="postgresql, h2"/>
+    <property name="floatType" value="float" dbms="mysql, oracle, mssql"/>
+
+    <!--
+        Added the entity UserExtra.
+    -->
+    <changeSet id="20180218142400-1" author="hirro">
+        <loadData encoding="UTF-8" file="config/liquibase/users_extra.csv" separator=";" tableName="user_extra"></loadData>
+    </changeSet>
+    <changeSet id="20180218142400-2" author="hirro">
+        <loadData encoding="UTF-8" file="config/liquibase/domains.csv" separator=";" tableName="domain"></loadData>
+    </changeSet>
+    <changeSet id="20180218142400-3" author="hirro">
+        <loadData encoding="UTF-8" file="config/liquibase/domain_authorized_users.csv" separator=";" tableName="domain_authorized_users"></loadData>
+    </changeSet>
+    <changeSet id="20180218142400-4" author="hirro">
+        <loadData encoding="UTF-8" file="config/liquibase/customers.csv" separator=";" tableName="customer"></loadData>
+    </changeSet>
+    <changeSet id="20180218142400-5" author="hirro">
+        <loadData encoding="UTF-8" file="config/liquibase/projects.csv" separator=";" tableName="project"></loadData>
+    </changeSet>
+    <changeSet id="20180218142400-6" author="hirro">
+        <loadData encoding="UTF-8" file="config/liquibase/project_project_members.csv" separator=";" tableName="project_project_members"></loadData>
+    </changeSet>
+</databaseChangeLog>

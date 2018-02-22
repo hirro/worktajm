@@ -13,16 +13,24 @@ import com.arnellconsulting.worktajm.service.dto.DomainDTO;
 import com.arnellconsulting.worktajm.service.mapper.DomainMapper;
 import com.arnellconsulting.worktajm.web.rest.errors.ExceptionTranslator;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mapstruct.Context;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -46,6 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = WorktajmApp.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DomainResourceIntTest {
 
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
@@ -97,6 +106,10 @@ public class DomainResourceIntTest {
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
+    @After
+    public void cleanup() {
+    }
+
     /**
      * Create an entity for this test.
      *
@@ -106,28 +119,23 @@ public class DomainResourceIntTest {
     public static Domain createEntity(EntityManager em) {
         Domain domain = new Domain().name(DEFAULT_NAME);
         // Add required entity
-        Address address = AddressResourceIntTest.createEntity(em);
-        em.persist(address);
-        em.flush();
+        Address address = TestUtil.createAddressEntity();
         domain.setAddress(address);
         return domain;
     }
 
     @Before
     public void initTest() {
-        domainSearchRepository.deleteAll();
         domain = createEntity(em);
 
         // Create test users
-        userA = UserResourceIntTest.createEntity(em);
-        userA.setLogin(USER_A_LOGIN);
-
-        userB = UserResourceIntTest.createEntity(em);
-        userB.setLogin(USER_B_LOGIN);
+        userA = userRepository.findOne(5L);
+        userB = userRepository.findOne(6L);
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void createDomain() throws Exception {
         int databaseSizeBeforeCreate = domainRepository.findAll().size();
 
@@ -146,11 +154,13 @@ public class DomainResourceIntTest {
 
         // Validate the Domain in Elasticsearch
         Domain domainEs = domainSearchRepository.findOne(testDomain.getId());
-        assertThat(domainEs).isEqualToIgnoringGivenFields(testDomain);
+        assertThat(domainEs).isEqualToIgnoringGivenFields(testDomain, "address");
+        assertThat(domainEs.getAddress()).isEqualToIgnoringGivenFields(testDomain.getAddress());
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void createDomainWithExistingId() throws Exception {
         int databaseSizeBeforeCreate = domainRepository.findAll().size();
 
@@ -210,17 +220,12 @@ public class DomainResourceIntTest {
     @Transactional
     @WithMockUser(USER_A_LOGIN)
     public void getDomainAuthorized() throws Exception {
-        // Initialize the database
-        userRepository.saveAndFlush(userA);
-        domain.addAuthorizedUsers(this.userA);
-        domainRepository.saveAndFlush(domain);
-
         // Get the domain
-        restDomainMockMvc.perform(get("/api/domains/{id}", domain.getId()))
+        restDomainMockMvc.perform(get("/api/domains/{id}", 1))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.id").value(domain.getId().intValue()))
-            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.name").value("Domain A"));
     }
 
     @Test
@@ -241,7 +246,7 @@ public class DomainResourceIntTest {
     public void getNonExistingDomain() throws Exception {
         // Get the domain
         restDomainMockMvc.perform(get("/api/domains/{id}", Long.MAX_VALUE))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -250,8 +255,7 @@ public class DomainResourceIntTest {
     public void updateDomain() throws Exception {
 
         // Initialize the database
-        userRepository.saveAndFlush(userA);
-        domain.addAuthorizedUsers(this.userA);
+        domain.getAuthorizedUsers().add(userA);
         domainRepository.saveAndFlush(domain);
         domainSearchRepository.save(domain);
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
@@ -276,7 +280,8 @@ public class DomainResourceIntTest {
 
         // Validate the Domain in Elasticsearch
         Domain domainEs = domainSearchRepository.findOne(testDomain.getId());
-        assertThat(domainEs).isEqualToIgnoringGivenFields(testDomain);
+        assertThat(domainEs).isEqualToIgnoringGivenFields(testDomain, "address");
+        assertThat(domainEs.getAddress()).isEqualToIgnoringGivenFields(testDomain.getAddress());
     }
 
     @Test
@@ -286,13 +291,14 @@ public class DomainResourceIntTest {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
 
         // Create the Domain
+        domain.setId(Long.MAX_VALUE);
         DomainDTO domainDTO = domainMapper.toDto(domain);
 
         // If the entity doesn't have an ID, it will be created instead of just being updated
         restDomainMockMvc.perform(put("/api/domains")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(domainDTO)))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isNotFound());
 
         // Validate the Domain in the database
         List<Domain> domainList = domainRepository.findAll();
@@ -375,5 +381,18 @@ public class DomainResourceIntTest {
     public void testEntityFromId() {
         assertThat(domainMapper.fromId(42L).getId()).isEqualTo(42);
         assertThat(domainMapper.fromId(null)).isNull();
+    }
+
+    public void resetAll(ApplicationContext applicationContext) throws Exception {
+        for (String name : applicationContext.getBeanDefinitionNames()) {
+            Object bean = applicationContext.getBean(name);
+            if (AopUtils.isAopProxy(bean) && bean instanceof Advised) {
+                bean = ((Advised) bean).getTargetSource().getTarget();
+            }
+            if (Mockito.mockingDetails(bean).isMock()) {
+                Mockito.reset(bean);
+            }
+
+        }
     }
 }

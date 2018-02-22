@@ -1,18 +1,17 @@
 package com.arnellconsulting.worktajm.web.rest;
 
-import com.arnellconsulting.worktajm.domain.User;
-import com.arnellconsulting.worktajm.security.AuthoritiesConstants;
-import com.arnellconsulting.worktajm.service.UserService;
-import com.codahale.metrics.annotation.Timed;
 import com.arnellconsulting.worktajm.domain.Domain;
-
+import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.DomainRepository;
 import com.arnellconsulting.worktajm.repository.search.DomainSearchRepository;
+import com.arnellconsulting.worktajm.security.AuthoritiesConstants;
+import com.arnellconsulting.worktajm.service.UserService;
+import com.arnellconsulting.worktajm.service.dto.DomainDTO;
+import com.arnellconsulting.worktajm.service.mapper.DomainMapper;
 import com.arnellconsulting.worktajm.web.rest.errors.BadRequestAlertException;
 import com.arnellconsulting.worktajm.web.rest.util.HeaderUtil;
 import com.arnellconsulting.worktajm.web.rest.util.PaginationUtil;
-import com.arnellconsulting.worktajm.service.dto.DomainDTO;
-import com.arnellconsulting.worktajm.service.mapper.DomainMapper;
+import com.codahale.metrics.annotation.Timed;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +28,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * REST controller for managing Domain.
@@ -72,13 +69,22 @@ public class DomainResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/domains")
+    @Secured({AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER})
     @Timed
-    public ResponseEntity<DomainDTO> createDomain(@Valid @RequestBody DomainDTO domainDTO) throws URISyntaxException {
+    public ResponseEntity<DomainDTO> createDomain(@Valid @RequestBody DomainDTO domainDTO,
+                                                  Principal principal)
+        throws URISyntaxException
+    {
         log.debug("REST request to save Domain : {}", domainDTO);
         if (domainDTO.getId() != null) {
             throw new BadRequestAlertException("A new domain cannot already have an ID", ENTITY_NAME, "idexists");
         }
         Domain domain = domainMapper.toEntity(domainDTO);
+
+        // Add current user as authorized
+        User user = userService.getLoggedInUser();
+        domain.addAuthorizedUsers(user);
+
         domain = domainRepository.save(domain);
         DomainDTO result = domainMapper.toDto(domain);
         domainSearchRepository.save(domain);
@@ -98,15 +104,24 @@ public class DomainResource {
      */
     @PutMapping("/domains")
     @Timed
-    @Secured(AuthoritiesConstants.ADMIN)
+    @Secured({AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER})
     public ResponseEntity<DomainDTO> updateDomain(@Valid @RequestBody DomainDTO domainDTO) throws URISyntaxException {
         log.debug("REST request to update Domain : {}", domainDTO);
 
         // Check user has permission to access domain
-        checkAccessToDomain(domainDTO.getId());
+        Domain existingDomain = domainRepository.findOne(domainDTO.getId());
+        if (existingDomain == null) {
+            return ResponseEntity.notFound().build();
+        }
+        checkAccessToDomain(existingDomain);
 
         // Update
         Domain domain = domainMapper.toEntity(domainDTO);
+
+        // Add current user as authorized
+        User user = userService.getLoggedInUser();
+        domain.addAuthorizedUsers(user);
+
         domain = domainRepository.save(domain);
         DomainDTO result = domainMapper.toDto(domain);
         domainSearchRepository.save(domain);
@@ -144,10 +159,13 @@ public class DomainResource {
     public ResponseEntity<DomainDTO> getDomain(@PathVariable Long id) {
         log.debug("REST request to get Domain : {}", id);
 
-        // Check user has permission to access domain
-        checkAccessToDomain(id);
-
         Domain domain = domainRepository.findOneWithEagerRelationships(id);
+        if (domain == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Check user has permission to access domain
+        checkAccessToDomain(domain);
+
         DomainDTO domainDTO = domainMapper.toDto(domain);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(domainDTO));
     }
@@ -165,7 +183,11 @@ public class DomainResource {
         log.debug("REST request to delete Domain : {}", id);
 
         // Check user has permission to access domain
-        checkAccessToDomain(id);
+        Domain domain = domainRepository.findOne(id);
+        if (domain == null) {
+            return ResponseEntity.notFound().build();
+        }
+        checkAccessToDomain(domain);
 
         domainRepository.delete(id);
         domainSearchRepository.delete(id);
@@ -189,12 +211,7 @@ public class DomainResource {
         return new ResponseEntity<>(domainMapper.toDto(page.getContent()), headers, HttpStatus.OK);
     }
 
-    private void checkAccessToDomain(Long domainId) {
-
-        // Must have id
-        if (domainId == null) {
-            throw new AccessDeniedException("No id");
-        }
+    private void checkAccessToDomain(Domain domain) {
 
         // Must find user
         Optional<User> user = this.userService.getUserWithAuthorities();
@@ -203,9 +220,9 @@ public class DomainResource {
         }
 
         // Make sure user has access to domain
-        Domain existingDomain = domainRepository.findOne(domainId);
-        if (!existingDomain.isUserIdAuthorized(user.get().getId())) {
+        if (!domain.isUserIdAuthorized(user.get().getId())) {
             throw new AccessDeniedException("User is not allowed to access domain");
         }
     }
+
 }

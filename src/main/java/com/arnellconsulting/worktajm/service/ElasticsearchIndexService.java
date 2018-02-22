@@ -23,10 +23,6 @@ public class ElasticsearchIndexService {
 
     private final Logger log = LoggerFactory.getLogger(ElasticsearchIndexService.class);
 
-    private final AddressRepository addressRepository;
-
-    private final AddressSearchRepository addressSearchRepository;
-
     private final CustomerRepository customerRepository;
 
     private final CustomerSearchRepository customerSearchRepository;
@@ -56,8 +52,6 @@ public class ElasticsearchIndexService {
     public ElasticsearchIndexService(
         UserRepository userRepository,
         UserSearchRepository userSearchRepository,
-        AddressRepository addressRepository,
-        AddressSearchRepository addressSearchRepository,
         CustomerRepository customerRepository,
         CustomerSearchRepository customerSearchRepository,
         DomainRepository domainRepository,
@@ -71,8 +65,6 @@ public class ElasticsearchIndexService {
         ElasticsearchTemplate elasticsearchTemplate) {
         this.userRepository = userRepository;
         this.userSearchRepository = userSearchRepository;
-        this.addressRepository = addressRepository;
-        this.addressSearchRepository = addressSearchRepository;
         this.customerRepository = customerRepository;
         this.customerSearchRepository = customerSearchRepository;
         this.domainRepository = domainRepository;
@@ -89,7 +81,6 @@ public class ElasticsearchIndexService {
     @Async
     @Timed
     public void reindexAll() {
-        reindexForClass(Address.class, addressRepository, addressSearchRepository);
         reindexForClass(Customer.class, customerRepository, customerSearchRepository);
         reindexForClass(Domain.class, domainRepository, domainSearchRepository);
         reindexForClass(Project.class, projectRepository, projectSearchRepository);

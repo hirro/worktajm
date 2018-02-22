@@ -1,5 +1,6 @@
 package com.arnellconsulting.worktajm.web.rest;
 
+import com.arnellconsulting.worktajm.domain.Address;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -59,6 +60,14 @@ public class TestUtil {
             byteArray[i] = Byte.parseByte(data, 2);
         }
         return byteArray;
+    }
+
+    public static Address createAddressEntity() {
+        Address address = new Address();
+        address.setAddressLine1("Line 1");
+        address.setAddressLine2("Line 2");
+        address.setAddressLine3("Line 3");
+        return address;
     }
 
     /**

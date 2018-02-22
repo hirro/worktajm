@@ -2,12 +2,14 @@ package com.arnellconsulting.worktajm.web.rest;
 
 import com.arnellconsulting.worktajm.WorktajmApp;
 
+import com.arnellconsulting.worktajm.domain.Domain;
 import com.arnellconsulting.worktajm.domain.Project;
 import com.arnellconsulting.worktajm.domain.Customer;
 import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.ProjectRepository;
 import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.ProjectSearchRepository;
+import com.arnellconsulting.worktajm.service.UserService;
 import com.arnellconsulting.worktajm.service.dto.ProjectDTO;
 import com.arnellconsulting.worktajm.service.mapper.ProjectMapper;
 import com.arnellconsulting.worktajm.web.rest.errors.ExceptionTranslator;
@@ -80,6 +82,9 @@ public class ProjectResourceIntTest {
     @Autowired
     private EntityManager em;
 
+    @Autowired
+    private UserService userService;
+
     private MockMvc restProjectMockMvc;
 
     private Project project;
@@ -91,12 +96,15 @@ public class ProjectResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final ProjectResource projectResource = new ProjectResource(projectRepository, userRepository, projectMapper, projectSearchRepository);
+        final ProjectResource projectResource = new ProjectResource(projectRepository, userRepository, projectMapper, projectSearchRepository, userService);
         this.restProjectMockMvc = MockMvcBuilders.standaloneSetup(projectResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
             .setConversionService(createFormattingConversionService())
             .setMessageConverters(jacksonMessageConverter).build();
+        userA = userRepository.findOneByLogin(USER_A_LOGIN).get();
+        userB = userRepository.findOneByLogin(USER_B_LOGIN).get();
+        project = createEntity(null);
     }
 
     /**
@@ -110,31 +118,29 @@ public class ProjectResourceIntTest {
             .name(DEFAULT_NAME)
             .description(DEFAULT_DESCRIPTION)
             .hourlyRate(DEFAULT_HOURLY_RATE);
-        // Add required entity
-        Customer customer = CustomerResourceIntTest.createEntity(em);
-        em.persist(customer);
-        em.flush();
-        project.setCustomer(customer);
         return project;
-    }
-
-    @Before
-    public void initTest() {
-        projectSearchRepository.deleteAll();
-        project = createEntity(em);
-
-        // Create test users
-        userA = UserResourceIntTest.createEntity(em);
-        userA.setLogin(USER_A_LOGIN);
-
-        userB = UserResourceIntTest.createEntity(em);
-        userB.setLogin(USER_B_LOGIN);
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void createProject() throws Exception {
         int databaseSizeBeforeCreate = projectRepository.findAll().size();
+
+        // Create domain
+        Domain domain = DomainResourceIntTest.createEntity(null);
+        domain.getAuthorizedUsers().add(userA);
+        em.persist(domain);
+
+        // Create customer
+        Customer customer = CustomerResourceIntTest.createEntity(null);
+        customer.setDomain(domain);
+        em.persist(customer);
+
+        // Define project
+        project.setCustomer(customer);
+        project.getProjectMembers().add(userA);
+        em.detach(project);
 
         // Create the Project
         ProjectDTO projectDTO = projectMapper.toDto(project);
@@ -216,8 +222,18 @@ public class ProjectResourceIntTest {
     @WithMockUser(USER_A_LOGIN)
     public void getProject() throws Exception {
 
-        // Initialize the database
-        userRepository.saveAndFlush(userA);
+        // Create domain
+        Domain domain = DomainResourceIntTest.createEntity(null);
+        domain.getAuthorizedUsers().add(userA);
+        em.persist(domain);
+
+        // Create customer
+        Customer customer = CustomerResourceIntTest.createEntity(null);
+        customer.setDomain(domain);
+        em.persist(customer);
+
+        // Create project
+        project.setCustomer(customer);
         project.getProjectMembers().add(userA);
         projectRepository.saveAndFlush(project);
 
@@ -242,27 +258,34 @@ public class ProjectResourceIntTest {
 
     @Test
     @Transactional
-    @WithMockUser(USER_B_LOGIN)
+    @WithMockUser("getNonAuthorizedExistingProject")
     public void getNonAuthorizedExistingProject() throws Exception {
-        // Initialize the database
-        userRepository.saveAndFlush(userA);
-        userRepository.saveAndFlush(userB);
-        project.addProjectMembers(userA);
-        projectRepository.saveAndFlush(project);
-        projectSearchRepository.save(project);
-        int databaseSizeBeforeUpdate = projectRepository.findAll().size();
 
         // Get the project
-        restProjectMockMvc.perform(get("/api/projects/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
+        restProjectMockMvc.perform(get("/api/projects/{id}", 1))
+            .andExpect(status().isForbidden());
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateAuthorizedProject() throws Exception {
-        // Initialize the database
+
+        // Create domain
+        Domain domain = DomainResourceIntTest.createEntity(null);
+        domain.getAuthorizedUsers().add(userA);
+        em.persist(domain);
+
+        // Create customer
+        Customer customer = CustomerResourceIntTest.createEntity(null);
+        customer.setDomain(domain);
+        em.persist(customer);
+
+        // Create project
+        project.setCustomer(customer);
+        project.getProjectMembers().add(userA);
         projectRepository.saveAndFlush(project);
-        projectSearchRepository.save(project);
+
         int databaseSizeBeforeUpdate = projectRepository.findAll().size();
 
         // Update the project
@@ -295,29 +318,38 @@ public class ProjectResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateNonExistingProject() throws Exception {
-        int databaseSizeBeforeUpdate = projectRepository.findAll().size();
-
         // Create the Project
         ProjectDTO projectDTO = projectMapper.toDto(project);
 
-        // If the entity doesn't have an ID, it will be created instead of just being updated
+        // If the entity doesn't have an ID, it will be rejected instead of just being updated
         restProjectMockMvc.perform(put("/api/projects")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(projectDTO)))
-            .andExpect(status().isCreated());
-
-        // Validate the Project in the database
-        List<Project> projectList = projectRepository.findAll();
-        assertThat(projectList).hasSize(databaseSizeBeforeUpdate + 1);
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void deleteProject() throws Exception {
-        // Initialize the database
+
+        // Create domain
+        Domain domain = DomainResourceIntTest.createEntity(null);
+        domain.getAuthorizedUsers().add(userA);
+        em.persist(domain);
+
+        // Create customer
+        Customer customer = CustomerResourceIntTest.createEntity(null);
+        customer.setDomain(domain);
+        em.persist(customer);
+
+        // Create project
+        project.setCustomer(customer);
+        project.getProjectMembers().add(userA);
         projectRepository.saveAndFlush(project);
-        projectSearchRepository.save(project);
+
         int databaseSizeBeforeDelete = projectRepository.findAll().size();
 
         // Get the project
@@ -337,7 +369,20 @@ public class ProjectResourceIntTest {
     @Test
     @Transactional
     public void searchProject() throws Exception {
-        // Initialize the database
+
+        // Create domain
+        Domain domain = DomainResourceIntTest.createEntity(null);
+        domain.getAuthorizedUsers().add(userA);
+        em.persist(domain);
+
+        // Create customer
+        Customer customer = CustomerResourceIntTest.createEntity(null);
+        customer.setDomain(domain);
+        em.persist(customer);
+
+        // Create project
+        project.setCustomer(customer);
+        project.getProjectMembers().add(userA);
         projectRepository.saveAndFlush(project);
         projectSearchRepository.save(project);
 
