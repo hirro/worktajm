@@ -109,7 +109,11 @@ public class DomainResource {
         log.debug("REST request to update Domain : {}", domainDTO);
 
         // Check user has permission to access domain
-        checkAccessToDomain(domainDTO.getId());
+        Domain existingDomain = domainRepository.findOne(domainDTO.getId());
+        if (existingDomain == null) {
+            return ResponseEntity.notFound().build();
+        }
+        checkAccessToDomain(existingDomain);
 
         // Update
         Domain domain = domainMapper.toEntity(domainDTO);
@@ -155,10 +159,13 @@ public class DomainResource {
     public ResponseEntity<DomainDTO> getDomain(@PathVariable Long id) {
         log.debug("REST request to get Domain : {}", id);
 
-        // Check user has permission to access domain
-        checkAccessToDomain(id);
-
         Domain domain = domainRepository.findOneWithEagerRelationships(id);
+        if (domain == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Check user has permission to access domain
+        checkAccessToDomain(domain);
+
         DomainDTO domainDTO = domainMapper.toDto(domain);
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(domainDTO));
     }
@@ -176,7 +183,11 @@ public class DomainResource {
         log.debug("REST request to delete Domain : {}", id);
 
         // Check user has permission to access domain
-        checkAccessToDomain(id);
+        Domain domain = domainRepository.findOne(id);
+        if (domain == null) {
+            return ResponseEntity.notFound().build();
+        }
+        checkAccessToDomain(domain);
 
         domainRepository.delete(id);
         domainSearchRepository.delete(id);
@@ -200,12 +211,7 @@ public class DomainResource {
         return new ResponseEntity<>(domainMapper.toDto(page.getContent()), headers, HttpStatus.OK);
     }
 
-    private void checkAccessToDomain(Long domainId) {
-
-        // Must have id
-        if (domainId == null) {
-            throw new AccessDeniedException("No id");
-        }
+    private void checkAccessToDomain(Domain domain) {
 
         // Must find user
         Optional<User> user = this.userService.getUserWithAuthorities();
@@ -214,8 +220,7 @@ public class DomainResource {
         }
 
         // Make sure user has access to domain
-        Domain existingDomain = domainRepository.findOne(domainId);
-        if (!existingDomain.isUserIdAuthorized(user.get().getId())) {
+        if (!domain.isUserIdAuthorized(user.get().getId())) {
             throw new AccessDeniedException("User is not allowed to access domain");
         }
     }

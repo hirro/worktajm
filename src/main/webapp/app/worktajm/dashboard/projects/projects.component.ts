@@ -1,6 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Project} from '../../../entities/project';
-import {TimeEntry} from '../../../entities/time-entry';
 import {WorktajmDashboardService} from '../dashboard.service';
 import {Subscription} from 'rxjs/Subscription';
 

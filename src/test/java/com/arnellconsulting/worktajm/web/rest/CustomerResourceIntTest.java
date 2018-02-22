@@ -5,7 +5,9 @@ import com.arnellconsulting.worktajm.WorktajmApp;
 import com.arnellconsulting.worktajm.domain.Customer;
 import com.arnellconsulting.worktajm.domain.Address;
 import com.arnellconsulting.worktajm.domain.Domain;
+import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.CustomerRepository;
+import com.arnellconsulting.worktajm.repository.UserRepository;
 import com.arnellconsulting.worktajm.repository.search.CustomerSearchRepository;
 import com.arnellconsulting.worktajm.service.dto.CustomerDTO;
 import com.arnellconsulting.worktajm.service.mapper.CustomerMapper;
@@ -20,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -29,6 +32,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.arnellconsulting.worktajm.web.rest.TestUtil.createFormattingConversionService;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_A_LOGIN;
+import static com.arnellconsulting.worktajm.web.rest.UserResourceIntTest.USER_B_LOGIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -67,9 +72,15 @@ public class CustomerResourceIntTest {
     @Autowired
     private EntityManager em;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private MockMvc restCustomerMockMvc;
 
     private Customer customer;
+    private User userA;
+    private User userB;
+    private Domain domain;
 
     @Before
     public void setup() {
@@ -80,6 +91,12 @@ public class CustomerResourceIntTest {
             .setControllerAdvice(exceptionTranslator)
             .setConversionService(createFormattingConversionService())
             .setMessageConverters(jacksonMessageConverter).build();
+        customerSearchRepository.deleteAll();
+        customer = createEntity(null);
+        userA = userRepository.findOneByLogin(USER_A_LOGIN).get();
+        userB = userRepository.findOneByLogin(USER_B_LOGIN).get();
+        setupDomain();
+
     }
 
     /**
@@ -89,28 +106,22 @@ public class CustomerResourceIntTest {
      * if they test an entity which requires the current entity.
      */
     public static Customer createEntity(EntityManager em) {
-        Customer customer = new Customer()
-            .name(DEFAULT_NAME);
-        // Add required entity
-        Address address = TestUtil.createAddressEntity();
-        customer.setAddress(address);
-        // Add required entity
-        Domain domain = DomainResourceIntTest.createEntity(em);
-        em.persist(domain);
-        em.flush();
-        customer.setDomain(domain);
+        Customer customer = new Customer().name(DEFAULT_NAME);
         return customer;
     }
 
     @Before
     public void initTest() {
-        customerSearchRepository.deleteAll();
-        customer = createEntity(em);
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void createCustomer() throws Exception {
+
+        // Setup customer
+        customer.setDomain(domain);
+
         int databaseSizeBeforeCreate = customerRepository.findAll().size();
 
         // Create the Customer
@@ -129,6 +140,14 @@ public class CustomerResourceIntTest {
         // Validate the Customer in Elasticsearch
         Customer customerEs = customerSearchRepository.findOne(testCustomer.getId());
         assertThat(customerEs).isEqualToIgnoringGivenFields(testCustomer, "address");
+    }
+
+    private Domain setupDomain() {
+        // Create domain
+        domain = DomainResourceIntTest.createEntity(null);
+        domain.getAuthorizedUsers().add(userA);
+        em.persist(domain);
+        return domain;
     }
 
     @Test
@@ -172,8 +191,10 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void getAllCustomers() throws Exception {
         // Initialize the database
+        customer.setDomain(domain);
         customerRepository.saveAndFlush(customer);
 
         // Get all the customerList
@@ -186,9 +207,13 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void getCustomer() throws Exception {
-        // Initialize the database
-        customerRepository.saveAndFlush(customer);
+
+        // Create customer
+        Customer customer = CustomerResourceIntTest.createEntity(null);
+        customer.setDomain(domain);
+        customer = customerRepository.saveAndFlush(customer);
 
         // Get the customer
         restCustomerMockMvc.perform(get("/api/customers/{id}", customer.getId()))
@@ -200,6 +225,7 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void getNonExistingCustomer() throws Exception {
         // Get the customer
         restCustomerMockMvc.perform(get("/api/customers/{id}", Long.MAX_VALUE))
@@ -208,18 +234,22 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateCustomer() throws Exception {
-        // Initialize the database
-        customerRepository.saveAndFlush(customer);
-        customerSearchRepository.save(customer);
+
+        // Create customer
+        Customer customer = CustomerResourceIntTest.createEntity(null);
+        customer.setDomain(domain);
+        customer = customerRepository.saveAndFlush(customer);
+
         int databaseSizeBeforeUpdate = customerRepository.findAll().size();
 
         // Update the customer
         Customer updatedCustomer = customerRepository.findOne(customer.getId());
+
         // Disconnect from session so that the updates on updatedCustomer are not directly saved in db
         em.detach(updatedCustomer);
-        updatedCustomer
-            .name(UPDATED_NAME);
+        updatedCustomer.name(UPDATED_NAME);
         CustomerDTO customerDTO = customerMapper.toDto(updatedCustomer);
 
         restCustomerMockMvc.perform(put("/api/customers")
@@ -240,27 +270,28 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void updateNonExistingCustomer() throws Exception {
         int databaseSizeBeforeUpdate = customerRepository.findAll().size();
 
         // Create the Customer
         CustomerDTO customerDTO = customerMapper.toDto(customer);
 
-        // If the entity doesn't have an ID, it will be created instead of just being updated
+        // If the entity doesn't have an ID, it will be rejected
         restCustomerMockMvc.perform(put("/api/customers")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(customerDTO)))
-            .andExpect(status().isCreated());
+            .andExpect(status().isBadRequest());
 
-        // Validate the Customer in the database
-        List<Customer> customerList = customerRepository.findAll();
-        assertThat(customerList).hasSize(databaseSizeBeforeUpdate + 1);
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void deleteCustomer() throws Exception {
+
         // Initialize the database
+        customer.setDomain(domain);
         customerRepository.saveAndFlush(customer);
         customerSearchRepository.save(customer);
         int databaseSizeBeforeDelete = customerRepository.findAll().size();
@@ -281,8 +312,10 @@ public class CustomerResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void searchCustomer() throws Exception {
         // Initialize the database
+        customer.setDomain(domain);
         customerRepository.saveAndFlush(customer);
         customerSearchRepository.save(customer);
 

@@ -14,11 +14,13 @@ import com.arnellconsulting.worktajm.service.mapper.UserExtraMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -62,13 +64,39 @@ public class UserExtraResource {
     public ResponseEntity<UserExtraDTO> updateUserExtra(@RequestBody UserExtraDTO userExtraDTO) throws URISyntaxException {
         log.debug("REST request to update UserExtra : {}", userExtraDTO);
         UserExtraDTO result;
+
+        // Check: Must have id
+        if (userExtraDTO.getId() == null) {
+            log.warn("Tried to update user extra with missing id");
+            return ResponseEntity.notFound().build();
+        }
+
+        // Check: Must be logged in
+        Optional<User> loggedInUser = getLoggedInUser();
+        if (!loggedInUser.isPresent()) {
+            log.warn("Attempted to update user extra while not being logged in");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // Check: Must have user extra
+        UserExtra userExtraInDb = userExtraRepository.findOne(userExtraDTO.getId());
+        if (userExtraInDb == null) {
+            log.warn("Attempted to update user extra while not being logged in");
+            return ResponseEntity.notFound().build();
+        }
+
+        // Check: May only modify user extra owned by itself
+        if (userExtraInDb.getId() != userExtraInDb.getId()) {
+            log.warn("Tried is modify user extra for other user. Violating user: {}", loggedInUser.get().getLogin());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         try {
-            User loggedInUser = getLoggedInUser().get();
-            UserExtra userExtraInDb = userExtraRepository.findUserExtraByUser(loggedInUser).get();
             UserExtra userExtra = userExtraMapper.toEntity(userExtraDTO);
+
+            // Copy new values from received object to database object
             userExtraInDb.copyFrom(userExtra);
-            userExtraInDb = userExtraRepository.save(userExtraInDb);
-            result = userExtraMapper.toDto(userExtraInDb);
+            result = userExtraMapper.toDto(userExtraRepository.save(userExtraInDb));
             userExtraSearchRepository.save(userExtraInDb);
             return ResponseEntity.ok()
                 .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, userExtraDTO.getId().toString()))
@@ -101,6 +129,10 @@ public class UserExtraResource {
 
     private Optional<User> getLoggedInUser() {
         Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
-        return userRepository.findOneByLogin(userLogin.get());
+        if (userLogin.isPresent()) {
+            String resolvedLogin = userLogin.get().toLowerCase();
+            return userRepository.findOneByLogin(resolvedLogin);
+        }
+        return Optional.empty();
     }
 }

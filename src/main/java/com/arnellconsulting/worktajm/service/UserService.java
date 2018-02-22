@@ -17,6 +17,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -294,7 +295,14 @@ public class UserService {
      */
     public User getLoggedInUser() {
         Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
-        return userRepository.findOneByLogin(userLogin.get()).get();
+        if (userLogin.isPresent()) {
+            String resolvedLogin = userLogin.get().toLowerCase();
+            final Optional<User> user = userRepository.findOneByLogin(resolvedLogin);
+            if (user.isPresent()) {
+                return user.get();
+            }
+        }
+        throw new AccessDeniedException("Failed to find user");
     }
 
 }

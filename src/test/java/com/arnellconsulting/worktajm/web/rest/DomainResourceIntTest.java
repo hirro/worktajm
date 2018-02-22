@@ -126,21 +126,16 @@ public class DomainResourceIntTest {
 
     @Before
     public void initTest() {
-        userRepository.deleteAll();
-        domainRepository.deleteAll();
-        domainSearchRepository.deleteAll();
         domain = createEntity(em);
 
         // Create test users
-        userA = UserResourceIntTest.createEntity(em);
-        userA.setLogin(USER_A_LOGIN);
-
-        userB = UserResourceIntTest.createEntity(em);
-        userB.setLogin(USER_B_LOGIN);
+        userA = userRepository.findOne(5L);
+        userB = userRepository.findOne(6L);
     }
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void createDomain() throws Exception {
         int databaseSizeBeforeCreate = domainRepository.findAll().size();
 
@@ -165,6 +160,7 @@ public class DomainResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser(USER_A_LOGIN)
     public void createDomainWithExistingId() throws Exception {
         int databaseSizeBeforeCreate = domainRepository.findAll().size();
 
@@ -224,17 +220,12 @@ public class DomainResourceIntTest {
     @Transactional
     @WithMockUser(USER_A_LOGIN)
     public void getDomainAuthorized() throws Exception {
-        // Initialize the database
-        userRepository.saveAndFlush(userA);
-        domain.addAuthorizedUsers(this.userA);
-        domainRepository.saveAndFlush(domain);
-
         // Get the domain
-        restDomainMockMvc.perform(get("/api/domains/{id}", domain.getId()))
+        restDomainMockMvc.perform(get("/api/domains/{id}", 1))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.id").value(domain.getId().intValue()))
-            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.name").value("Domain A"));
     }
 
     @Test
@@ -255,7 +246,7 @@ public class DomainResourceIntTest {
     public void getNonExistingDomain() throws Exception {
         // Get the domain
         restDomainMockMvc.perform(get("/api/domains/{id}", Long.MAX_VALUE))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -264,8 +255,7 @@ public class DomainResourceIntTest {
     public void updateDomain() throws Exception {
 
         // Initialize the database
-        userRepository.saveAndFlush(userA);
-        domain.addAuthorizedUsers(this.userA);
+        domain.getAuthorizedUsers().add(userA);
         domainRepository.saveAndFlush(domain);
         domainSearchRepository.save(domain);
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
@@ -301,13 +291,14 @@ public class DomainResourceIntTest {
         int databaseSizeBeforeUpdate = domainRepository.findAll().size();
 
         // Create the Domain
+        domain.setId(Long.MAX_VALUE);
         DomainDTO domainDTO = domainMapper.toDto(domain);
 
         // If the entity doesn't have an ID, it will be created instead of just being updated
         restDomainMockMvc.perform(put("/api/domains")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(domainDTO)))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isNotFound());
 
         // Validate the Domain in the database
         List<Domain> domainList = domainRepository.findAll();

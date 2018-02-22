@@ -2,7 +2,7 @@ package com.arnellconsulting.worktajm.web.rest;
 
 import com.arnellconsulting.worktajm.domain.User;
 import com.arnellconsulting.worktajm.repository.UserRepository;
-import com.arnellconsulting.worktajm.security.SecurityUtils;
+import com.arnellconsulting.worktajm.service.UserService;
 import com.codahale.metrics.annotation.Timed;
 import com.arnellconsulting.worktajm.domain.TimeEntry;
 
@@ -29,11 +29,9 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,11 +57,14 @@ public class TimeEntryResource {
 
     private final UserRepository userRepository;
 
-    public TimeEntryResource(TimeEntryRepository timeEntryRepository, TimeEntryMapper timeEntryMapper, TimeEntrySearchRepository timeEntrySearchRepository, UserRepository userRepository) {
+    private final UserService userService;
+
+    public TimeEntryResource(TimeEntryRepository timeEntryRepository, TimeEntryMapper timeEntryMapper, TimeEntrySearchRepository timeEntrySearchRepository, UserRepository userRepository, UserService userService) {
         this.timeEntryRepository = timeEntryRepository;
         this.timeEntryMapper = timeEntryMapper;
         this.timeEntrySearchRepository = timeEntrySearchRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     /**
@@ -84,7 +85,8 @@ public class TimeEntryResource {
         TimeEntry timeEntry = timeEntryMapper.toEntity(timeEntryDTO);
 
         // Time entries are always owned by the logged in user.
-        timeEntry.setUser(getLoggedInUser());
+        User user = userService.getLoggedInUser();
+        timeEntry.setUser(user);
 
         timeEntry = timeEntryRepository.save(timeEntry);
         TimeEntryDTO result = timeEntryMapper.toDto(timeEntry);
@@ -119,7 +121,8 @@ public class TimeEntryResource {
         }
 
         // Only logged in user may update object
-        if (timeEntry.getUser().getId() != getLoggedInUser().getId()) {
+        User user = userService.getLoggedInUser();
+        if (timeEntry.getUser().getId() != user.getId()) {
             throw new AccessDeniedException("Only owner may modify time entry");
         }
 
@@ -209,11 +212,6 @@ public class TimeEntryResource {
             pageable);
         HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders("", page, "/api/_search/time-entries");
         return new ResponseEntity<>(timeEntryMapper.toDto(page.getContent()), headers, HttpStatus.OK);
-    }
-
-    private User getLoggedInUser() {
-        Optional<String> userLogin = SecurityUtils.getCurrentUserLogin();
-        return userRepository.findOneByLogin(userLogin.get()).get();
     }
 
 }

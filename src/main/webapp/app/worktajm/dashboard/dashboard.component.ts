@@ -1,5 +1,4 @@
-import {Component, OnInit} from '@angular/core';
-import {WorktajmDashboardService} from './dashboard.service';
+import {Component} from '@angular/core';
 
 @Component({
     selector: 'jhi-dashboard',
