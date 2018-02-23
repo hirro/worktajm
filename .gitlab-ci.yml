@@ -1,0 +1,7 @@
+image: openjdk:8
+
+stages:
+    - build
+    - test
+    - package
+
