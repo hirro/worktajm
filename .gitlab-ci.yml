@@ -19,7 +19,8 @@ before_script:
 maven-build:
     stage: build
     script: ./mvnw compile -Dmaven.repo.local=$MAVEN_USER_HOME
-    tags: worktajm
+    tags:
+    - worktajm
 
 maven-test:
     stage: test
@@ -28,7 +29,8 @@ maven-test:
     artifacts:
         paths:
             - target/surefire-reports/*
-    tags: worktajm
+    tags:
+    - worktajm
 
 maven-front-test:
     stage: test
@@ -37,7 +39,8 @@ maven-front-test:
     artifacts:
         paths:
             - target/test-results/karma/*
-    tags: worktajm
+    tags:
+    - worktajm
 
 maven-package:
     stage: package
@@ -46,5 +49,6 @@ maven-package:
     artifacts:
         paths:
             - target/*.war
-    tags: worktajm
+    tags:
+    - worktajm
 
