@@ -45,10 +45,9 @@ maven-front-test:
 maven-package:
     stage: package
     script:
-        - ./mvnw verify -Pprod -DskipTests -Dmaven.repo.local=$MAVEN_USER_HOME
+        - ./mvnw verify dockerfile:build dockerfile:push -Pprod -DskipTests -Dmaven.repo.local=$MAVEN_USER_HOME -Ddockerfile.username=$DOCKERHUB_USER -Ddockerfile.password=$DOCKERHUB_PASSWORD
     artifacts:
         paths:
             - target/*.war
     tags:
     - worktajm
-
