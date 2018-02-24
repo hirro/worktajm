@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.arnellconsulting.worktajm</groupId>
     <artifactId>worktajm</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${version.number}</version>
     <packaging>war</packaging>
     <name>Worktajm</name>
 
@@ -83,6 +82,8 @@
         <sonar.tests>${project.basedir}/src/test/</sonar.tests>
 
         <!-- jhipster-needle-maven-property -->
+
+        <version.number>${git.commit.time}.${git.commit.id.abbrev}</version.number>
     </properties>
 
     <dependencyManagement>
@@ -367,6 +368,11 @@
             <scope>test</scope>
         </dependency>
         <!-- jhipster-needle-maven-add-dependency -->
+        <dependency>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <version>2.2.4</version>
+        </dependency>       
     </dependencies>
 
     <build>
@@ -380,6 +386,24 @@
             </testResource>
         </testResources>
         <plugins>
+          <plugin>
+              <groupId>pl.project13.maven</groupId>
+              <artifactId>git-commit-id-plugin</artifactId>
+              <version>2.2.1</version>
+              <executions>
+                  <execution>
+                      <phase>validate</phase>
+                      <goals>
+                          <goal>revision</goal>
+                      </goals>
+                  </execution>
+              </executions>
+              <configuration>
+                  <dateFormat>yyyyMMdd-HHmmss</dateFormat><!--  human-readable part of the version number -->
+                  <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                  <generateGitPropertiesFile>false</generateGitPropertiesFile><!-- somehow necessary. otherwise the variables are not available in the pom -->
+              </configuration>
+          </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
